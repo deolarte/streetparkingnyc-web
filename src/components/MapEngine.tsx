@@ -19,25 +19,32 @@ interface MapEngineProps {
   mapInstanceRef: React.MutableRefObject<Map | null>;
 }
 
-const ESRI_LIGHT_GRAY_STYLE: any = {
+// CartoDB Voyager Style: Crisp @2x retina navigation tiles with comprehensive NYC street names
+const CARTO_VOYAGER_STYLE: any = {
   version: 8 as const,
   sources: {
-    'esri-base': {
+    'carto-base': {
       type: 'raster' as const,
       tiles: [
-        'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+        'https://a.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}@2x.png',
+        'https://b.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}@2x.png',
+        'https://c.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}@2x.png',
+        'https://d.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}@2x.png',
       ],
       tileSize: 256,
-      maxzoom: 16,
-      attribution: 'Esri, HERE, Garmin, © OpenStreetMap contributors, and the GIS user community',
+      maxzoom: 20,
+      attribution: '© OpenStreetMap contributors, © CARTO',
     },
-    'esri-labels': {
+    'carto-labels': {
       type: 'raster' as const,
       tiles: [
-        'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
+        'https://a.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}@2x.png',
+        'https://b.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}@2x.png',
+        'https://c.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}@2x.png',
+        'https://d.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}@2x.png',
       ],
       tileSize: 256,
-      maxzoom: 16,
+      maxzoom: 20,
     },
     'curbs-source': {
       type: 'geojson' as const,
@@ -49,9 +56,9 @@ const ESRI_LIGHT_GRAY_STYLE: any = {
   },
   layers: [
     {
-      id: 'esri-base-layer',
+      id: 'carto-base-layer',
       type: 'raster' as const,
-      source: 'esri-base',
+      source: 'carto-base',
       minzoom: 0,
       maxzoom: 22,
     },
@@ -66,7 +73,7 @@ const ESRI_LIGHT_GRAY_STYLE: any = {
       paint: {
         'line-color': '#0f172a',
         'line-width': ['interpolate' as const, ['linear' as const], ['zoom' as const], 11, 3.5, 14, 5.5, 16, 7.5, 18, 11],
-        'line-opacity': 0.25,
+        'line-opacity': 0.22,
       },
     },
     {
@@ -92,7 +99,7 @@ const ESRI_LIGHT_GRAY_STYLE: any = {
           '#64748b', // Slate Fallback
         ],
         'line-width': ['interpolate' as const, ['linear' as const], ['zoom' as const], 11, 2.5, 14, 4, 16, 6, 18, 9],
-        'line-opacity': 0.68, // Translucent color so roads and labels beneath shine through
+        'line-opacity': 0.65, // Translucent so roads & buildings underneath shine through
       },
     },
     {
@@ -112,10 +119,10 @@ const ESRI_LIGHT_GRAY_STYLE: any = {
       },
     },
     {
-      /* High-contrast reference street labels placed ON TOP of curb lines so street names are always 100% visible */
-      id: 'esri-labels-layer',
+      /* Crisp @2x retina street & avenue labels rendered ON TOP of all curb lines */
+      id: 'carto-labels-layer',
       type: 'raster' as const,
-      source: 'esri-labels',
+      source: 'carto-labels',
       minzoom: 0,
       maxzoom: 22,
     },
@@ -207,15 +214,22 @@ export const MapEngine: React.FC<MapEngineProps> = ({
 
     const map = new Map({
       container: mapContainerRef.current,
-      style: ESRI_LIGHT_GRAY_STYLE,
+      style: CARTO_VOYAGER_STYLE,
       center: [-74.006, 40.7128], // NYC City Hall / Lower Manhattan
       zoom: 14.5,
       maxZoom: 20,
       minZoom: 10,
-      pitch: 20,
+      pitch: 0, // Flat 2D map
+      maxPitch: 0, // Lock pitch strictly to 0
+      minPitch: 0,
+      pitchWithRotate: false,
       bearing: 0,
       attributionControl: false,
     });
+
+    if (map.touchPitch) {
+      map.touchPitch.disable();
+    }
 
     mapInstanceRef.current = map;
     map.addControl(new AttributionControl({ compact: true }), 'bottom-right');
@@ -395,7 +409,7 @@ export const MapEngine: React.FC<MapEngineProps> = ({
 
   const handleZoomIn = () => mapInstanceRef.current?.zoomIn();
   const handleZoomOut = () => mapInstanceRef.current?.zoomOut();
-  const handleResetNorth = () => mapInstanceRef.current?.resetNorthPitch();
+  const handleResetNorth = () => mapInstanceRef.current?.resetNorth();
 
   return (
     <div className="relative w-full h-full">
@@ -440,8 +454,8 @@ export const MapEngine: React.FC<MapEngineProps> = ({
         <button
           onClick={handleResetNorth}
           className="p-2.5 rounded-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200/80 dark:border-gray-800 shadow-xl text-gray-700 dark:text-gray-200 hover:text-blue-600 active:scale-95 transition-all"
-          title="Reset Compass & Pitch"
-          aria-label="Reset compass"
+          title="Reset to North"
+          aria-label="Reset to north"
         >
           <Compass className="w-5 h-5" />
         </button>

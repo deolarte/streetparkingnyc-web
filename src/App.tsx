@@ -108,7 +108,7 @@ export function App() {
       mapInstanceRef.current.flyTo({
         center,
         zoom,
-        pitch: 30,
+        pitch: 0,
         essential: true,
       });
     }
