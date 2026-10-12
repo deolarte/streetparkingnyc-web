@@ -66,7 +66,11 @@ export const TemporalSlider: React.FC<TemporalSliderProps> = ({
     <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-200/80 dark:border-gray-800 p-2.5 sm:p-3.5 transition-all text-xs">
       {/* Top Header: Always visible compact status bar */}
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center space-x-2">
+        <div 
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex items-center space-x-2 cursor-pointer select-none"
+          title="Click to toggle time simulation slider"
+        >
           <div className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 shrink-0">
             <Clock className="w-4 h-4" />
           </div>
@@ -85,7 +89,7 @@ export const TemporalSlider: React.FC<TemporalSliderProps> = ({
           </div>
         </div>
 
-        {/* Buttons: Live Now & Mobile Expand/Collapse Toggle */}
+        {/* Buttons: Live Now & Always-Visible Simulate Toggle */}
         <div className="flex items-center space-x-1.5 shrink-0">
           <button
             onClick={handleResetToNow}
@@ -99,13 +103,19 @@ export const TemporalSlider: React.FC<TemporalSliderProps> = ({
             <span>Now</span>
           </button>
 
-          {/* Toggle Expand/Collapse on Mobile */}
+          {/* Dedicated Simulate Time Button (Always Visible in Portrait & Landscape) */}
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-1 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 sm:hidden"
-            aria-label="Toggle time controls"
+            className={`px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center space-x-1 transition-all shadow-xs active:scale-95 ${
+              !isNow || isExpanded
+                ? 'bg-blue-600 text-white shadow-blue-600/20'
+                : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+            }`}
+            title={isExpanded ? 'Collapse time controls' : 'Simulate different time/day'}
+            aria-label="Simulate time"
           >
-            {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+            <span>{isExpanded ? 'Hide' : 'Simulate'}</span>
+            {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
           </button>
         </div>
       </div>

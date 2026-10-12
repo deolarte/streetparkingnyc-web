@@ -287,8 +287,8 @@ export function App() {
         </div>
       )}
 
-      {/* Floating Summary Stats Pill (Top Left Under Header) */}
-      <div className="absolute top-[calc(max(env(safe-area-inset-top,44px),44px)+8.5rem)] left-3 z-20 hidden md:flex flex-col space-y-1.5 pointer-events-none">
+      {/* Floating Summary Stats Pill (Desktop Only, Hidden in Mobile Landscape & Small Screens) */}
+      <div className="absolute top-[calc(max(env(safe-area-inset-top,44px),44px)+8.5rem)] left-3 z-20 hidden lg:flex [@media(max-height:550px)]:!hidden flex-col space-y-1.5 pointer-events-none">
         <div className="pointer-events-auto bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-3 py-2 rounded-2xl shadow-lg border border-gray-200/80 dark:border-gray-800 text-xs space-y-1">
           <div className="flex items-center justify-between gap-3">
             <span className="font-bold text-gray-800 dark:text-gray-200 text-[11px] uppercase tracking-wider">

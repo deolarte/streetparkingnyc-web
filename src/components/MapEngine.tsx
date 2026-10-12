@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Map, Marker, AttributionControl, GeoJSONSource, config, type MapLayerMouseEvent } from 'maplibre-gl';
 import type { FeatureCollection, LineString } from 'geojson';
-import { Locate, Compass, ZoomIn, ZoomOut } from 'lucide-react';
+import { Locate, ZoomIn, ZoomOut } from 'lucide-react';
 import type { CurbSegment } from '../types';
 
 // Configure MapLibre Web Worker URL explicitly to load the local bundled worker
@@ -419,7 +419,6 @@ export const MapEngine: React.FC<MapEngineProps> = ({
 
   const handleZoomIn = () => mapInstanceRef.current?.zoomIn();
   const handleZoomOut = () => mapInstanceRef.current?.zoomOut();
-  const handleResetNorth = () => mapInstanceRef.current?.resetNorth();
 
   return (
     <div className="relative w-full h-full">
@@ -458,16 +457,6 @@ export const MapEngine: React.FC<MapEngineProps> = ({
           aria-label="Zoom out"
         >
           <ZoomOut className="w-5 h-5" />
-        </button>
-
-        {/* Reset North / Compass */}
-        <button
-          onClick={handleResetNorth}
-          className="p-2.5 rounded-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200/80 dark:border-gray-800 shadow-xl text-gray-700 dark:text-gray-200 hover:text-blue-600 active:scale-95 transition-all"
-          title="Reset to North"
-          aria-label="Reset to north"
-        >
-          <Compass className="w-5 h-5" />
         </button>
       </div>
     </div>
