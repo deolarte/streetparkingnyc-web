@@ -11,7 +11,42 @@ interface MapEngineProps {
   mapInstanceRef: React.MutableRefObject<Map | null>;
 }
 
-const POSITRON_VECTOR_STYLE = 'https://tiles.openfreemap.org/styles/positron';
+const ESRI_LIGHT_GRAY_STYLE = {
+  version: 8 as const,
+  sources: {
+    'esri-base': {
+      type: 'raster' as const,
+      tiles: [
+        'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+      ],
+      tileSize: 256,
+      attribution: 'Esri, HERE, Garmin, © OpenStreetMap contributors, and the GIS user community',
+    },
+    'esri-labels': {
+      type: 'raster' as const,
+      tiles: [
+        'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
+      ],
+      tileSize: 256,
+    },
+  },
+  layers: [
+    {
+      id: 'esri-base-layer',
+      type: 'raster' as const,
+      source: 'esri-base',
+      minzoom: 0,
+      maxzoom: 19,
+    },
+    {
+      id: 'esri-labels-layer',
+      type: 'raster' as const,
+      source: 'esri-labels',
+      minzoom: 0,
+      maxzoom: 19,
+    },
+  ],
+};
 
 export const MapEngine: React.FC<MapEngineProps> = ({
   curbs,
@@ -39,7 +74,7 @@ export const MapEngine: React.FC<MapEngineProps> = ({
 
     const map = new Map({
       container: mapContainerRef.current,
-      style: POSITRON_VECTOR_STYLE,
+      style: ESRI_LIGHT_GRAY_STYLE,
       center: [-74.006, 40.7128], // NYC City Hall / Lower Manhattan
       zoom: 14,
       pitch: 25,
