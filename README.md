@@ -3,7 +3,7 @@
 > **Real-Time NYC Street Parking Regulations, Alternate Side Parking (ASP) Sweeping Tracker & Muni-Meter Rates**
 
 Live Production Target: **[park.djtechnyc.com](https://park.djtechnyc.com)**  
-GitHub: **djtechnyc/streetparkingnyc-web**
+GitHub: **[deolarte/streetparkingnyc-web](https://github.com/deolarte/streetparkingnyc-web)**
 
 ---
 
@@ -57,7 +57,7 @@ GitHub: **djtechnyc/streetparkingnyc-web**
 
 ```bash
 # Clone the repository
-git clone https://github.com/djtechnyc/streetparkingnyc-web.git
+git clone https://github.com/deolarte/streetparkingnyc-web.git
 cd streetparkingnyc-web
 
 # Install dependencies
