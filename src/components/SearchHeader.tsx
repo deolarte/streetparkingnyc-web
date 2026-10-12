@@ -8,6 +8,8 @@ import {
   MapPin,
   Loader2,
   Navigation,
+  Coffee,
+  MessageSquare,
 } from 'lucide-react';
 import type { CurbSegment, VehicleType } from '../types';
 import { searchNycAddress, type AddressCandidate } from '../services/geocodingService';
@@ -24,6 +26,8 @@ interface SearchHeaderProps {
   onSearchAddress: (candidate: AddressCandidate) => void;
   searchedAddressLabel?: string | null;
   onClearSearchedAddress?: () => void;
+  onOpenFeedback?: () => void;
+  onOpenTipModal?: () => void;
 }
 
 const NYC_NEIGHBORHOODS = [
@@ -49,6 +53,8 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
   onSearchAddress,
   searchedAddressLabel,
   onClearSearchedAddress,
+  onOpenFeedback,
+  onOpenTipModal,
 }) => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -309,8 +315,34 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
         </div>
       </div>
 
-      {/* Neighborhood Quick Navigation Pills */}
+      {/* Neighborhood Quick Navigation Pills & Action Buttons */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+        {/* Buy Me a Coffee Tip Button */}
+        {onOpenTipModal && (
+          <button
+            type="button"
+            onClick={onOpenTipModal}
+            className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-gray-950 font-black text-[11px] shadow-sm flex items-center space-x-1 shrink-0 transition-transform active:scale-95"
+            title="Buy me a coffee / tip developer"
+          >
+            <Coffee className="w-3.5 h-3.5 fill-gray-950/20" />
+            <span>Tip ☕</span>
+          </button>
+        )}
+
+        {/* Feedback Button */}
+        {onOpenFeedback && (
+          <button
+            type="button"
+            onClick={onOpenFeedback}
+            className="px-2.5 py-1 rounded-lg bg-white/90 dark:bg-gray-800/90 hover:bg-blue-50 dark:hover:bg-gray-700 text-blue-700 dark:text-blue-300 font-bold text-[11px] shadow-xs border border-blue-200/80 dark:border-blue-900/60 flex items-center space-x-1 shrink-0 transition-colors"
+            title="Submit feedback or report sign accuracy"
+          >
+            <MessageSquare className="w-3.5 h-3.5 text-blue-500" />
+            <span>Feedback</span>
+          </button>
+        )}
+
         <span className="text-[10px] font-semibold uppercase text-gray-500 dark:text-gray-400 pl-1 shrink-0">
           Jump to:
         </span>

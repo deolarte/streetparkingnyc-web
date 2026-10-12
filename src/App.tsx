@@ -10,6 +10,8 @@ import type { AddressCandidate } from './services/geocodingService';
 import type { CurbSegment, VehicleType, RawCurbSegment } from './types';
 import { AdBanner } from './components/AdBanner';
 import { InterstitialAd } from './components/InterstitialAd';
+import { FeedbackModal } from './components/FeedbackModal';
+import { TipModal } from './components/TipModal';
 import { Loader2 } from 'lucide-react';
 
 export function App() {
@@ -22,6 +24,8 @@ export function App() {
   const [selectedCurbId, setSelectedCurbId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showInterstitial, setShowInterstitial] = useState<boolean>(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState<boolean>(false);
+  const [showTipModal, setShowTipModal] = useState<boolean>(false);
 
   const userActionCountRef = useRef(0);
   const lastInterstitialTimeRef = useRef(Date.now());
@@ -199,7 +203,7 @@ export function App() {
   }, [evaluatedCurbs]);
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-slate-900 select-none">
+    <div className="relative w-full h-[100dvh] overflow-hidden bg-slate-900 select-none">
       {/* Fullscreen Map Canvas */}
       <MapEngine
         curbs={displayCurbs}
@@ -225,6 +229,8 @@ export function App() {
             onSearchAddress={handleSearchAddress}
             searchedAddressLabel={searchedLocation ? searchedLocation.label : null}
             onClearSearchedAddress={handleClearSearchedAddress}
+            onOpenFeedback={() => setShowFeedbackModal(true)}
+            onOpenTipModal={() => setShowTipModal(true)}
           />
         </div>
       </div>
@@ -280,12 +286,12 @@ export function App() {
         </div>
       </div>
 
-      {/* Bottom Temporal Slider Container (Floating above bottom, clear of iOS Safari bottom URL bar) */}
+      {/* Bottom Unified Card: Temporal Slider + Embedded Persistent Mobile Ad (Never Floats Over or Blocks Controls) */}
       <div
         className={`absolute inset-x-2 sm:inset-x-4 max-w-xl mx-auto z-20 pointer-events-none transition-all duration-300 ${
           selectedCurb
             ? 'hidden sm:block sm:bottom-[340px]'
-            : 'bottom-[max(calc(env(safe-area-inset-bottom,0px)+72px),76px)] sm:bottom-4'
+            : 'bottom-[max(calc(env(safe-area-inset-bottom,0px)+12px),16px)] sm:bottom-4'
         }`}
       >
         <div className="pointer-events-auto">
@@ -293,24 +299,26 @@ export function App() {
             isNow={isNow}
             selectedTime={selectedTime}
             onTimeChange={handleTimeChange}
+            bottomSlot={
+              <div className="sm:hidden w-full flex justify-center">
+                <AdBanner format="banner-320x50" className="!my-0" />
+              </div>
+            }
           />
         </div>
       </div>
-
-      {/* Always-Present Persistent Mobile Ad Banner (Docked at Screen Bottom when Drawer is closed) */}
-      {!selectedCurb && (
-        <div className="sm:hidden fixed bottom-[max(calc(env(safe-area-inset-bottom,0px)+8px),10px)] inset-x-0 z-20 flex justify-center pointer-events-auto px-2">
-          <div className="shadow-xl rounded-2xl overflow-hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200/80 dark:border-gray-800">
-            <AdBanner format="banner-320x50" className="!my-0" />
-          </div>
-        </div>
-      )}
 
       {/* Mobile Bottom Sheet Drawer for Selected Curb */}
       <BottomSheet segment={selectedCurb} onClose={() => setSelectedCurbId(null)} />
 
       {/* High-Value Interstitial Ad Modal */}
       <InterstitialAd isOpen={showInterstitial} onClose={() => setShowInterstitial(false)} />
+
+      {/* User Feedback Submission Modal */}
+      <FeedbackModal isOpen={showFeedbackModal} onClose={() => setShowFeedbackModal(false)} />
+
+      {/* Buy Me a Coffee Tip Modal */}
+      <TipModal isOpen={showTipModal} onClose={() => setShowTipModal(false)} />
     </div>
   );
 }

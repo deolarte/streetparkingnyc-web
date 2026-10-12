@@ -56,13 +56,6 @@ const ESRI_LIGHT_GRAY_STYLE: any = {
       maxzoom: 22,
     },
     {
-      id: 'esri-labels-layer',
-      type: 'raster' as const,
-      source: 'esri-labels',
-      minzoom: 0,
-      maxzoom: 22,
-    },
-    {
       id: 'curbs-casing',
       type: 'line' as const,
       source: 'curbs-source',
@@ -72,8 +65,8 @@ const ESRI_LIGHT_GRAY_STYLE: any = {
       },
       paint: {
         'line-color': '#0f172a',
-        'line-width': ['interpolate' as const, ['linear' as const], ['zoom' as const], 11, 5, 14, 8, 16, 12, 18, 18],
-        'line-opacity': 0.9,
+        'line-width': ['interpolate' as const, ['linear' as const], ['zoom' as const], 11, 3.5, 14, 5.5, 16, 7.5, 18, 11],
+        'line-opacity': 0.25,
       },
     },
     {
@@ -98,8 +91,8 @@ const ESRI_LIGHT_GRAY_STYLE: any = {
           '#3b82f6', // Vivid Blue (Muni-Meter)
           '#64748b', // Slate Fallback
         ],
-        'line-width': ['interpolate' as const, ['linear' as const], ['zoom' as const], 11, 3.5, 14, 6, 16, 9, 18, 14],
-        'line-opacity': 1.0,
+        'line-width': ['interpolate' as const, ['linear' as const], ['zoom' as const], 11, 2.5, 14, 4, 16, 6, 18, 9],
+        'line-opacity': 0.68, // Translucent color so roads and labels beneath shine through
       },
     },
     {
@@ -113,10 +106,18 @@ const ESRI_LIGHT_GRAY_STYLE: any = {
       },
       paint: {
         'line-color': '#ffffff',
-        'line-width': ['interpolate' as const, ['linear' as const], ['zoom' as const], 12, 10, 15, 16, 18, 24],
+        'line-width': ['interpolate' as const, ['linear' as const], ['zoom' as const], 12, 8, 15, 13, 18, 18],
         'line-opacity': 0.85,
-        'line-blur': 3,
+        'line-blur': 2,
       },
+    },
+    {
+      /* High-contrast reference street labels placed ON TOP of curb lines so street names are always 100% visible */
+      id: 'esri-labels-layer',
+      type: 'raster' as const,
+      source: 'esri-labels',
+      minzoom: 0,
+      maxzoom: 22,
     },
   ],
 };

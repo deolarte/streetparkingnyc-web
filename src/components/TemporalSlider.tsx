@@ -6,15 +6,17 @@ interface TemporalSliderProps {
   isNow: boolean;
   selectedTime: Date;
   onTimeChange: (newTime: Date, isNow: boolean) => void;
+  bottomSlot?: React.ReactNode;
 }
 
 export const TemporalSlider: React.FC<TemporalSliderProps> = ({
   isNow,
   selectedTime,
   onTimeChange,
+  bottomSlot,
 }) => {
   const [isExpanded, setIsExpanded] = useState(() =>
-    typeof window !== 'undefined' ? window.innerWidth >= 640 : true
+    typeof window !== 'undefined' ? window.innerWidth >= 640 : false
   );
   const aspInfo = getAspHolidayStatus(selectedTime);
 
@@ -190,6 +192,13 @@ export const TemporalSlider: React.FC<TemporalSliderProps> = ({
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Embedded Persistent Mobile Ad (Part of the card layer, non-overlapping) */}
+      {bottomSlot && (
+        <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-800/80 flex justify-center w-full">
+          {bottomSlot}
         </div>
       )}
     </div>
