@@ -19,32 +19,19 @@ interface MapEngineProps {
   mapInstanceRef: React.MutableRefObject<Map | null>;
 }
 
-// CartoDB Voyager Style: Crisp @2x retina navigation tiles with comprehensive NYC street names
-const CARTO_VOYAGER_STYLE: any = {
+// Watermark-Free High-Definition Street Basemap + Vector Street Name Labeling
+const MAP_STYLE: any = {
   version: 8 as const,
+  glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
   sources: {
-    'carto-base': {
+    'street-base': {
       type: 'raster' as const,
       tiles: [
-        'https://a.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}@2x.png',
-        'https://b.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}@2x.png',
-        'https://c.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}@2x.png',
-        'https://d.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}@2x.png',
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
       ],
       tileSize: 256,
-      maxzoom: 20,
-      attribution: '© OpenStreetMap contributors, © CARTO',
-    },
-    'carto-labels': {
-      type: 'raster' as const,
-      tiles: [
-        'https://a.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}@2x.png',
-        'https://b.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}@2x.png',
-        'https://c.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}@2x.png',
-        'https://d.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}@2x.png',
-      ],
-      tileSize: 256,
-      maxzoom: 20,
+      maxzoom: 19,
+      attribution: 'Esri, HERE, Garmin, © OpenStreetMap contributors',
     },
     'curbs-source': {
       type: 'geojson' as const,
@@ -56,9 +43,9 @@ const CARTO_VOYAGER_STYLE: any = {
   },
   layers: [
     {
-      id: 'carto-base-layer',
+      id: 'street-base-layer',
       type: 'raster' as const,
-      source: 'carto-base',
+      source: 'street-base',
       minzoom: 0,
       maxzoom: 22,
     },
@@ -99,7 +86,7 @@ const CARTO_VOYAGER_STYLE: any = {
           '#64748b', // Slate Fallback
         ],
         'line-width': ['interpolate' as const, ['linear' as const], ['zoom' as const], 11, 2.5, 14, 4, 16, 6, 18, 9],
-        'line-opacity': 0.65, // Translucent so roads & buildings underneath shine through
+        'line-opacity': 0.65, // Translucent color so roads & buildings underneath shine through
       },
     },
     {
@@ -119,12 +106,24 @@ const CARTO_VOYAGER_STYLE: any = {
       },
     },
     {
-      /* Crisp @2x retina street & avenue labels rendered ON TOP of all curb lines */
-      id: 'carto-labels-layer',
-      type: 'raster' as const,
-      source: 'carto-labels',
-      minzoom: 0,
-      maxzoom: 22,
+      /* Crisp vector street name labels printed right on each parking street block */
+      id: 'curbs-labels',
+      type: 'symbol' as const,
+      source: 'curbs-source',
+      minzoom: 14.5,
+      layout: {
+        'symbol-placement': 'line' as const,
+        'text-field': ['get' as const, 'onStreet'],
+        'text-font': ['Noto Sans Regular'],
+        'text-size': ['interpolate' as const, ['linear' as const], ['zoom' as const], 14.5, 11, 16.5, 13, 18, 15],
+        'text-letter-spacing': 0.05,
+        'symbol-spacing': 280,
+      },
+      paint: {
+        'text-color': '#0f172a',
+        'text-halo-color': '#ffffff',
+        'text-halo-width': 3,
+      },
     },
   ],
 };
@@ -214,7 +213,7 @@ export const MapEngine: React.FC<MapEngineProps> = ({
 
     const map = new Map({
       container: mapContainerRef.current,
-      style: CARTO_VOYAGER_STYLE,
+      style: MAP_STYLE,
       center: [-74.006, 40.7128], // NYC City Hall / Lower Manhattan
       zoom: 14.5,
       maxZoom: 20,

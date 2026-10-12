@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   MapPin,
@@ -12,9 +12,12 @@ import {
   CalendarClock,
   CheckCircle2,
   Smartphone,
+  CloudSnow,
+  ExternalLink,
 } from 'lucide-react';
 import type { CurbSegment } from '../types';
 import { AdBanner } from './AdBanner';
+import { fetchNycStormAdvisory, type StormAlert } from '../services/weatherAdvisory';
 
 interface BottomSheetProps {
   segment: CurbSegment | null;
@@ -23,6 +26,12 @@ interface BottomSheetProps {
 }
 
 export const BottomSheet: React.FC<BottomSheetProps> = ({ segment, onClose }) => {
+  const [advisory, setAdvisory] = useState<StormAlert | null>(null);
+
+  useEffect(() => {
+    fetchNycStormAdvisory().then((res) => setAdvisory(res));
+  }, []);
+
   if (!segment) return null;
 
   const getStatusColorTheme = () => {
@@ -241,40 +250,67 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ segment, onClose }) =>
                 </div>
               )}
 
-              {/* ParkNYC: Mobile app deep link parknyc:// (hidden on web desktop since ParkNYC has no web app) */}
+              {/* ParkNYC: Official App Link (Direct official Apple App Store / Google Play page) */}
               {typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? (
                 <button
                   type="button"
                   onClick={() => {
-                    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
                     const isAndroid = /Android/i.test(navigator.userAgent);
-
-                    // Launch ParkNYC application via mobile URL scheme
-                    window.location.href = 'parknyc://';
-
-                    // Fallback to official App Store / Play Store if app not installed
-                    setTimeout(() => {
-                      if (document.hidden) return;
-                      if (isIOS) {
-                        window.location.href = 'https://apps.apple.com/us/app/parknyc/id1630138547';
-                      } else if (isAndroid) {
-                        window.location.href = 'https://play.google.com/store/apps/details?id=com.flowbird.parknyc';
-                      }
-                    }, 1500);
+                    const appUrl = isAndroid
+                      ? 'https://play.google.com/store/apps/details?id=com.flowbird.parknyc'
+                      : 'https://apps.apple.com/us/app/parknyc-powered-by-flowbird/id1588661793';
+                    window.open(appUrl, '_blank', 'noopener,noreferrer');
                   }}
                   className="w-full py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center justify-center space-x-2 transition-all shadow-md shadow-blue-600/20 active:scale-[0.98]"
                 >
                   <Smartphone className="w-3.5 h-3.5" />
-                  <span>Open ParkNYC App</span>
+                  <span>Open Official ParkNYC App</span>
                 </button>
               ) : (
                 <div className="flex items-center space-x-2 py-2 px-3 rounded-xl bg-blue-100/70 dark:bg-blue-900/30 text-blue-900 dark:text-blue-200 text-xs border border-blue-200/60 dark:border-blue-800/40">
                   <Smartphone className="w-4 h-4 shrink-0 text-blue-600 dark:text-blue-400" />
-                  <span>Pay with the official <strong>ParkNYC mobile app</strong> on your phone (Enter Zone {segment.meterInfo.payByCell}).</span>
+                  <span>Pay with official <strong>ParkNYC mobile app</strong> on your phone (Enter Zone {segment.meterInfo.payByCell}).</span>
                 </div>
               )}
             </div>
           )}
+
+          {/* Unintrusive NYC 311 & Weather Advisory Card (Option 2 & 3) */}
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 text-xs space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center space-x-2">
+                <div className={`p-1.5 rounded-lg ${
+                  advisory?.hasStormAlert
+                    ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300'
+                    : 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300'
+                }`}>
+                  {advisory?.hasStormAlert ? <CloudSnow className="w-4 h-4" /> : <Info className="w-4 h-4" />}
+                </div>
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400 block">
+                    NYC 311 City Status & Weather
+                  </span>
+                  <span className="font-bold text-gray-900 dark:text-white text-xs">
+                    {advisory?.hasStormAlert ? advisory.event : 'NYC 311 Daily Service Updates'}
+                  </span>
+                </div>
+              </div>
+
+              <a
+                href={advisory?.portalUrl || 'https://portal.311.nyc.gov/'}
+                target="_blank"
+                rel="noreferrer"
+                className="px-2.5 py-1 rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-[10px] font-bold text-blue-600 dark:text-blue-300 border border-gray-200 dark:border-gray-600 flex items-center space-x-1 shrink-0 transition-colors shadow-2xs"
+              >
+                <span>portal.311.nyc.gov</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+
+            <p className="text-[11px] text-gray-600 dark:text-gray-300 leading-relaxed">
+              {advisory?.aspAdvice || 'During major snowstorms, DSNY suspends Alternate Side Parking for plowing operations. Parking meters generally remain in effect.'}
+            </p>
+          </div>
 
           {/* Official NYC DOT Signs Section */}
           <div className="space-y-2">

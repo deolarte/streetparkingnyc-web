@@ -51,7 +51,9 @@ export const AdBanner: React.FC<AdBannerProps> = ({
             </div>
             {typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? (
               <a
-                href="parknyc://"
+                href="https://apps.apple.com/us/app/parknyc-powered-by-flowbird/id1588661793"
+                target="_blank"
+                rel="noopener,noreferrer"
                 className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline shrink-0 bg-blue-50 dark:bg-blue-950/60 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800"
               >
                 Open App →
