@@ -325,6 +325,22 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
 
       {/* Neighborhood Quick Navigation Pills & Action Buttons */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+        {/* Language Selector (Always First & Instantly Visible on Mobile) */}
+        <LanguageSelector />
+
+        {/* FAQ & Legal Disclosures Button */}
+        {onOpenAbout && (
+          <button
+            type="button"
+            onClick={onOpenAbout}
+            className="px-2.5 py-1 rounded-lg bg-white/90 dark:bg-gray-800/90 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-[11px] shadow-xs border border-gray-200/80 dark:border-gray-700/80 flex items-center space-x-1 shrink-0 transition-colors"
+            title="About StreetPark, FAQ & Data Disclosures"
+          >
+            <Info className="w-3.5 h-3.5 text-gray-500" />
+            <span>{t('faq_btn')}</span>
+          </button>
+        )}
+
         {/* Buy Me a Coffee Tip Button */}
         {onOpenTipModal && (
           <button
@@ -350,22 +366,6 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
             <span>{t('feedback_btn')}</span>
           </button>
         )}
-
-        {/* FAQ & Legal Disclosures Button */}
-        {onOpenAbout && (
-          <button
-            type="button"
-            onClick={onOpenAbout}
-            className="px-2.5 py-1 rounded-lg bg-white/90 dark:bg-gray-800/90 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-[11px] shadow-xs border border-gray-200/80 dark:border-gray-700/80 flex items-center space-x-1 shrink-0 transition-colors"
-            title="About StreetPark, FAQ & Data Disclosures"
-          >
-            <Info className="w-3.5 h-3.5 text-gray-500" />
-            <span>{t('faq_btn')}</span>
-          </button>
-        )}
-
-        {/* Language Selector */}
-        <LanguageSelector />
 
         <span className="text-[10px] font-semibold uppercase text-gray-500 dark:text-gray-400 pl-1 shrink-0">
           {t('jump_to')}

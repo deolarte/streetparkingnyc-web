@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Smartphone,
   Share2,
+  Globe,
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -22,7 +23,7 @@ interface AboutModalProps {
 }
 
 export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
-  const { t } = useLanguage();
+  const { t, locale, setLocale, languages, isI18nEnabled } = useLanguage();
   if (!isOpen) return null;
 
   const handleDismiss = () => {
@@ -77,6 +78,36 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
               Physical street signs posted on the block, temporary construction placards, film shoot restrictions, emergency tow-away orders, and police instructions <strong>always supersede any digital information</strong>. The driver remains solely responsible for parking compliance. StreetPark and its operators assume no legal liability for parking summonses, fines, or towing fees.
             </p>
           </div>
+
+          {/* Language Selection Card */}
+          {isI18nEnabled && (
+            <div className="space-y-2">
+              <div className="flex items-center space-x-1.5 text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider">
+                <Globe className="w-4 h-4 text-blue-600" />
+                <span>Language / Idioma / 语言</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {languages.map((lang) => {
+                  const isSelected = lang.code === locale;
+                  return (
+                    <button
+                      key={lang.code}
+                      type="button"
+                      onClick={() => setLocale(lang.code)}
+                      className={`py-2 px-2.5 rounded-2xl flex flex-col items-center justify-center space-y-1 transition-all border active:scale-95 ${
+                        isSelected
+                          ? 'bg-blue-50 dark:bg-blue-950/50 border-blue-500 text-blue-700 dark:text-blue-300 font-bold shadow-xs ring-2 ring-blue-500/20'
+                          : 'bg-gray-50 dark:bg-gray-800/60 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      <span className="text-xl">{lang.flag}</span>
+                      <span className="text-[11px] font-semibold">{lang.nativeName}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Color Legend & Map Guide */}
           <div className="space-y-2.5">
