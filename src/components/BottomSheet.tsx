@@ -6,12 +6,12 @@ import {
   AlertTriangle,
   Info,
   DollarSign,
-  ExternalLink,
   ShieldCheck,
   ShieldAlert,
   Compass,
   CalendarClock,
   CheckCircle2,
+  Smartphone,
 } from 'lucide-react';
 import type { CurbSegment } from '../types';
 import { AdBanner } from './AdBanner';
@@ -241,15 +241,38 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ segment, onClose }) =>
                 </div>
               )}
 
-              <a
-                href={`https://parknyc.org`}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center justify-center space-x-2 transition-all shadow-md shadow-blue-600/20"
-              >
-                <span>Pay via ParkNYC (Zone {segment.meterInfo.payByCell})</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
+              {/* ParkNYC: Mobile app deep link parknyc:// (hidden on web desktop since ParkNYC has no web app) */}
+              {typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+                    const isAndroid = /Android/i.test(navigator.userAgent);
+
+                    // Launch ParkNYC application via mobile URL scheme
+                    window.location.href = 'parknyc://';
+
+                    // Fallback to official App Store / Play Store if app not installed
+                    setTimeout(() => {
+                      if (document.hidden) return;
+                      if (isIOS) {
+                        window.location.href = 'https://apps.apple.com/us/app/parknyc/id1630138547';
+                      } else if (isAndroid) {
+                        window.location.href = 'https://play.google.com/store/apps/details?id=com.flowbird.parknyc';
+                      }
+                    }, 1500);
+                  }}
+                  className="w-full py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center justify-center space-x-2 transition-all shadow-md shadow-blue-600/20 active:scale-[0.98]"
+                >
+                  <Smartphone className="w-3.5 h-3.5" />
+                  <span>Open ParkNYC App</span>
+                </button>
+              ) : (
+                <div className="flex items-center space-x-2 py-2 px-3 rounded-xl bg-blue-100/70 dark:bg-blue-900/30 text-blue-900 dark:text-blue-200 text-xs border border-blue-200/60 dark:border-blue-800/40">
+                  <Smartphone className="w-4 h-4 shrink-0 text-blue-600 dark:text-blue-400" />
+                  <span>Pay with the official <strong>ParkNYC mobile app</strong> on your phone (Enter Zone {segment.meterInfo.payByCell}).</span>
+                </div>
+              )}
             </div>
           )}
 

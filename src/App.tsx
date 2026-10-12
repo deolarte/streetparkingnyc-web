@@ -9,6 +9,7 @@ import { evaluateSegmentParking } from './services/signParser';
 import type { AddressCandidate } from './services/geocodingService';
 import type { CurbSegment, VehicleType, RawCurbSegment } from './types';
 import { AdBanner } from './components/AdBanner';
+import { InterstitialAd } from './components/InterstitialAd';
 import { Loader2 } from 'lucide-react';
 
 export function App() {
@@ -20,6 +21,21 @@ export function App() {
   const [rawCurbs, setRawCurbs] = useState<RawCurbSegment[]>([]);
   const [selectedCurbId, setSelectedCurbId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [showInterstitial, setShowInterstitial] = useState<boolean>(false);
+
+  const userActionCountRef = useRef(0);
+  const lastInterstitialTimeRef = useRef(Date.now());
+
+  const triggerInterstitialCheck = () => {
+    userActionCountRef.current += 1;
+    const now = Date.now();
+    // Trigger interstitial after every 4th curb interaction with a 150s (2.5 min) cooldown
+    if (userActionCountRef.current >= 4 && now - lastInterstitialTimeRef.current > 150000) {
+      userActionCountRef.current = 0;
+      lastInterstitialTimeRef.current = now;
+      setShowInterstitial(true);
+    }
+  };
 
   const mapInstanceRef = useRef<Map | null>(null);
 
@@ -78,6 +94,9 @@ export function App() {
 
   const handleSelectCurb = (curb: CurbSegment | null) => {
     setSelectedCurbId(curb ? curb.id : null);
+    if (curb) {
+      triggerInterstitialCheck();
+    }
   };
 
   const handleJumpToLocation = (center: [number, number], zoom: number = 15.5) => {
@@ -278,8 +297,20 @@ export function App() {
         </div>
       </div>
 
+      {/* Always-Present Persistent Mobile Ad Banner (Docked at Screen Bottom when Drawer is closed) */}
+      {!selectedCurb && (
+        <div className="sm:hidden fixed bottom-[max(calc(env(safe-area-inset-bottom,0px)+8px),10px)] inset-x-0 z-20 flex justify-center pointer-events-auto px-2">
+          <div className="shadow-xl rounded-2xl overflow-hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200/80 dark:border-gray-800">
+            <AdBanner format="banner-320x50" className="!my-0" />
+          </div>
+        </div>
+      )}
+
       {/* Mobile Bottom Sheet Drawer for Selected Curb */}
       <BottomSheet segment={selectedCurb} onClose={() => setSelectedCurbId(null)} />
+
+      {/* High-Value Interstitial Ad Modal */}
+      <InterstitialAd isOpen={showInterstitial} onClose={() => setShowInterstitial(false)} />
     </div>
   );
 }

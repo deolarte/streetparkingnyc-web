@@ -49,14 +49,18 @@ export const AdBanner: React.FC<AdBannerProps> = ({
                 </div>
               </div>
             </div>
-            <a
-              href="https://parknyc.org"
-              target="_blank"
-              rel="noreferrer"
-              className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline shrink-0 bg-blue-50 dark:bg-blue-950/60 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800"
-            >
-              Get App →
-            </a>
+            {typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? (
+              <a
+                href="parknyc://"
+                className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline shrink-0 bg-blue-50 dark:bg-blue-950/60 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800"
+              >
+                Open App →
+              </a>
+            ) : (
+              <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 shrink-0 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">
+                Mobile App
+              </span>
+            )}
           </div>
 
           {/* Live AdSense unit: overlays on top once Google serves ads */}
