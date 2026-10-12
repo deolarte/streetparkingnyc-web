@@ -88,6 +88,28 @@ export function App() {
   // Filter evaluated curbs for the map
   const displayCurbs = useMemo(() => {
     if (statusFilter === 'all') return evaluatedCurbs;
+    if (statusFilter === 'warning') {
+      return evaluatedCurbs.filter((c) => {
+        if (c.status === 'warning') return true;
+        // Curb active restriction, meter, or parking window ending/changing in <= 60 minutes
+        if (
+          c.timeUntilChangeMinutes !== undefined &&
+          c.timeUntilChangeMinutes > 0 &&
+          c.timeUntilChangeMinutes <= 60
+        ) {
+          return true;
+        }
+        // Parking timeline event or resumption within 60 minutes
+        if (
+          c.parkingTimeline?.durationMinutes !== undefined &&
+          c.parkingTimeline.durationMinutes > 0 &&
+          c.parkingTimeline.durationMinutes <= 60
+        ) {
+          return true;
+        }
+        return false;
+      });
+    }
     return evaluatedCurbs.filter((c) => c.status === statusFilter);
   }, [evaluatedCurbs, statusFilter]);
 
@@ -195,8 +217,18 @@ export function App() {
     for (const c of evaluatedCurbs) {
       if (c.status === 'free') freeCount++;
       else if (c.status === 'metered') meteredCount++;
-      else if (c.status === 'warning') warningCount++;
       else if (c.status === 'restricted') restrictedCount++;
+
+      const isSoon =
+        c.status === 'warning' ||
+        (c.timeUntilChangeMinutes !== undefined &&
+          c.timeUntilChangeMinutes > 0 &&
+          c.timeUntilChangeMinutes <= 60) ||
+        (c.parkingTimeline?.durationMinutes !== undefined &&
+          c.parkingTimeline.durationMinutes > 0 &&
+          c.parkingTimeline.durationMinutes <= 60);
+
+      if (isSoon) warningCount++;
     }
 
     return { freeCount, meteredCount, warningCount, restrictedCount };
@@ -213,6 +245,7 @@ export function App() {
         onLocationFound={handleLocationFound}
         onViewportChange={handleViewportChange}
         mapInstanceRef={mapInstanceRef}
+        statusFilter={statusFilter}
       />
 
       {/* Top Floating Controls Container with iOS Safe Area Insets */}
@@ -239,7 +272,11 @@ export function App() {
       {statusFilter !== 'all' && displayCurbs.length === 0 && evaluatedCurbs.length > 0 && (
         <div className="absolute top-[calc(max(env(safe-area-inset-top,44px),44px)+7.5rem)] sm:top-28 inset-x-4 max-w-sm mx-auto z-30 pointer-events-auto">
           <div className="bg-amber-600/95 dark:bg-amber-900/95 text-white text-xs px-3.5 py-2 rounded-2xl shadow-xl flex items-center justify-between gap-2 backdrop-blur-md border border-amber-400/40">
-            <span>No "{statusFilter}" curbs active here right now</span>
+            <span>
+              {statusFilter === 'warning'
+                ? 'No curbs changing in the next 60 min in this area'
+                : `No "${statusFilter}" curbs active here right now`}
+            </span>
             <button
               onClick={() => setStatusFilter('all')}
               className="bg-white text-gray-900 hover:bg-gray-100 px-2.5 py-1 rounded-xl text-[11px] font-bold uppercase transition-colors shrink-0 shadow-xs"

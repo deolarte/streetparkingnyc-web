@@ -17,6 +17,7 @@ interface MapEngineProps {
   onLocationFound?: (coords: [number, number]) => void;
   onViewportChange?: (bounds: { north: number; south: number; east: number; west: number }) => void;
   mapInstanceRef: React.MutableRefObject<Map | null>;
+  statusFilter?: string;
 }
 
 // Watermark-Free High-Definition Street Basemap + Vector Street Name Labeling
@@ -136,6 +137,7 @@ export const MapEngine: React.FC<MapEngineProps> = ({
   onLocationFound,
   onViewportChange,
   mapInstanceRef,
+  statusFilter = 'all',
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [isLocating, setIsLocating] = useState(false);
@@ -144,11 +146,14 @@ export const MapEngine: React.FC<MapEngineProps> = ({
 
   // Keep refs to avoid stale closures in MapLibre event listeners
   const curbsRef = useRef<CurbSegment[]>(curbs);
+  const statusFilterRef = useRef<string>(statusFilter);
   const onSelectCurbRef = useRef(onSelectCurb);
   const onViewportChangeRef = useRef(onViewportChange);
 
   const buildGeoJson = useCallback((curbList: CurbSegment[]): FeatureCollection<LineString> => {
     const validFeatures: FeatureCollection<LineString>['features'] = [];
+    const isSoonMode = statusFilterRef.current === 'warning';
+
     for (const curb of curbList) {
       if (!Array.isArray(curb.coordinates) || curb.coordinates.length < 2) continue;
       // Sanitize coordinates to ensure strictly finite numbers [lng, lat]
@@ -168,7 +173,7 @@ export const MapEngine: React.FC<MapEngineProps> = ({
           fromStreet: curb.fromStreet || '',
           toStreet: curb.toStreet || '',
           borough: curb.borough || '',
-          status: curb.status || 'free',
+          status: isSoonMode ? 'warning' : (curb.status || 'free'),
           statusBadge: curb.statusBadge || 'Free Parking',
           canParkUntil: curb.canParkUntil || '',
           canParkHeadline: curb.canParkHeadline || '',
@@ -202,10 +207,11 @@ export const MapEngine: React.FC<MapEngineProps> = ({
 
   useEffect(() => {
     curbsRef.current = curbs;
+    statusFilterRef.current = statusFilter;
     onSelectCurbRef.current = onSelectCurb;
     onViewportChangeRef.current = onViewportChange;
     updateSourceData();
-  }, [curbs, onSelectCurb, onViewportChange, updateSourceData]);
+  }, [curbs, statusFilter, onSelectCurb, onViewportChange, updateSourceData]);
 
   // Initialize MapLibre
   useEffect(() => {
@@ -217,7 +223,12 @@ export const MapEngine: React.FC<MapEngineProps> = ({
       center: [-74.006, 40.7128], // NYC City Hall / Lower Manhattan
       zoom: 14.5,
       maxZoom: 20,
-      minZoom: 10,
+      minZoom: 10.2, // Prevent zooming out beyond greater NYC area
+      // Strict NYC 5-Borough bounding box + small radius buffer to prevent panning to other states
+      maxBounds: [
+        [-74.32, 40.48], // Southwest bound: south of Staten Island / Arthur Kill
+        [-73.65, 40.96], // Northeast bound: north of Bronx / Pelhams, east of Queens
+      ],
       pitch: 0, // Flat 2D map
       maxPitch: 0, // Lock pitch strictly to 0
       minPitch: 0,
