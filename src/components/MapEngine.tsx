@@ -12,6 +12,7 @@ if (typeof window !== 'undefined') {
 interface MapEngineProps {
   curbs: CurbSegment[];
   selectedCurb: CurbSegment | null;
+  searchedLocation?: { center: [number, number]; label?: string } | null;
   onSelectCurb: (curb: CurbSegment | null) => void;
   onLocationFound?: (coords: [number, number]) => void;
   onViewportChange?: (bounds: { north: number; south: number; east: number; west: number }) => void;
@@ -123,6 +124,7 @@ const ESRI_LIGHT_GRAY_STYLE: any = {
 export const MapEngine: React.FC<MapEngineProps> = ({
   curbs,
   selectedCurb,
+  searchedLocation,
   onSelectCurb,
   onLocationFound,
   onViewportChange,
@@ -131,6 +133,7 @@ export const MapEngine: React.FC<MapEngineProps> = ({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [isLocating, setIsLocating] = useState(false);
   const userMarkerRef = useRef<Marker | null>(null);
+  const searchMarkerRef = useRef<Marker | null>(null);
 
   // Keep refs to avoid stale closures in MapLibre event listeners
   const curbsRef = useRef<CurbSegment[]>(curbs);
@@ -290,6 +293,47 @@ export const MapEngine: React.FC<MapEngineProps> = ({
       }
     } catch (e) {}
   }, [selectedCurb, mapInstanceRef]);
+
+  // Manage searched address destination marker
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    if (!searchedLocation) {
+      if (searchMarkerRef.current) {
+        searchMarkerRef.current.remove();
+        searchMarkerRef.current = null;
+      }
+      return;
+    }
+
+    const { center, label } = searchedLocation;
+    if (!searchMarkerRef.current) {
+      const el = document.createElement('div');
+      el.className = 'flex flex-col items-center pointer-events-none -translate-y-2 select-none';
+      el.innerHTML = `
+        <div class="bg-slate-900/95 text-white text-[11px] font-bold px-2.5 py-1 rounded-xl shadow-xl border border-rose-500/60 whitespace-nowrap mb-1 flex items-center gap-1.5 backdrop-blur-md">
+          <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+          <span class="marker-label">${label || 'Searched Address'}</span>
+        </div>
+        <div class="relative flex items-center justify-center">
+          <div class="absolute w-8 h-8 rounded-full bg-rose-500/30 animate-ping"></div>
+          <div class="w-6 h-6 rounded-full bg-rose-600 border-2 border-white shadow-xl ring-4 ring-rose-500/40 flex items-center justify-center text-white text-xs font-black">
+            📍
+          </div>
+        </div>
+      `;
+      searchMarkerRef.current = new Marker({ element: el, anchor: 'bottom' })
+        .setLngLat(center)
+        .addTo(map);
+    } else {
+      searchMarkerRef.current.setLngLat(center);
+      const labelEl = searchMarkerRef.current.getElement().querySelector('.marker-label');
+      if (labelEl && label) {
+        labelEl.textContent = label;
+      }
+    }
+  }, [searchedLocation, mapInstanceRef]);
 
   // Geolocation Handler
   const handleLocateMe = useCallback(() => {

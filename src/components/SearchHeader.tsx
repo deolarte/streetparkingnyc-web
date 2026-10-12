@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Search,
   X,
   Car,
   Truck,
   Filter,
+  MapPin,
+  Loader2,
+  Navigation,
 } from 'lucide-react';
 import type { CurbSegment, VehicleType } from '../types';
+import { searchNycAddress, type AddressCandidate } from '../services/geocodingService';
 import { AdBanner } from './AdBanner';
 
 interface SearchHeaderProps {
@@ -17,6 +21,9 @@ interface SearchHeaderProps {
   curbs: CurbSegment[];
   onSelectCurb: (curb: CurbSegment) => void;
   onJumpToLocation: (center: [number, number], zoom?: number) => void;
+  onSearchAddress: (candidate: AddressCandidate) => void;
+  searchedAddressLabel?: string | null;
+  onClearSearchedAddress?: () => void;
 }
 
 const NYC_NEIGHBORHOODS = [
@@ -39,9 +46,39 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
   curbs,
   onSelectCurb,
   onJumpToLocation,
+  onSearchAddress,
+  searchedAddressLabel,
+  onClearSearchedAddress,
 }) => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [addressCandidates, setAddressCandidates] = useState<AddressCandidate[]>([]);
+  const [isSearchingAddresses, setIsSearchingAddresses] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Debounced address geocoding search for NYC addresses
+  useEffect(() => {
+    const trimmed = query.trim();
+    if (!trimmed || trimmed.length < 3) {
+      setAddressCandidates([]);
+      setIsSearchingAddresses(false);
+      return;
+    }
+
+    setIsSearchingAddresses(true);
+    const timer = setTimeout(async () => {
+      try {
+        const results = await searchNycAddress(trimmed);
+        setAddressCandidates(results);
+      } catch (err) {
+        console.warn('Address search error:', err);
+      } finally {
+        setIsSearchingAddresses(false);
+      }
+    }, 280);
+
+    return () => clearTimeout(timer);
+  }, [query]);
 
   const filteredCurbs = query.trim()
     ? curbs.filter(
@@ -53,8 +90,68 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
       )
     : [];
 
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = query.trim();
+    if (!trimmed) return;
+
+    // 1. If we already have address candidates, use the top match
+    if (addressCandidates.length > 0) {
+      const topMatch = addressCandidates[0];
+      onSearchAddress(topMatch);
+      setIsOpen(false);
+      searchInputRef.current?.blur();
+      return;
+    }
+
+    // 2. Otherwise immediately geocode query
+    setIsSearchingAddresses(true);
+    try {
+      const freshResults = await searchNycAddress(trimmed);
+      if (freshResults.length > 0) {
+        onSearchAddress(freshResults[0]);
+        setIsOpen(false);
+        searchInputRef.current?.blur();
+        return;
+      }
+    } finally {
+      setIsSearchingAddresses(false);
+    }
+
+    // 3. Fallback to matching curb
+    if (filteredCurbs.length > 0) {
+      const curb = filteredCurbs[0];
+      onSelectCurb(curb);
+      setIsOpen(false);
+      if (curb.coordinates[0]) {
+        onJumpToLocation(curb.coordinates[0], 17.2);
+      }
+      searchInputRef.current?.blur();
+    }
+  };
+
   return (
     <div className="w-full space-y-2">
+      {/* Active Searched Address Notification Pill */}
+      {searchedAddressLabel && (
+        <div className="flex items-center justify-between bg-rose-500/95 dark:bg-rose-900/95 text-white text-xs px-3 py-1.5 rounded-xl shadow-lg border border-rose-400/40 backdrop-blur-md">
+          <div className="flex items-center space-x-1.5 truncate">
+            <MapPin className="w-3.5 h-3.5 shrink-0 text-white animate-pulse" />
+            <span className="font-bold truncate">Block View: {searchedAddressLabel}</span>
+            <span className="text-[10px] bg-rose-700/80 px-1.5 py-0.5 rounded-md font-semibold shrink-0">
+              ~1 Block Radius
+            </span>
+          </div>
+          <button
+            onClick={onClearSearchedAddress}
+            className="ml-2 hover:bg-rose-700/80 p-0.5 rounded-md transition-colors shrink-0"
+            title="Clear address pin"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
       {/* Top Search & Filter Bar */}
       <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/80 dark:border-gray-800 p-2 sm:p-2.5">
         <div className="flex items-center gap-2">
@@ -70,12 +167,17 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
             </div>
           </div>
 
-          {/* Search Input Box */}
-          <div className="relative flex-1">
+          {/* Search Input Form */}
+          <form onSubmit={handleFormSubmit} className="relative flex-1">
             <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-gray-400">
-              <Search className="w-4 h-4" />
+              {isSearchingAddresses ? (
+                <Loader2 className="w-4 h-4 animate-spin text-rose-500" />
+              ) : (
+                <Search className="w-4 h-4" />
+              )}
             </div>
             <input
+              ref={searchInputRef}
               type="text"
               value={query}
               onChange={(e) => {
@@ -83,21 +185,32 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
                 setIsOpen(true);
               }}
               onFocus={() => setIsOpen(true)}
-              placeholder="Search NYC street, cross street, borough..."
-              className="w-full pl-8 pr-7 py-2 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              placeholder="Enter NYC address, landmark, or street..."
+              className="w-full pl-8 pr-14 py-2 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all"
             />
-            {query && (
+            <div className="absolute inset-y-0 right-0 flex items-center pr-1.5 space-x-1">
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQuery('');
+                    setAddressCandidates([]);
+                    setIsOpen(false);
+                  }}
+                  className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
               <button
-                onClick={() => {
-                  setQuery('');
-                  setIsOpen(false);
-                }}
-                className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                type="submit"
+                className="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[11px] font-bold shadow-xs transition-colors shrink-0"
+                title="Search address & zoom to 1-block radius"
               >
-                <X className="w-3.5 h-3.5" />
+                Go
               </button>
-            )}
-          </div>
+            </div>
+          </form>
 
           {/* Vehicle Mode Toggle */}
           <div className="flex items-center bg-gray-100 dark:bg-gray-800 p-0.5 rounded-xl shrink-0">
@@ -212,11 +325,55 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
         ))}
       </div>
 
-      {/* Search Results Dropdown with Interstitial Ad Card */}
+      {/* Search Results Dropdown with Address Suggestions and Matching Curbs */}
       {isOpen && query.trim().length > 0 && (
-        <div className="bg-white/98 dark:bg-gray-900/98 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 p-2 max-h-72 overflow-y-auto space-y-1">
-          {filteredCurbs.length > 0 ? (
-            <>
+        <div className="bg-white/98 dark:bg-gray-900/98 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 p-2 max-h-80 overflow-y-auto space-y-2">
+          {/* Section 1: Geocoded NYC Addresses & Landmarks (1-Block Radius) */}
+          {addressCandidates.length > 0 && (
+            <div className="space-y-1">
+              <div className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-2 pt-1 flex items-center gap-1.5">
+                <MapPin className="w-3 h-3 text-rose-500" />
+                <span>NYC Addresses & Places (Zoom to 1-Block Radius)</span>
+              </div>
+              {addressCandidates.map((cand, idx) => (
+                <button
+                  key={`addr-${idx}`}
+                  onClick={() => {
+                    onSearchAddress(cand);
+                    setIsOpen(false);
+                    setQuery(cand.shortAddress);
+                    searchInputRef.current?.blur();
+                  }}
+                  className="w-full text-left p-2 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-between text-xs transition-colors group"
+                >
+                  <div className="flex items-center space-x-2.5 min-w-0 pr-2">
+                    <div className="w-7 h-7 rounded-lg bg-rose-100 dark:bg-rose-900/40 flex items-center justify-center shrink-0 text-rose-600 dark:text-rose-400 group-hover:scale-105 transition-transform">
+                      <MapPin className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-bold text-gray-900 dark:text-white group-hover:text-rose-600 dark:group-hover:text-rose-400 truncate">
+                        {cand.shortAddress}
+                      </div>
+                      <div className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                        {cand.address}
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/80 text-rose-700 dark:text-rose-300 shrink-0 shadow-2xs">
+                    1-Block Zoom
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Section 2: Matching Street Curbs with Live Regulation Badges */}
+          {filteredCurbs.length > 0 && (
+            <div className="space-y-1 border-t border-gray-100 dark:border-gray-800 pt-1.5">
+              <div className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-2 flex items-center gap-1.5">
+                <Navigation className="w-3 h-3 text-blue-500" />
+                <span>Matching Street Curbs</span>
+              </div>
               {filteredCurbs.slice(0, 5).map((curb) => (
                 <button
                   key={curb.id}
@@ -224,22 +381,23 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
                     onSelectCurb(curb);
                     setIsOpen(false);
                     if (curb.coordinates[0]) {
-                      onJumpToLocation(curb.coordinates[0], 17);
+                      onJumpToLocation(curb.coordinates[0], 17.2);
                     }
+                    searchInputRef.current?.blur();
                   }}
                   className="w-full text-left p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-between text-xs transition-colors"
                 >
-                  <div>
-                    <div className="font-bold text-gray-900 dark:text-white flex items-center space-x-1.5">
+                  <div className="min-w-0 pr-2">
+                    <div className="font-bold text-gray-900 dark:text-white flex items-center space-x-1.5 truncate">
                       <span>{curb.onStreet}</span>
-                      <span className="text-[10px] text-gray-400">({curb.borough})</span>
+                      <span className="text-[10px] text-gray-400 font-normal shrink-0">({curb.borough})</span>
                     </div>
-                    <div className="text-[11px] text-gray-500 dark:text-gray-400">
+                    <div className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
                       {curb.fromStreet} → {curb.toStreet}
                     </div>
                   </div>
                   <span
-                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${
                       curb.status === 'free'
                         ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
                         : curb.status === 'metered'
@@ -253,17 +411,21 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
                   </span>
                 </button>
               ))}
-
-              {/* Non-intrusive Search / Filter Interstitial Ad Card */}
-              <AdBanner format="native-card" />
-            </>
-          ) : (
-            <div className="p-4 text-center text-xs text-gray-500 dark:text-gray-400">
-              No matching street curbs found for "{query}".
             </div>
           )}
+
+          {/* Zero results state */}
+          {addressCandidates.length === 0 && filteredCurbs.length === 0 && !isSearchingAddresses && (
+            <div className="p-4 text-center text-xs text-gray-500 dark:text-gray-400">
+              No matching NYC addresses or curbs found for "{query}". Press Enter to search anyway.
+            </div>
+          )}
+
+          {/* Non-intrusive Ad Card */}
+          <AdBanner format="native-card" />
         </div>
       )}
     </div>
   );
 };
+

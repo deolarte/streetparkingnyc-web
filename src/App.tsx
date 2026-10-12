@@ -6,6 +6,7 @@ import { TemporalSlider } from './components/TemporalSlider';
 import { BottomSheet } from './components/BottomSheet';
 import { fetchLiveSocrataCurbs, fetchCurbsNearLocation } from './services/socrataApi';
 import { evaluateSegmentParking } from './services/signParser';
+import type { AddressCandidate } from './services/geocodingService';
 import type { CurbSegment, VehicleType } from './types';
 import { Loader2 } from 'lucide-react';
 
@@ -14,6 +15,7 @@ export function App() {
   const [isNow, setIsNow] = useState<boolean>(true);
   const [vehicleType, setVehicleType] = useState<VehicleType>('passenger');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [searchedLocation, setSearchedLocation] = useState<{ center: [number, number]; label: string } | null>(null);
   const [rawCurbs, setRawCurbs] = useState<
     Array<
       Omit<
@@ -146,6 +148,32 @@ export function App() {
     }
   };
 
+  const handleSearchAddress = async (candidate: AddressCandidate) => {
+    setSearchedLocation({ center: candidate.center, label: candidate.shortAddress });
+    // Zoom in within a 1-block radius (zoom 17.2)
+    handleJumpToLocation(candidate.center, 17.2);
+
+    // Automatically load live parking regulations within this block radius
+    const [lon, lat] = candidate.center;
+    try {
+      setIsLoading(true);
+      const nearbyCurbs = await fetchCurbsNearLocation(lat, lon);
+      setRawCurbs((prev) => {
+        const existingIds = new Set(prev.map((c) => c.id));
+        const newCurbs = nearbyCurbs.filter((c) => !existingIds.has(c.id));
+        return [...prev, ...newCurbs];
+      });
+    } catch (err) {
+      console.warn('Could not load curbs for address:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleClearSearchedAddress = () => {
+    setSearchedLocation(null);
+  };
+
   // Quick stats summary
   const stats = useMemo(() => {
     let freeCount = 0;
@@ -169,6 +197,7 @@ export function App() {
       <MapEngine
         curbs={displayCurbs}
         selectedCurb={selectedCurb}
+        searchedLocation={searchedLocation}
         onSelectCurb={handleSelectCurb}
         onLocationFound={handleLocationFound}
         onViewportChange={handleViewportChange}
@@ -186,6 +215,9 @@ export function App() {
             curbs={evaluatedCurbs}
             onSelectCurb={handleSelectCurb}
             onJumpToLocation={handleJumpToLocation}
+            onSearchAddress={handleSearchAddress}
+            searchedAddressLabel={searchedLocation ? searchedLocation.label : null}
+            onClearSearchedAddress={handleClearSearchedAddress}
           />
         </div>
       </div>
