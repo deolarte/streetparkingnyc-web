@@ -13,7 +13,7 @@ interface MapEngineProps {
   mapInstanceRef: React.MutableRefObject<Map | null>;
 }
 
-const ESRI_LIGHT_GRAY_STYLE = {
+const ESRI_LIGHT_GRAY_STYLE: any = {
   version: 8 as const,
   sources: {
     'esri-base': {
@@ -22,7 +22,7 @@ const ESRI_LIGHT_GRAY_STYLE = {
         'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
       ],
       tileSize: 256,
-      maxzoom: 16, // Forces MapLibre to overzoom zoom 16 tiles up to 22 without 404s
+      maxzoom: 16,
       attribution: 'Esri, HERE, Garmin, © OpenStreetMap contributors, and the GIS user community',
     },
     'esri-labels': {
@@ -32,6 +32,13 @@ const ESRI_LIGHT_GRAY_STYLE = {
       ],
       tileSize: 256,
       maxzoom: 16,
+    },
+    'curbs-source': {
+      type: 'geojson' as const,
+      data: {
+        type: 'FeatureCollection' as const,
+        features: [],
+      },
     },
   },
   layers: [
@@ -49,6 +56,62 @@ const ESRI_LIGHT_GRAY_STYLE = {
       minzoom: 0,
       maxzoom: 22,
     },
+    {
+      id: 'curbs-casing',
+      type: 'line' as const,
+      source: 'curbs-source',
+      layout: {
+        'line-cap': 'round' as const,
+        'line-join': 'round' as const,
+      },
+      paint: {
+        'line-color': '#0f172a',
+        'line-width': ['interpolate' as const, ['linear' as const], ['zoom' as const], 11, 6, 14, 9, 16, 14, 18, 20],
+        'line-opacity': 0.95,
+      },
+    },
+    {
+      id: 'curbs-line',
+      type: 'line' as const,
+      source: 'curbs-source',
+      layout: {
+        'line-cap': 'round' as const,
+        'line-join': 'round' as const,
+      },
+      paint: {
+        'line-color': [
+          'match' as const,
+          ['get' as const, 'status'],
+          'free',
+          '#05df72', // Neon Emerald Green
+          'warning',
+          '#f59e0b', // High-Vis Amber
+          'restricted',
+          '#ff2b4e', // High-Vis Coral Red
+          'metered',
+          '#2563eb', // Electric Blue
+          '#94a3b8',
+        ],
+        'line-width': ['interpolate' as const, ['linear' as const], ['zoom' as const], 11, 4, 14, 6.5, 16, 10, 18, 15],
+        'line-opacity': 1.0,
+      },
+    },
+    {
+      id: 'curbs-selected-halo',
+      type: 'line' as const,
+      source: 'curbs-source',
+      filter: ['==' as const, ['get' as const, 'id'], ''],
+      layout: {
+        'line-cap': 'round' as const,
+        'line-join': 'round' as const,
+      },
+      paint: {
+        'line-color': '#ffffff',
+        'line-width': ['interpolate' as const, ['linear' as const], ['zoom' as const], 12, 10, 15, 16, 18, 24],
+        'line-opacity': 0.85,
+        'line-blur': 3,
+      },
+    },
   ],
 };
 
@@ -61,7 +124,6 @@ export const MapEngine: React.FC<MapEngineProps> = ({
   mapInstanceRef,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const userMarkerRef = useRef<Marker | null>(null);
 
@@ -69,12 +131,6 @@ export const MapEngine: React.FC<MapEngineProps> = ({
   const curbsRef = useRef<CurbSegment[]>(curbs);
   const onSelectCurbRef = useRef(onSelectCurb);
   const onViewportChangeRef = useRef(onViewportChange);
-
-  useEffect(() => {
-    curbsRef.current = curbs;
-    onSelectCurbRef.current = onSelectCurb;
-    onViewportChangeRef.current = onViewportChange;
-  }, [curbs, onSelectCurb, onViewportChange]);
 
   const buildGeoJson = useCallback((curbList: CurbSegment[]): FeatureCollection<LineString> => {
     const validFeatures = curbList
@@ -102,6 +158,27 @@ export const MapEngine: React.FC<MapEngineProps> = ({
     };
   }, []);
 
+  const updateSourceData = useCallback(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+    try {
+      const source = map.getSource('curbs-source') as GeoJSONSource | undefined;
+      if (source) {
+        source.setData(buildGeoJson(curbsRef.current));
+        map.triggerRepaint();
+      }
+    } catch (e) {
+      console.warn('Error updating curbs source:', e);
+    }
+  }, [mapInstanceRef, buildGeoJson]);
+
+  useEffect(() => {
+    curbsRef.current = curbs;
+    onSelectCurbRef.current = onSelectCurb;
+    onViewportChangeRef.current = onViewportChange;
+    updateSourceData();
+  }, [curbs, onSelectCurb, onViewportChange, updateSourceData]);
+
   // Initialize MapLibre
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -119,105 +196,12 @@ export const MapEngine: React.FC<MapEngineProps> = ({
     });
 
     mapInstanceRef.current = map;
-
     map.addControl(new AttributionControl({ compact: true }), 'bottom-right');
 
     let moveDebounceTimeout: any = null;
 
-    map.on('load', () => {
-      setMapLoaded(true);
-
-      const initialGeoJson = buildGeoJson(curbsRef.current);
-
-      // GeoJSON source for curb segments
-      map.addSource('curbs-source', {
-        type: 'geojson',
-        data: initialGeoJson,
-      });
-
-      // Curb line casing (bold outline for extreme high contrast against gray basemap)
-      map.addLayer({
-        id: 'curbs-casing',
-        type: 'line',
-        source: 'curbs-source',
-        layout: {
-          'line-cap': 'round',
-          'line-join': 'round',
-        },
-        paint: {
-          'line-color': '#0f172a',
-          'line-width': ['interpolate', ['linear'], ['zoom'], 11, 5, 14, 8, 16, 13, 18, 18],
-          'line-opacity': 0.9,
-        },
-      });
-
-      // Main color-coded curb line
-      map.addLayer({
-        id: 'curbs-line',
-        type: 'line',
-        source: 'curbs-source',
-        layout: {
-          'line-cap': 'round',
-          'line-join': 'round',
-        },
-        paint: {
-          'line-color': [
-            'match',
-            ['get', 'status'],
-            'free',
-            '#05df72', // Neon Emerald Green
-            'warning',
-            '#f59e0b', // High-Vis Amber
-            'restricted',
-            '#ff2b4e', // High-Vis Coral Red
-            'metered',
-            '#2563eb', // Electric Blue
-            '#94a3b8',
-          ],
-          'line-width': ['interpolate', ['linear'], ['zoom'], 11, 3.5, 14, 6, 16, 10, 18, 14],
-          'line-opacity': 1.0,
-        },
-      });
-
-      // Selection Halo
-      map.addLayer({
-        id: 'curbs-selected-halo',
-        type: 'line',
-        source: 'curbs-source',
-        filter: ['==', ['get', 'id'], ''],
-        layout: {
-          'line-cap': 'round',
-          'line-join': 'round',
-        },
-        paint: {
-          'line-color': '#ffffff',
-          'line-width': ['interpolate', ['linear'], ['zoom'], 12, 10, 15, 15, 18, 22],
-          'line-opacity': 0.8,
-          'line-blur': 3,
-        },
-      });
-
-      // Click handler on curb line & casing
-      const handleCurbClick = (e: MapLayerMouseEvent) => {
-        if (!e.features || e.features.length === 0) return;
-        const feat = e.features[0];
-        const segId = feat.properties?.id;
-        const found = curbsRef.current.find((c) => c.id === segId);
-        if (found) {
-          onSelectCurbRef.current(found);
-        }
-      };
-
-      map.on('click', 'curbs-line', handleCurbClick);
-      map.on('click', 'curbs-casing', handleCurbClick);
-
-      // Hover cursors
-      map.on('mouseenter', 'curbs-line', () => {
-        map.getCanvas().style.cursor = 'pointer';
-      });
-      map.on('mouseleave', 'curbs-line', () => {
-        map.getCanvas().style.cursor = '';
-      });
+    const handleLoadedOrStyled = () => {
+      updateSourceData();
 
       // Trigger initial viewport curb load
       const bounds = map.getBounds();
@@ -227,10 +211,36 @@ export const MapEngine: React.FC<MapEngineProps> = ({
         east: bounds.getEast(),
         west: bounds.getWest(),
       });
+    };
+
+    map.on('load', handleLoadedOrStyled);
+    map.on('styledata', updateSourceData);
+
+    // Click handler on curb line & casing
+    const handleCurbClick = (e: MapLayerMouseEvent) => {
+      if (!e.features || e.features.length === 0) return;
+      const feat = e.features[0];
+      const segId = feat.properties?.id;
+      const found = curbsRef.current.find((c) => c.id === segId);
+      if (found) {
+        onSelectCurbRef.current(found);
+      }
+    };
+
+    map.on('click', 'curbs-line', handleCurbClick);
+    map.on('click', 'curbs-casing', handleCurbClick);
+
+    // Hover cursors
+    map.on('mouseenter', 'curbs-line', () => {
+      map.getCanvas().style.cursor = 'pointer';
+    });
+    map.on('mouseleave', 'curbs-line', () => {
+      map.getCanvas().style.cursor = '';
     });
 
     // Debounced moveend listener to fetch live data wherever user pans/zooms
     const handleMoveEnd = () => {
+      updateSourceData();
       clearTimeout(moveDebounceTimeout);
       moveDebounceTimeout = setTimeout(() => {
         if (map.getZoom() >= 13) {
@@ -252,30 +262,20 @@ export const MapEngine: React.FC<MapEngineProps> = ({
       map.remove();
       mapInstanceRef.current = null;
     };
-  }, [mapInstanceRef, buildGeoJson]);
-
-  // Update GeoJSON source when curbs change
-  useEffect(() => {
-    const map = mapInstanceRef.current;
-    if (!map || !mapLoaded) return;
-
-    const source = map.getSource('curbs-source') as GeoJSONSource | undefined;
-    if (!source) return;
-
-    const geojson = buildGeoJson(curbs);
-    source.setData(geojson);
-  }, [curbs, mapLoaded, mapInstanceRef, buildGeoJson]);
+  }, [mapInstanceRef, buildGeoJson, updateSourceData]);
 
   // Update selection highlight
   useEffect(() => {
     const map = mapInstanceRef.current;
-    if (!map || !mapLoaded) return;
+    if (!map) return;
 
     const selectedId = selectedCurb ? selectedCurb.id : '';
-    if (map.getLayer('curbs-selected-halo')) {
-      map.setFilter('curbs-selected-halo', ['==', ['get', 'id'], selectedId]);
-    }
-  }, [selectedCurb, mapLoaded, mapInstanceRef]);
+    try {
+      if (map.getLayer('curbs-selected-halo')) {
+        map.setFilter('curbs-selected-halo', ['==', ['get', 'id'], selectedId]);
+      }
+    } catch (e) {}
+  }, [selectedCurb, mapInstanceRef]);
 
   // Geolocation Handler
   const handleLocateMe = useCallback(() => {
@@ -342,7 +342,7 @@ export const MapEngine: React.FC<MapEngineProps> = ({
       <div ref={mapContainerRef} className="w-full h-full" />
 
       {/* Floating Map Controls (Right Side, adjusted for mobile status bar and header) */}
-      <div className="absolute right-2.5 sm:right-3 top-[calc(max(env(safe-area-inset-top,0px),8px)+9rem)] sm:top-28 z-20 flex flex-col space-y-2">
+      <div className="absolute right-2.5 sm:right-3 top-[calc(max(env(safe-area-inset-top,44px),44px)+8.5rem)] sm:top-28 z-20 flex flex-col space-y-2">
         {/* Near Me GPS Button */}
         <button
           onClick={handleLocateMe}

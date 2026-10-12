@@ -176,7 +176,7 @@ export function App() {
       />
 
       {/* Top Floating Controls Container with iOS Safe Area Insets */}
-      <div className="absolute top-0 inset-x-0 pt-[max(env(safe-area-inset-top,0px),8px)] px-2 sm:px-4 max-w-xl mx-auto z-30 pointer-events-none space-y-2">
+      <div className="absolute top-0 inset-x-0 pt-[max(env(safe-area-inset-top,44px),44px)] sm:pt-3 px-2 sm:px-4 max-w-xl mx-auto z-30 pointer-events-none space-y-2">
         <div className="pointer-events-auto">
           <SearchHeader
             vehicleType={vehicleType}
@@ -192,12 +192,12 @@ export function App() {
 
       {/* Zero match alert when active filter hides all curbs */}
       {statusFilter !== 'all' && displayCurbs.length === 0 && evaluatedCurbs.length > 0 && (
-        <div className="absolute top-[calc(max(env(safe-area-inset-top,0px),8px)+6.5rem)] inset-x-4 max-w-sm mx-auto z-20 pointer-events-auto">
-          <div className="bg-amber-600/95 dark:bg-amber-900/95 text-white text-xs px-3.5 py-1.5 rounded-full shadow-lg flex items-center justify-between gap-2 backdrop-blur-md">
-            <span>No curbs match "{statusFilter}" in this area</span>
+        <div className="absolute top-[calc(max(env(safe-area-inset-top,44px),44px)+7.5rem)] sm:top-28 inset-x-4 max-w-sm mx-auto z-30 pointer-events-auto">
+          <div className="bg-amber-600/95 dark:bg-amber-900/95 text-white text-xs px-3.5 py-2 rounded-2xl shadow-xl flex items-center justify-between gap-2 backdrop-blur-md border border-amber-400/40">
+            <span>No "{statusFilter}" curbs active here right now</span>
             <button
               onClick={() => setStatusFilter('all')}
-              className="bg-white/20 hover:bg-white/30 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase transition-colors shrink-0"
+              className="bg-white text-gray-900 hover:bg-gray-100 px-2.5 py-1 rounded-xl text-[11px] font-bold uppercase transition-colors shrink-0 shadow-xs"
             >
               Show All
             </button>
@@ -206,7 +206,7 @@ export function App() {
       )}
 
       {/* Floating Summary Stats Pill (Top Left Under Header) */}
-      <div className="absolute top-[calc(max(env(safe-area-inset-top,0px),8px)+7.5rem)] left-3 z-20 hidden md:flex flex-col space-y-1.5 pointer-events-none">
+      <div className="absolute top-[calc(max(env(safe-area-inset-top,44px),44px)+8.5rem)] left-3 z-20 hidden md:flex flex-col space-y-1.5 pointer-events-none">
         <div className="pointer-events-auto bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-3 py-2 rounded-2xl shadow-lg border border-gray-200/80 dark:border-gray-800 text-xs space-y-1">
           <div className="flex items-center justify-between gap-3">
             <span className="font-bold text-gray-800 dark:text-gray-200 text-[11px] uppercase tracking-wider">
