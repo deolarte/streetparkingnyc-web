@@ -10,6 +10,7 @@ import {
   Navigation,
   Coffee,
   MessageSquare,
+  Info,
 } from 'lucide-react';
 import type { CurbSegment, VehicleType } from '../types';
 import { searchNycAddress, type AddressCandidate } from '../services/geocodingService';
@@ -28,6 +29,7 @@ interface SearchHeaderProps {
   onClearSearchedAddress?: () => void;
   onOpenFeedback?: () => void;
   onOpenTipModal?: () => void;
+  onOpenAbout?: () => void;
 }
 
 const NYC_NEIGHBORHOODS = [
@@ -55,6 +57,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
   onClearSearchedAddress,
   onOpenFeedback,
   onOpenTipModal,
+  onOpenAbout,
 }) => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -342,6 +345,19 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
           >
             <MessageSquare className="w-3.5 h-3.5 text-blue-500" />
             <span>Feedback</span>
+          </button>
+        )}
+
+        {/* FAQ & Legal Disclosures Button */}
+        {onOpenAbout && (
+          <button
+            type="button"
+            onClick={onOpenAbout}
+            className="px-2.5 py-1 rounded-lg bg-white/90 dark:bg-gray-800/90 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-[11px] shadow-xs border border-gray-200/80 dark:border-gray-700/80 flex items-center space-x-1 shrink-0 transition-colors"
+            title="About StreetPark, FAQ & Data Disclosures"
+          >
+            <Info className="w-3.5 h-3.5 text-gray-500" />
+            <span>FAQ & Rules</span>
           </button>
         )}
 

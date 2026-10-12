@@ -12,6 +12,7 @@ import { AdBanner } from './components/AdBanner';
 import { InterstitialAd } from './components/InterstitialAd';
 import { FeedbackModal } from './components/FeedbackModal';
 import { TipModal } from './components/TipModal';
+import { AboutModal } from './components/AboutModal';
 import { Loader2 } from 'lucide-react';
 
 export function App() {
@@ -26,6 +27,7 @@ export function App() {
   const [showInterstitial, setShowInterstitial] = useState<boolean>(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState<boolean>(false);
   const [showTipModal, setShowTipModal] = useState<boolean>(false);
+  const [showAboutModal, setShowAboutModal] = useState<boolean>(false);
 
   const userActionCountRef = useRef(0);
   const lastInterstitialTimeRef = useRef(Date.now());
@@ -264,6 +266,7 @@ export function App() {
             onClearSearchedAddress={handleClearSearchedAddress}
             onOpenFeedback={() => setShowFeedbackModal(true)}
             onOpenTipModal={() => setShowTipModal(true)}
+            onOpenAbout={() => setShowAboutModal(true)}
           />
         </div>
       </div>
@@ -365,6 +368,9 @@ export function App() {
 
       {/* Buy Me a Coffee Tip Modal */}
       <TipModal isOpen={showTipModal} onClose={() => setShowTipModal(false)} />
+
+      {/* About StreetPark, Data Disclosures & FAQ Modal */}
+      <AboutModal isOpen={showAboutModal} onClose={() => setShowAboutModal(false)} />
     </div>
   );
 }
