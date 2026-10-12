@@ -23,8 +23,10 @@ export const TipModal: React.FC<TipModalProps> = ({ isOpen, onClose }) => {
     { amount: 25, label: '⛽ $25 Gas Tank', desc: 'Super supporter boost' },
   ];
 
+  const bmcUsername = import.meta.env.VITE_BUYMEACOFFEE_USERNAME || 'djtechnyc';
+
   const handleOpenTipLink = () => {
-    const url = `https://buymeacoffee.com/djtechnyc`;
+    const url = `https://buymeacoffee.com/${bmcUsername}`;
     window.open(url, '_blank', 'noopener,noreferrer');
     onClose();
   };
