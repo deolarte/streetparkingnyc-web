@@ -139,7 +139,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
                 {segment.onStreet}
               </h2>
               <p className="text-xs text-gray-600 dark:text-gray-300">
-                Between <span className="font-semibold">{segment.fromStreet}</span> &{' '}
+                {t('between_label')} <span className="font-semibold">{segment.fromStreet}</span> {t('and_label')}{' '}
                 <span className="font-semibold">{segment.toStreet}</span>
               </p>
             </div>
@@ -206,7 +206,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
                   </div>
                   <div>
                     <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 dark:text-emerald-300 block">
-                      {segment.parkingTimeline.canParkNow ? 'Can Park Until' : 'When You Can Park'}
+                      {segment.parkingTimeline.canParkNow ? t('can_park_until') : t('when_you_can_park')}
                     </span>
                     <span className="text-xs font-bold text-gray-700 dark:text-gray-200">
                       {segment.parkingTimeline.nextEventTitle}
@@ -240,14 +240,14 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
                 {segment.parkingTimeline.resumeParkingFormatted && (
                   <div className="mt-2 pt-2 border-t border-gray-200/80 dark:border-gray-700/80 flex items-center space-x-1.5 text-xs text-rose-600 dark:text-rose-400 font-bold">
                     <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                    <span>Active restriction ends at {segment.parkingTimeline.resumeParkingFormatted}</span>
+                    <span>{t('active_restriction_ends_at')} {segment.parkingTimeline.resumeParkingFormatted}</span>
                   </div>
                 )}
 
                 {segment.parkingTimeline.canParkNow && segment.status === 'free' && (
                   <div className="mt-1 flex items-center space-x-1 text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold">
                     <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-600" />
-                    <span>Outside scheduled restrictions, NYC residential parking is free & unlimited.</span>
+                    <span>{t('outside_restrictions_note')}</span>
                   </div>
                 )}
               </div>
@@ -271,14 +271,14 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
 
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="bg-white/80 dark:bg-gray-800/80 p-2 rounded-xl">
-                  <span className="text-[10px] text-gray-500 block uppercase">Operational Hours</span>
+                  <span className="text-[10px] text-gray-500 block uppercase">{t('operational_hours')}</span>
                   <span className="font-semibold text-gray-800 dark:text-gray-200">
                     {segment.meterInfo.allVehiclesHours || segment.meterInfo.commercialHours || 'Standard Hours'}
                   </span>
                 </div>
 
                 <div className="bg-white/80 dark:bg-gray-800/80 p-2 rounded-xl">
-                  <span className="text-[10px] text-gray-500 block uppercase">Max Duration</span>
+                  <span className="text-[10px] text-gray-500 block uppercase">{t('max_duration')}</span>
                   <span className="font-semibold text-gray-800 dark:text-gray-200">
                     {segment.meterInfo.allVehiclesDuration || segment.meterInfo.commercialDuration || '2 Hours'}
                   </span>
@@ -287,7 +287,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
 
               {segment.meterInfo.allVehiclesRate && (
                 <div className="text-xs text-gray-600 dark:text-gray-300 bg-white/80 dark:bg-gray-800/80 p-2 rounded-xl">
-                  <span className="text-[10px] text-gray-500 block uppercase">Parking Rates</span>
+                  <span className="text-[10px] text-gray-500 block uppercase">{t('parking_rates')}</span>
                   <span className="font-semibold text-gray-900 dark:text-gray-100">
                     {segment.meterInfo.allVehiclesRate}
                   </span>
@@ -357,10 +357,10 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
                 </div>
                 <div>
                   <span className="text-[10px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400 block">
-                    NYC 311 City Status & Weather
+                    {t('nyc_311_title')}
                   </span>
                   <span className="font-bold text-gray-900 dark:text-white text-xs">
-                    {advisory?.hasStormAlert ? advisory.event : 'NYC 311 Daily Service Updates'}
+                    {advisory?.hasStormAlert ? advisory.event : t('nyc_311_subtitle')}
                   </span>
                 </div>
               </div>
@@ -377,7 +377,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
             </div>
 
             <p className="text-[11px] text-gray-600 dark:text-gray-300 leading-relaxed">
-              {advisory?.aspAdvice || 'During major snowstorms, DSNY suspends Alternate Side Parking for plowing operations. Parking meters generally remain in effect.'}
+              {advisory?.aspAdvice || t('nyc_311_default_advice')}
             </p>
           </div>
 
@@ -385,7 +385,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
           <div className="space-y-2">
             <div className="flex items-center space-x-1.5 text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300">
               <Info className="w-3.5 h-3.5 text-gray-500" />
-              <span>Official NYC DOT Posted Signs ({segment.signs.length})</span>
+              <span>{t('official_signs_title')} ({segment.signs.length})</span>
             </div>
 
             <div className="space-y-2">
@@ -403,7 +403,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
                     </p>
                     {sign.arrowDirection && (
                       <span className="text-[10px] text-gray-500 dark:text-gray-400 block">
-                        Arrow: {sign.arrowDirection}
+                        {t('arrow_label')} {sign.arrowDirection}
                       </span>
                     )}
                   </div>

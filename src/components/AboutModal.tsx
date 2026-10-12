@@ -9,13 +9,13 @@ import {
   CheckCircle2,
   Sliders,
   Clock,
-  Calendar,
   ShieldCheck,
   Smartphone,
   Share2,
   Globe,
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { aboutContent } from '../i18n/aboutContent';
 
 interface AboutModalProps {
   isOpen: boolean;
@@ -25,6 +25,8 @@ interface AboutModalProps {
 export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
   const { t, locale, setLocale, languages, isI18nEnabled } = useLanguage();
   if (!isOpen) return null;
+
+  const content = aboutContent[locale] || aboutContent.en;
 
   const handleDismiss = () => {
     if (typeof window !== 'undefined') {
@@ -50,7 +52,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
                 {t('about_title')}
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Map legend, time simulation & legal disclaimers
+                {content.subtitle}
               </p>
             </div>
           </div>
@@ -69,13 +71,13 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
           <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 space-y-1.5">
             <div className="flex items-center space-x-2 text-rose-700 dark:text-rose-400 font-bold text-xs">
               <ShieldAlert className="w-4 h-4 shrink-0" />
-              <span>Legal Disclaimer & Driver Responsibility</span>
+              <span>{content.disclaimer.title}</span>
             </div>
             <p className="text-rose-900/90 dark:text-rose-200 text-[11px] leading-relaxed">
-              <strong>StreetPark</strong> is an independent civic utility and is <strong>NOT affiliated with, sponsored by, or endorsed by the City of New York or the NYC Department of Transportation (NYC DOT)</strong>.
+              <strong>StreetPark</strong> {content.disclaimer.p1}
             </p>
             <p className="text-rose-800/80 dark:text-rose-300 text-[11px] leading-relaxed">
-              Physical street signs posted on the block, temporary construction placards, film shoot restrictions, emergency tow-away orders, and police instructions <strong>always supersede any digital information</strong>. The driver remains solely responsible for parking compliance. StreetPark and its operators assume no legal liability for parking summonses, fines, or towing fees.
+              {content.disclaimer.p2}
             </p>
           </div>
 
@@ -113,7 +115,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
           <div className="space-y-2.5">
             <div className="flex items-center space-x-1.5 text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider">
               <span className="w-2.5 h-2.5 rounded-full bg-blue-600" />
-              <span>Map Color Legend</span>
+              <span>{content.legendTitle}</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
@@ -121,10 +123,10 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
               <div className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-900/50 space-y-1">
                 <div className="flex items-center space-x-1.5 font-bold text-emerald-800 dark:text-emerald-300">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
-                  <span>Free (Green)</span>
+                  <span>{content.legend.freeTitle}</span>
                 </div>
                 <p className="text-emerald-900/80 dark:text-emerald-200/80 text-[10.5px]">
-                  Legal free parking permitted. No active street cleaning or meter fees in effect. Outside posted restriction windows, NYC residential curbs are free and unlimited.
+                  {content.legend.freeDesc}
                 </p>
               </div>
 
@@ -132,10 +134,10 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
               <div className="p-2.5 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/50 space-y-1">
                 <div className="flex items-center space-x-1.5 font-bold text-blue-800 dark:text-blue-300">
                   <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shrink-0" />
-                  <span>Meter (Blue)</span>
+                  <span>{content.legend.meterTitle}</span>
                 </div>
                 <p className="text-blue-900/80 dark:text-blue-200/80 text-[10.5px]">
-                  Active NYC Muni-Meter zone. Pay-by-cell required via official ParkNYC app or kiosk. Subject to posted maximum stay limits (1–3 hours). Free outside operating hours!
+                  {content.legend.meterDesc}
                 </p>
               </div>
 
@@ -143,10 +145,10 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
               <div className="p-2.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/50 space-y-1">
                 <div className="flex items-center space-x-1.5 font-bold text-amber-800 dark:text-amber-300">
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" />
-                  <span>Soon (&lt;60Min) (Amber)</span>
+                  <span>{content.legend.soonTitle}</span>
                 </div>
                 <p className="text-amber-900/80 dark:text-amber-200/80 text-[10.5px]">
-                  Status change in &lt;60 minutes! Spots opening up soon (sweeping/meters ending shortly), or active legal parking expiring soon as restrictions begin.
+                  {content.legend.soonDesc}
                 </p>
               </div>
 
@@ -154,10 +156,10 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
               <div className="p-2.5 rounded-xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/50 space-y-1">
                 <div className="flex items-center space-x-1.5 font-bold text-rose-800 dark:text-rose-300">
                   <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0" />
-                  <span>No Parking (Red)</span>
+                  <span>{content.legend.restrictedTitle}</span>
                 </div>
                 <p className="text-rose-900/80 dark:text-rose-200/80 text-[10.5px]">
-                  Parking prohibited. Active Alternate Side street sweeping (ASP), No Standing Anytime, or commercial truck loading only. Violators are ticketed and towed.
+                  {content.legend.restrictedDesc}
                 </p>
               </div>
             </div>
@@ -167,33 +169,17 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
           <div className="space-y-2">
             <div className="flex items-center space-x-1.5 text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider">
               <Sliders className="w-4 h-4 text-blue-600" />
-              <span>How Time Simulation Works</span>
+              <span>{content.simulationTitle}</span>
             </div>
             <div className="bg-gray-50 dark:bg-gray-800/60 rounded-2xl p-3 border border-gray-100 dark:border-gray-800 space-y-2 text-[11px]">
-              <div className="flex items-start space-x-2">
-                <Clock className="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" />
-                <div>
-                  <strong>Tap "Simulate"</strong>: Expands the interactive time control dial at the bottom of the screen.
+              {content.simulationSteps.map((step, idx) => (
+                <div key={idx} className="flex items-start space-x-2">
+                  <Clock className="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" />
+                  <div>
+                    <strong>{step.title}</strong>: {step.desc}
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start space-x-2">
-                <Sliders className="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" />
-                <div>
-                  <strong>Slide Across 24 Hours</strong>: Drag the time slider to test rules at any hour of the day or night (e.g., test what curbs become legal at 7:00 PM tonight or 8:30 AM tomorrow).
-                </div>
-              </div>
-              <div className="flex items-start space-x-2">
-                <Calendar className="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" />
-                <div>
-                  <strong>Day Selector</strong>: Use <code className="font-mono text-[10px] bg-gray-200 dark:bg-gray-700 px-1 py-0.5 rounded">-1 Day</code> / <code className="font-mono text-[10px] bg-gray-200 dark:bg-gray-700 px-1 py-0.5 rounded">+1 Day</code> to plan weekend parking or check street sweeping for upcoming days.
-                </div>
-              </div>
-              <div className="flex items-start space-x-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                <div>
-                  <strong>Return to Live Feed</strong>: Tap <strong className="text-emerald-700 dark:text-emerald-300">"Now"</strong> anytime to instantly snap back to real-time clock synchronization.
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 
@@ -201,27 +187,17 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
           <div className="space-y-2">
             <div className="flex items-center space-x-1.5 text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider">
               <Database className="w-4 h-4 text-blue-600" />
-              <span>Official NYC Data Sources & Attribution</span>
+              <span>{content.sourcesTitle}</span>
             </div>
             <div className="bg-gray-50 dark:bg-gray-800/60 rounded-2xl p-3 border border-gray-100 dark:border-gray-800 space-y-2 text-[11px]">
-              <div className="flex items-start space-x-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                <div>
-                  <strong>NYC Open Data (NYC DOT GIS)</strong>: Parking sign regulations, curb order numbers, coordinates, and Muni-Meter pay-by-cell zones via official NYC Socrata datasets.
+              {content.sources.map((s, idx) => (
+                <div key={idx} className="flex items-start space-x-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                  <div>
+                    <strong>{s.title}</strong>: {s.desc}
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start space-x-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                <div>
-                  <strong>NYC 311 Daily Service Feeds</strong>: Real-time Alternate Side Parking (ASP) suspension notices and official holiday calendars.
-                </div>
-              </div>
-              <div className="flex items-start space-x-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                <div>
-                  <strong>Basemap Data</strong>: Vector streets and geometry provided © Esri, HERE, Garmin, and OpenStreetMap contributors.
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 
@@ -229,45 +205,20 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
           <div className="space-y-2.5">
             <div className="flex items-center space-x-1.5 text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider">
               <HelpCircle className="w-4 h-4 text-amber-500" />
-              <span>Frequently Asked Questions</span>
+              <span>{content.faqTitle}</span>
             </div>
 
             <div className="space-y-2 text-[11px]">
-              <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 space-y-1">
-                <p className="font-bold text-gray-900 dark:text-white">
-                  Is parking free on Sundays in NYC?
-                </p>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Yes! According to NYC DOT traffic rules, parking meters are not in effect on Sundays throughout all five boroughs unless a posted sign explicitly states Sunday meter hours.
-                </p>
-              </div>
-
-              <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 space-y-1">
-                <p className="font-bold text-gray-900 dark:text-white">
-                  What is Alternate Side Parking (ASP)?
-                </p>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Alternate Side Parking regulations require drivers to vacate curbs for 90 minutes to allow NYC Department of Sanitation street sweepers to clean. Violators are subject to a $65 summons.
-                </p>
-              </div>
-
-              <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 space-y-1">
-                <p className="font-bold text-gray-900 dark:text-white">
-                  What is the difference between Major and Minor Holidays?
-                </p>
-                <p className="text-gray-600 dark:text-gray-300">
-                  On <strong>Major Legal Holidays</strong> (New Year's Day, Memorial Day, July 4th, Labor Day, Thanksgiving, Christmas), both ASP and parking meters are suspended. On <strong>Minor Religious/Civic Holidays</strong> (Columbus Day, MLK Day, Presidents' Day, etc.), only ASP is suspended while parking meters remain in full effect.
-                </p>
-              </div>
-
-              <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 space-y-1">
-                <p className="font-bold text-gray-900 dark:text-white">
-                  How does Commercial mode work?
-                </p>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Toggling the "Commercial" switch evaluates curbs from the perspective of commercial delivery trucks, displaying dedicated commercial loading meters and zones where passenger vehicles are prohibited.
-                </p>
-              </div>
+              {content.faqs.map((faq, idx) => (
+                <div key={idx} className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 space-y-1">
+                  <p className="font-bold text-gray-900 dark:text-white">
+                    {faq.q}
+                  </p>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    {faq.a}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -275,38 +226,36 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
           <div className="space-y-2.5">
             <div className="flex items-center space-x-1.5 text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider">
               <Smartphone className="w-4 h-4 text-purple-600" />
-              <span>Save to Home Screen (Mobile App Mode)</span>
+              <span>{content.pwaTitle}</span>
             </div>
 
             <div className="bg-purple-50/70 dark:bg-purple-950/30 rounded-2xl p-3 border border-purple-200/80 dark:border-purple-900/50 space-y-2.5 text-[11px] leading-relaxed">
               <p className="text-purple-950 dark:text-purple-200 font-medium">
-                Install StreetPark directly onto your smartphone home screen for a fast, full-screen native app experience without browser URL bars:
+                {content.pwaSubtitle}
               </p>
 
               <div className="space-y-2">
                 <div className="p-2.5 rounded-xl bg-white dark:bg-gray-800 border border-purple-100 dark:border-purple-900/40 space-y-1">
                   <div className="flex items-center space-x-1.5 font-bold text-gray-900 dark:text-white">
                     <Share2 className="w-3.5 h-3.5 text-blue-500" />
-                    <span>iPhone & iPad (Safari)</span>
+                    <span>{content.pwaIosTitle}</span>
                   </div>
                   <ol className="list-decimal list-inside space-y-0.5 text-gray-600 dark:text-gray-300 pl-1 text-[10.5px]">
-                    <li>Open <strong>park.djtechnyc.com</strong> in Safari.</li>
-                    <li>Tap the <strong>Share</strong> button (square icon with an arrow pointing up at the bottom).</li>
-                    <li>Scroll down and select <strong>"Add to Home Screen"</strong>.</li>
-                    <li>Tap <strong>"Add"</strong> in the top-right corner.</li>
+                    {content.pwaIosSteps.map((step, idx) => (
+                      <li key={idx}>{step}</li>
+                    ))}
                   </ol>
                 </div>
 
                 <div className="p-2.5 rounded-xl bg-white dark:bg-gray-800 border border-purple-100 dark:border-purple-900/40 space-y-1">
                   <div className="flex items-center space-x-1.5 font-bold text-gray-900 dark:text-white">
                     <Smartphone className="w-3.5 h-3.5 text-emerald-500" />
-                    <span>Android (Chrome & Samsung Internet)</span>
+                    <span>{content.pwaAndroidTitle}</span>
                   </div>
                   <ol className="list-decimal list-inside space-y-0.5 text-gray-600 dark:text-gray-300 pl-1 text-[10.5px]">
-                    <li>Open <strong>park.djtechnyc.com</strong> in Chrome.</li>
-                    <li>Tap the <strong>three vertical dots (⋮)</strong> menu in the upper-right corner.</li>
-                    <li>Tap <strong>"Add to Home screen"</strong> (or <strong>"Install app"</strong>).</li>
-                    <li>Confirm by tapping <strong>"Install"</strong> or <strong>"Add"</strong>.</li>
+                    {content.pwaAndroidSteps.map((step, idx) => (
+                      <li key={idx}>{step}</li>
+                    ))}
                   </ol>
                 </div>
               </div>
@@ -317,28 +266,28 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
           <div className="space-y-2.5">
             <div className="flex items-center space-x-1.5 text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <span>Privacy Policy & Cookie Disclosures</span>
+              <span>{content.privacyTitle}</span>
             </div>
 
             <div className="bg-gray-50 dark:bg-gray-800/60 rounded-2xl p-3 border border-gray-100 dark:border-gray-800 space-y-2 text-[11px] leading-relaxed">
               <div>
-                <strong className="text-gray-900 dark:text-white block font-semibold">Zero PII (Personally Identifiable Information) Collection:</strong>
+                <strong className="text-gray-900 dark:text-white block font-semibold">{content.privacy.piiTitle}</strong>
                 <span className="text-gray-600 dark:text-gray-300">
-                  StreetPark does not require account registration, logins, passwords, or emails to use the map. We do not collect, buy, or sell any personal identifying information.
+                  {content.privacy.piiDesc}
                 </span>
               </div>
 
               <div>
-                <strong className="text-gray-900 dark:text-white block font-semibold">Device Location (GPS):</strong>
+                <strong className="text-gray-900 dark:text-white block font-semibold">{content.privacy.gpsTitle}</strong>
                 <span className="text-gray-600 dark:text-gray-300">
-                  When you tap the "Near Me" GPS button, your coordinates are processed strictly client-side on your device to center the map. Your location is never logged, stored, or transmitted to any server.
+                  {content.privacy.gpsDesc}
                 </span>
               </div>
 
               <div>
-                <strong className="text-gray-900 dark:text-white block font-semibold">Advertising & Cookies (Google AdSense):</strong>
+                <strong className="text-gray-900 dark:text-white block font-semibold">{content.privacy.adsTitle}</strong>
                 <span className="text-gray-600 dark:text-gray-300">
-                  We use Google AdSense to serve advertisements that support server hosting costs. Third-party vendors, including Google, use cookies to serve ads based on prior visits to this website or other sites across the Internet. You may opt out of personalized advertising by visiting{' '}
+                  {content.privacy.adsDesc}{' '}
                   <a
                     href="https://www.google.com/settings/ads"
                     target="_blank"

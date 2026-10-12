@@ -14,6 +14,8 @@ import { FeedbackModal } from './components/FeedbackModal';
 import { TipModal } from './components/TipModal';
 import { AboutModal } from './components/AboutModal';
 import { Loader2 } from 'lucide-react';
+import { useLanguage } from './context/LanguageContext';
+import { localizeCurbSegment } from './i18n/ruleLocalizer';
 
 export function App() {
   const [selectedTime, setSelectedTime] = useState<Date>(() => new Date());
@@ -94,10 +96,15 @@ export function App() {
     return () => clearInterval(interval);
   }, [isNow]);
 
-  // Re-evaluate curbs whenever selectedTime or vehicleType changes
+  const { locale } = useLanguage();
+
+  // Re-evaluate curbs whenever selectedTime, vehicleType, or locale changes
   const evaluatedCurbs = useMemo(() => {
-    return rawCurbs.map((raw) => evaluateSegmentParking(raw, selectedTime, vehicleType));
-  }, [rawCurbs, selectedTime, vehicleType]);
+    return rawCurbs.map((raw) => {
+      const evaluated = evaluateSegmentParking(raw, selectedTime, vehicleType);
+      return localizeCurbSegment(evaluated, locale);
+    });
+  }, [rawCurbs, selectedTime, vehicleType, locale]);
 
   // Derived selected curb object with live evaluation
   const selectedCurb = useMemo(() => {
