@@ -10,6 +10,7 @@ import {
   Sliders,
   Clock,
   Calendar,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface AboutModalProps {
@@ -231,6 +232,54 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
                 <p className="text-gray-600 dark:text-gray-300">
                   Toggling the "Commercial" switch evaluates curbs from the perspective of commercial delivery trucks, displaying dedicated commercial loading meters and zones where passenger vehicles are prohibited.
                 </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Privacy Policy, Cookies & PII Disclosures */}
+          <div className="space-y-2.5">
+            <div className="flex items-center space-x-1.5 text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <span>Privacy Policy & Cookie Disclosures</span>
+            </div>
+
+            <div className="bg-gray-50 dark:bg-gray-800/60 rounded-2xl p-3 border border-gray-100 dark:border-gray-800 space-y-2 text-[11px] leading-relaxed">
+              <div>
+                <strong className="text-gray-900 dark:text-white block font-semibold">Zero PII (Personally Identifiable Information) Collection:</strong>
+                <span className="text-gray-600 dark:text-gray-300">
+                  StreetPark does not require account registration, logins, passwords, or emails to use the map. We do not collect, buy, or sell any personal identifying information.
+                </span>
+              </div>
+
+              <div>
+                <strong className="text-gray-900 dark:text-white block font-semibold">Device Location (GPS):</strong>
+                <span className="text-gray-600 dark:text-gray-300">
+                  When you tap the "Near Me" GPS button, your coordinates are processed strictly client-side on your device to center the map. Your location is never logged, stored, or transmitted to any server.
+                </span>
+              </div>
+
+              <div>
+                <strong className="text-gray-900 dark:text-white block font-semibold">Advertising & Cookies (Google AdSense):</strong>
+                <span className="text-gray-600 dark:text-gray-300">
+                  We use Google AdSense to serve advertisements that support server hosting costs. Third-party vendors, including Google, use cookies to serve ads based on prior visits to this website or other sites across the Internet. You may opt out of personalized advertising by visiting{' '}
+                  <a
+                    href="https://www.google.com/settings/ads"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 dark:text-blue-400 font-semibold underline"
+                  >
+                    Google Ads Settings
+                  </a>{' '}
+                  or{' '}
+                  <a
+                    href="https://www.aboutads.info/choices/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 dark:text-blue-400 font-semibold underline"
+                  >
+                    AboutAds.info
+                  </a>.
+                </span>
               </div>
             </div>
           </div>
