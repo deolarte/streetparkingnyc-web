@@ -31,12 +31,10 @@ jobs:
           VITE_NYC_DATA_APP_TOKEN: ${{ secrets.VITE_NYC_DATA_APP_TOKEN }}
           VITE_GOOGLE_ADSENSE_ID: ${{ secrets.VITE_GOOGLE_ADSENSE_ID }}
 
-      - name: Deploy to Cloudflare Pages
-        if: github.ref == 'refs/heads/main'
-        uses: cloudflare/pages-action@v1
+      - name: Deploy to Cloudflare
+        if: github.ref == 'refs/heads/main' && secrets.CLOUDFLARE_API_TOKEN != ''
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: streetparkingnyc-web
-          directory: dist
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          command: deploy

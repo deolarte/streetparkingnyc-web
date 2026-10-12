@@ -14,6 +14,8 @@ import {
   Smartphone,
   CloudSnow,
   ExternalLink,
+  Copy,
+  Check,
 } from 'lucide-react';
 import type { CurbSegment } from '../types';
 import { AdBanner } from './AdBanner';
@@ -36,6 +38,15 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   onResetToNow,
 }) => {
   const [advisory, setAdvisory] = useState<StormAlert | null>(null);
+  const [copiedZone, setCopiedZone] = useState(false);
+
+  const handleCopyZone = (zone: string) => {
+    if (navigator?.clipboard) {
+      navigator.clipboard.writeText(zone);
+      setCopiedZone(true);
+      setTimeout(() => setCopiedZone(false), 2000);
+    }
+  };
 
   useEffect(() => {
     fetchNycStormAdvisory().then((res) => setAdvisory(res));
@@ -282,43 +293,62 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
               )}
 
               {/* ParkNYC: Mobile App Quick Launch & Store Links */}
-              {typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? (
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2">
-                    <a
-                      href="flowbird://"
-                      className="flex-1 py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center justify-center space-x-2 transition-all shadow-md shadow-blue-600/20 active:scale-[0.98]"
-                    >
-                      <Smartphone className="w-3.5 h-3.5" />
-                      <span>Open ParkNYC App</span>
-                    </a>
+              <div className="space-y-2 pt-1">
+                {/* 1-tap Copy Zone Button */}
+                <button
+                  type="button"
+                  onClick={() => handleCopyZone(segment.meterInfo!.payByCell)}
+                  className={`w-full py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 transition-all active:scale-[0.98] border shadow-xs ${
+                    copiedZone
+                      ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700'
+                      : 'bg-white/90 dark:bg-gray-800/90 text-blue-700 dark:text-blue-300 hover:bg-blue-50/80 dark:hover:bg-gray-700/80 border-blue-200 dark:border-blue-800'
+                  }`}
+                >
+                  {copiedZone ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                      <span>Zone {segment.meterInfo.payByCell} Copied to Clipboard!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                      <span>Copy Zone #{segment.meterInfo.payByCell}</span>
+                    </>
+                  )}
+                </button>
 
-                    <a
-                      href={
-                        /Android/i.test(navigator.userAgent)
-                          ? 'https://play.google.com/store/apps/details?id=com.flowbird.parknyc'
-                          : 'https://apps.apple.com/app/id1135073877'
-                      }
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="py-2.5 px-3 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold text-xs flex items-center justify-center space-x-1 transition-all border border-gray-200 dark:border-gray-700 shrink-0"
-                      title="Download ParkNYC from App Store"
-                    >
-                      <span>Get App</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={
+                      typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent)
+                        ? 'https://play.google.com/store/apps/details?id=com.flowbird.parknyc'
+                        : 'https://apps.apple.com/app/id1135073877'
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center justify-center space-x-1.5 transition-all shadow-md shadow-blue-600/20 active:scale-[0.98]"
+                    title="Open ParkNYC on App Store"
+                  >
+                    <Smartphone className="w-3.5 h-3.5" />
+                    <span>Open ParkNYC App</span>
+                  </a>
 
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400 text-center leading-tight">
-                    Zone <span className="font-bold text-gray-800 dark:text-gray-200 font-mono text-xs">{segment.meterInfo.payByCell}</span> • Tap <strong>Open</strong> to launch app, or <strong>Get App</strong> on App Store
-                  </p>
+                  <a
+                    href="https://parknyc.org/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="py-2.5 px-3 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold text-xs flex items-center justify-center space-x-1 transition-all border border-gray-200 dark:border-gray-700 shrink-0"
+                    title="Pay Online at ParkNYC.org"
+                  >
+                    <span>Pay Online</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
                 </div>
-              ) : (
-                <div className="flex items-center space-x-2 py-2 px-3 rounded-xl bg-blue-100/70 dark:bg-blue-900/30 text-blue-900 dark:text-blue-200 text-xs border border-blue-200/60 dark:border-blue-800/40">
-                  <Smartphone className="w-4 h-4 shrink-0 text-blue-600 dark:text-blue-400" />
-                  <span>Pay with official <strong>ParkNYC mobile app</strong> on your phone (Enter Zone {segment.meterInfo.payByCell}).</span>
-                </div>
-              )}
+
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 text-center leading-tight">
+                  Tap to copy Zone <span className="font-bold text-gray-800 dark:text-gray-200 font-mono text-xs">{segment.meterInfo.payByCell}</span>, then paste in ParkNYC or pay online.
+                </p>
+              </div>
             </div>
           )}
 
