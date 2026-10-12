@@ -10,6 +10,8 @@ import {
   ShieldCheck,
   ShieldAlert,
   Compass,
+  CalendarClock,
+  CheckCircle2,
 } from 'lucide-react';
 import type { CurbSegment } from '../types';
 import { AdBanner } from './AdBanner';
@@ -140,6 +142,64 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ segment, onClose }) =>
               </p>
             </div>
           </div>
+
+          {/* Prominent "Until When You Can Park" Card */}
+          {segment.parkingTimeline && (
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50/50 to-blue-50/60 dark:from-emerald-950/40 dark:via-gray-900/60 dark:to-blue-950/30 border border-emerald-300/80 dark:border-emerald-700/50 space-y-3 shadow-xs">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center space-x-2">
+                  <div className="p-1.5 rounded-xl bg-emerald-600 text-white shadow-xs">
+                    <CalendarClock className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 dark:text-emerald-300 block">
+                      {segment.parkingTimeline.canParkNow ? 'Can Park Until' : 'When You Can Park'}
+                    </span>
+                    <span className="text-xs font-bold text-gray-700 dark:text-gray-200">
+                      {segment.parkingTimeline.nextEventTitle}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="text-right shrink-0">
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black shadow-xs ${
+                    segment.parkingTimeline.canParkNow
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-rose-600 text-white'
+                  }`}>
+                    {segment.parkingTimeline.durationFormatted}
+                  </span>
+                </div>
+              </div>
+
+              {/* Primary Target Time Box */}
+              <div className="bg-white/90 dark:bg-gray-800/90 rounded-xl p-3 border border-emerald-200/70 dark:border-emerald-800/50 shadow-2xs space-y-1.5">
+                <div className="flex items-baseline justify-between gap-2 flex-wrap">
+                  <span className="text-base sm:text-lg font-black text-gray-900 dark:text-white tracking-tight">
+                    {segment.parkingTimeline.canParkUntilFormatted}
+                  </span>
+                </div>
+
+                <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                  {segment.parkingTimeline.nextEventDescription}
+                </p>
+
+                {segment.parkingTimeline.resumeParkingFormatted && (
+                  <div className="mt-2 pt-2 border-t border-gray-200/80 dark:border-gray-700/80 flex items-center space-x-1.5 text-xs text-rose-600 dark:text-rose-400 font-bold">
+                    <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                    <span>Active restriction ends at {segment.parkingTimeline.resumeParkingFormatted}</span>
+                  </div>
+                )}
+
+                {segment.parkingTimeline.canParkNow && segment.status === 'free' && (
+                  <div className="mt-1 flex items-center space-x-1 text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold">
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-600" />
+                    <span>Outside scheduled restrictions, NYC residential parking is free & unlimited.</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* ParkNYC Muni-Meter Section if metered */}
           {segment.meterInfo && (

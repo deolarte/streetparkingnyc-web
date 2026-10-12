@@ -395,6 +395,11 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
                     <div className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
                       {curb.fromStreet} → {curb.toStreet}
                     </div>
+                    {curb.canParkUntil && (
+                      <div className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center space-x-1 mt-0.5 truncate">
+                        <span>Park until: {curb.canParkUntil}</span>
+                      </div>
+                    )}
                   </div>
                   <span
                     className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${

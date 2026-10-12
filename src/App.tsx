@@ -7,7 +7,7 @@ import { BottomSheet } from './components/BottomSheet';
 import { fetchLiveSocrataCurbs, fetchCurbsNearLocation } from './services/socrataApi';
 import { evaluateSegmentParking } from './services/signParser';
 import type { AddressCandidate } from './services/geocodingService';
-import type { CurbSegment, VehicleType } from './types';
+import type { CurbSegment, VehicleType, RawCurbSegment } from './types';
 import { Loader2 } from 'lucide-react';
 
 export function App() {
@@ -16,20 +16,7 @@ export function App() {
   const [vehicleType, setVehicleType] = useState<VehicleType>('passenger');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchedLocation, setSearchedLocation] = useState<{ center: [number, number]; label: string } | null>(null);
-  const [rawCurbs, setRawCurbs] = useState<
-    Array<
-      Omit<
-        CurbSegment,
-        | 'status'
-        | 'statusBadge'
-        | 'statusHeadline'
-        | 'statusDescription'
-        | 'nextChangeTime'
-        | 'timeUntilChangeMinutes'
-        | 'activeRestrictionType'
-      >
-    >
-  >([]);
+  const [rawCurbs, setRawCurbs] = useState<RawCurbSegment[]>([]);
   const [selectedCurbId, setSelectedCurbId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 

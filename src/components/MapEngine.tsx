@@ -163,6 +163,8 @@ export const MapEngine: React.FC<MapEngineProps> = ({
           borough: curb.borough || '',
           status: curb.status || 'free',
           statusBadge: curb.statusBadge || 'Free Parking',
+          canParkUntil: curb.canParkUntil || '',
+          canParkHeadline: curb.canParkHeadline || '',
         },
         geometry: {
           type: 'LineString',
