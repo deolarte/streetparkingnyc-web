@@ -20,6 +20,8 @@ interface SearchHeaderProps {
 }
 
 const NYC_NEIGHBORHOODS = [
+  { name: 'Rego Park (Queens)', center: [-73.868, 40.7228] as [number, number], zoom: 15.5 },
+  { name: 'Astoria (Queens)', center: [-73.923, 40.764] as [number, number], zoom: 15.5 },
   { name: 'Financial District', center: [-74.008, 40.7075] as [number, number], zoom: 15.5 },
   { name: 'Chinatown / Civic', center: [-73.998, 40.714] as [number, number], zoom: 16 },
   { name: 'SoHo / Nolita', center: [-73.9968, 40.722] as [number, number], zoom: 15.5 },

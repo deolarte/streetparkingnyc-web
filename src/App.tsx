@@ -4,7 +4,7 @@ import { MapEngine } from './components/MapEngine';
 import { SearchHeader } from './components/SearchHeader';
 import { TemporalSlider } from './components/TemporalSlider';
 import { BottomSheet } from './components/BottomSheet';
-import { fetchLiveSocrataCurbs } from './services/socrataApi';
+import { fetchLiveSocrataCurbs, fetchCurbsNearLocation } from './services/socrataApi';
 import { evaluateSegmentParking } from './services/signParser';
 import type { CurbSegment, VehicleType } from './types';
 import { Loader2 } from 'lucide-react';
@@ -101,6 +101,23 @@ export function App() {
     }
   };
 
+  const handleLocationFound = async (coords: [number, number]) => {
+    try {
+      const [lon, lat] = coords;
+      setIsLoading(true);
+      const nearbyCurbs = await fetchCurbsNearLocation(lat, lon);
+      setRawCurbs((prev) => {
+        const existingIds = new Set(prev.map((c) => c.id));
+        const newCurbs = nearbyCurbs.filter((c) => !existingIds.has(c.id));
+        return [...prev, ...newCurbs];
+      });
+    } catch (err) {
+      console.error('Failed to load curbs for user location:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Quick stats summary
   const stats = useMemo(() => {
     let freeCount = 0;
@@ -125,11 +142,12 @@ export function App() {
         curbs={displayCurbs}
         selectedCurb={selectedCurb}
         onSelectCurb={handleSelectCurb}
+        onLocationFound={handleLocationFound}
         mapInstanceRef={mapInstanceRef}
       />
 
-      {/* Top Floating Controls Container */}
-      <div className="absolute top-2 sm:top-3 inset-x-2 sm:inset-x-4 max-w-xl mx-auto z-30 pointer-events-none space-y-2">
+      {/* Top Floating Controls Container with iOS Safe Area Insets */}
+      <div className="absolute top-0 inset-x-0 pt-[max(env(safe-area-inset-top,0px),8px)] px-2 sm:px-4 max-w-xl mx-auto z-30 pointer-events-none space-y-2">
         <div className="pointer-events-auto">
           <SearchHeader
             vehicleType={vehicleType}
@@ -144,7 +162,7 @@ export function App() {
       </div>
 
       {/* Floating Summary Stats Pill (Top Left Under Header) */}
-      <div className="absolute top-36 left-3 z-20 hidden md:flex flex-col space-y-1.5 pointer-events-none">
+      <div className="absolute top-[calc(max(env(safe-area-inset-top,0px),8px)+7.5rem)] left-3 z-20 hidden md:flex flex-col space-y-1.5 pointer-events-none">
         <div className="pointer-events-auto bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-3 py-2 rounded-2xl shadow-lg border border-gray-200/80 dark:border-gray-800 text-xs space-y-1">
           <div className="flex items-center justify-between gap-3">
             <span className="font-bold text-gray-800 dark:text-gray-200 text-[11px] uppercase tracking-wider">
@@ -174,10 +192,12 @@ export function App() {
         </div>
       </div>
 
-      {/* Bottom Temporal Slider Container (Floating above bottom or bottom sheet) */}
+      {/* Bottom Temporal Slider Container (Floating above bottom, clear of iOS Safari home bar) */}
       <div
         className={`absolute inset-x-2 sm:inset-x-4 max-w-xl mx-auto z-20 pointer-events-none transition-all duration-300 ${
-          selectedCurb ? 'bottom-[380px] sm:bottom-[340px]' : 'bottom-3 sm:bottom-4'
+          selectedCurb
+            ? 'hidden sm:block sm:bottom-[340px]'
+            : 'bottom-[max(calc(env(safe-area-inset-bottom,0px)+12px),16px)]'
         }`}
       >
         <div className="pointer-events-auto">

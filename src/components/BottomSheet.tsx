@@ -72,7 +72,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ segment, onClose }) =>
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 max-w-lg mx-auto px-2 sm:px-4 pb-2 sm:pb-4 pointer-events-none transition-transform duration-300">
+    <div className="fixed inset-x-0 bottom-0 z-40 max-w-lg mx-auto px-2 sm:px-4 pb-[max(env(safe-area-inset-bottom,0px),12px)] pointer-events-none transition-transform duration-300">
       <div className="pointer-events-auto bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-gray-200/90 dark:border-gray-800 rounded-3xl shadow-2xl overflow-hidden max-h-[82vh] flex flex-col">
         {/* Grab Handle */}
         <div className="w-full pt-3 pb-1 flex justify-center">

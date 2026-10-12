@@ -405,29 +405,178 @@ export const SEED_NYC_CURBS: Array<
     ],
   },
 
-  // 12. East 43rd Street (Midtown Manhattan - UN/Grand Central Corridor)
+  // 13. 84th Street (Rego Park / Middle Village, Queens) - Free Street Parking
   {
-    id: 'curb-man-e43-midtown',
-    onStreet: '2 Avenue',
-    fromStreet: 'East 43 Street',
-    toStreet: 'East 42 Street',
-    borough: 'Manhattan',
+    id: 'curb-qn-84st-regopark',
+    onStreet: '84 Street',
+    fromStreet: '60 Road',
+    toStreet: 'Eliot Avenue',
+    borough: 'Queens',
     sideOfStreet: 'W',
     coordinates: [
-      [-73.972100, 40.750100],
-      [-73.972400, 40.749600],
-      [-73.972750, 40.749050],
+      [-73.868200, 40.722400],
+      [-73.867900, 40.723100],
+      [-73.867600, 40.723800],
     ],
-    shapeLength: 230.0,
+    shapeLength: 220.0,
     signs: [
       {
-        signCode: 'SP-10BA',
-        description: 'NO STANDING ANYTIME -->',
-        arrowDirection: 'Right',
+        signCode: 'SP-413C',
+        description: 'NO PARKING (SANITATION BROOM SYMBOL) TUESDAY FRIDAY 8:30AM-10AM <->',
+        arrowDirection: 'Both',
+      },
+    ],
+  },
+
+  // 14. 60th Road (Rego Park / Middle Village, Queens) - Free Street Parking
+  {
+    id: 'curb-qn-60rd-regopark',
+    onStreet: '60 Road',
+    fromStreet: '83 Place',
+    toStreet: '84 Street',
+    borough: 'Queens',
+    sideOfStreet: 'N',
+    coordinates: [
+      [-73.869200, 40.722800],
+      [-73.868200, 40.722400],
+      [-73.867200, 40.722000],
+    ],
+    shapeLength: 260.0,
+    signs: [
+      {
+        signCode: 'SP-412C',
+        description: 'NO PARKING (SANITATION BROOM SYMBOL) MONDAY THURSDAY 9:30AM-11AM <->',
+        arrowDirection: 'Both',
+      },
+    ],
+  },
+
+  // 15. Eliot Avenue (Rego Park / Middle Village, Queens) - Free Neighborhood Parking
+  {
+    id: 'curb-qn-eliot-regopark',
+    onStreet: 'Eliot Avenue',
+    fromStreet: '83 Street',
+    toStreet: '84 Street',
+    borough: 'Queens',
+    sideOfStreet: 'S',
+    coordinates: [
+      [-73.869500, 40.721500],
+      [-73.868300, 40.721900],
+      [-73.867100, 40.722300],
+    ],
+    shapeLength: 300.0,
+    signs: [
+      {
+        signCode: 'SP-413C',
+        description: 'NO PARKING (SANITATION BROOM SYMBOL) TUESDAY FRIDAY 11:30AM-1PM <->',
+        arrowDirection: 'Both',
+      },
+    ],
+  },
+
+  // 16. Woodhaven Boulevard (Rego Park, Queens) - Metered Commercial Corridor
+  {
+    id: 'curb-qn-woodhaven-regopark',
+    onStreet: 'Woodhaven Boulevard',
+    fromStreet: '60 Road',
+    toStreet: 'Long Island Expressway',
+    borough: 'Queens',
+    sideOfStreet: 'E',
+    coordinates: [
+      [-73.864800, 40.723200],
+      [-73.864200, 40.724800],
+      [-73.863600, 40.726500],
+    ],
+    shapeLength: 340.0,
+    meterInfo: {
+      payByCell: '401280',
+      vehicleType: 'All Vehicles',
+      allVehiclesDuration: '2 Hours',
+      allVehiclesHours: 'Monday-Saturday 8:30 AM-7 PM',
+      allVehiclesRate: '$2.00 1st Hour / $3.50 2nd Hour',
+      meterRateZone: 'Zone Q1',
+    },
+    signs: [
+      {
+        signCode: 'PS-127B',
+        description: '2 HMP MONDAY-SATURDAY 8:30AM-7PM <->',
+        arrowDirection: 'Both',
       },
       {
-        signCode: 'PS-49D',
-        description: 'CONSUL / DIPLOMAT VEHICLES ONLY <->',
+        signCode: 'SP-412C',
+        description: 'NO PARKING (SANITATION BROOM SYMBOL) MONDAY THURSDAY 8AM-9:30AM <->',
+        arrowDirection: 'Both',
+      },
+    ],
+  },
+
+  // 17. Queens Boulevard (Rego Park, Queens) - Major Metered Corridor
+  {
+    id: 'curb-qn-queensblvd-63dr',
+    onStreet: 'Queens Boulevard',
+    fromStreet: '63 Road',
+    toStreet: '63 Drive',
+    borough: 'Queens',
+    sideOfStreet: 'N',
+    coordinates: [
+      [-73.862500, 40.729500],
+      [-73.860800, 40.730200],
+      [-73.859100, 40.730900],
+    ],
+    shapeLength: 320.0,
+    meterInfo: {
+      payByCell: '403150',
+      vehicleType: 'All Vehicles',
+      allVehiclesDuration: '2 Hours',
+      allVehiclesHours: 'Monday-Saturday 9 AM-7 PM',
+      allVehiclesRate: '$2.50 1st Hour / $4.00 2nd Hour',
+      meterRateZone: 'Zone Q1',
+    },
+    signs: [
+      {
+        signCode: 'PS-127C',
+        description: '2 HMP MONDAY-SATURDAY 9AM-7PM <->',
+        arrowDirection: 'Both',
+      },
+      {
+        signCode: 'SP-1044BA',
+        description: 'NO STANDING 7AM-10AM MONDAY-FRIDAY EXCEPT SUNDAY <->',
+        arrowDirection: 'Both',
+      },
+    ],
+  },
+
+  // 18. Austin Street (Forest Hills, Queens) - High Density Retail / Metered
+  {
+    id: 'curb-qn-austin-foresthills',
+    onStreet: 'Austin Street',
+    fromStreet: '71 Continental Avenue',
+    toStreet: '70 Road',
+    borough: 'Queens',
+    sideOfStreet: 'S',
+    coordinates: [
+      [-73.844800, 40.719800],
+      [-73.843600, 40.719400],
+      [-73.842400, 40.719000],
+    ],
+    shapeLength: 260.0,
+    meterInfo: {
+      payByCell: '402890',
+      vehicleType: 'All Vehicles',
+      allVehiclesDuration: '1 Hour',
+      allVehiclesHours: 'Monday-Saturday 9 AM-7 PM',
+      allVehiclesRate: '$2.50 / Hour',
+      meterRateZone: 'Zone Q1',
+    },
+    signs: [
+      {
+        signCode: 'PS-126A',
+        description: '1 HMP MONDAY-SATURDAY 9AM-7PM <->',
+        arrowDirection: 'Both',
+      },
+      {
+        signCode: 'SP-413C',
+        description: 'NO PARKING (SANITATION BROOM SYMBOL) TUESDAY FRIDAY 8:30AM-10AM <->',
         arrowDirection: 'Both',
       },
     ],
@@ -453,7 +602,7 @@ export async function fetchLiveSocrataCurbs(bounds?: {
     }
 
     // Query active ParkNYC block faces
-    let url = 'https://data.cityofnewyork.us/resource/e7yp-wx55.json?$limit=40';
+    let url = 'https://data.cityofnewyork.us/resource/e7yp-wx55.json?$limit=100';
     if (bounds) {
       // Socrata spatial query using within_box(the_geom, north, west, south, east)
       const boxQuery = `$where=within_box(the_geom, ${bounds.north}, ${bounds.west}, ${bounds.south}, ${bounds.east})`;
@@ -549,4 +698,17 @@ export async function fetchLiveSocrataCurbs(bounds?: {
     console.warn('Falling back to built-in high-fidelity NYC Open Data curbs:', err);
     return SEED_NYC_CURBS;
   }
+}
+
+/**
+ * Fetch curbs near a specific GPS location (lat/lon).
+ */
+export async function fetchCurbsNearLocation(lat: number, lon: number) {
+  const delta = 0.025; // ~1.5 miles box
+  return fetchLiveSocrataCurbs({
+    north: lat + delta,
+    south: lat - delta,
+    east: lon + delta,
+    west: lon - delta,
+  });
 }

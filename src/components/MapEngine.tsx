@@ -8,6 +8,7 @@ interface MapEngineProps {
   curbs: CurbSegment[];
   selectedCurb: CurbSegment | null;
   onSelectCurb: (curb: CurbSegment | null) => void;
+  onLocationFound?: (coords: [number, number]) => void;
   mapInstanceRef: React.MutableRefObject<Map | null>;
 }
 
@@ -20,6 +21,7 @@ const ESRI_LIGHT_GRAY_STYLE = {
         'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
       ],
       tileSize: 256,
+      maxzoom: 16, // Forces MapLibre to overzoom zoom 16 tiles up to 22 without 404s
       attribution: 'Esri, HERE, Garmin, © OpenStreetMap contributors, and the GIS user community',
     },
     'esri-labels': {
@@ -28,6 +30,7 @@ const ESRI_LIGHT_GRAY_STYLE = {
         'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
       ],
       tileSize: 256,
+      maxzoom: 16,
     },
   },
   layers: [
@@ -36,14 +39,14 @@ const ESRI_LIGHT_GRAY_STYLE = {
       type: 'raster' as const,
       source: 'esri-base',
       minzoom: 0,
-      maxzoom: 19,
+      maxzoom: 22,
     },
     {
       id: 'esri-labels-layer',
       type: 'raster' as const,
       source: 'esri-labels',
       minzoom: 0,
-      maxzoom: 19,
+      maxzoom: 22,
     },
   ],
 };
@@ -52,6 +55,7 @@ export const MapEngine: React.FC<MapEngineProps> = ({
   curbs,
   selectedCurb,
   onSelectCurb,
+  onLocationFound,
   mapInstanceRef,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -76,8 +80,10 @@ export const MapEngine: React.FC<MapEngineProps> = ({
       container: mapContainerRef.current,
       style: ESRI_LIGHT_GRAY_STYLE,
       center: [-74.006, 40.7128], // NYC City Hall / Lower Manhattan
-      zoom: 14,
-      pitch: 25,
+      zoom: 14.5,
+      maxZoom: 20,
+      minZoom: 10,
+      pitch: 20,
       bearing: 0,
       attributionControl: false,
     });
@@ -98,7 +104,7 @@ export const MapEngine: React.FC<MapEngineProps> = ({
         },
       });
 
-      // Curb line casing (outline shadow for high visibility)
+      // Curb line casing (bold outline for extreme high contrast)
       map.addLayer({
         id: 'curbs-casing',
         type: 'line',
@@ -108,9 +114,9 @@ export const MapEngine: React.FC<MapEngineProps> = ({
           'line-join': 'round',
         },
         paint: {
-          'line-color': '#0f172a',
-          'line-width': ['interpolate', ['linear'], ['zoom'], 12, 4, 15, 8, 18, 14],
-          'line-opacity': 0.7,
+          'line-color': '#090d16',
+          'line-width': ['interpolate', ['linear'], ['zoom'], 11, 4.5, 14, 8, 16, 12, 18, 16],
+          'line-opacity': 0.85,
         },
       });
 
@@ -128,17 +134,43 @@ export const MapEngine: React.FC<MapEngineProps> = ({
             'match',
             ['get', 'status'],
             'free',
-            '#10b981', // Green
+            '#05df72', // Neon Emerald Green
             'warning',
-            '#f59e0b', // Yellow
+            '#f59e0b', // High-Vis Amber
             'restricted',
-            '#ef4444', // Red
+            '#ff2b4e', // High-Vis Coral Red
             'metered',
-            '#3b82f6', // Blue
+            '#2563eb', // Electric Blue
             '#94a3b8',
           ],
-          'line-width': ['interpolate', ['linear'], ['zoom'], 12, 2.5, 15, 5, 18, 10],
-          'line-opacity': 0.95,
+          'line-width': ['interpolate', ['linear'], ['zoom'], 11, 3, 14, 5.5, 16, 8.5, 18, 12],
+          'line-opacity': 1.0,
+        },
+      });
+
+      // Curb point indicators (dots along curb segments)
+      map.addLayer({
+        id: 'curbs-points',
+        type: 'circle',
+        source: 'curbs-source',
+        minzoom: 12,
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 3, 14, 5, 16, 7],
+          'circle-color': [
+            'match',
+            ['get', 'status'],
+            'free',
+            '#05df72',
+            'warning',
+            '#f59e0b',
+            'restricted',
+            '#ff2b4e',
+            'metered',
+            '#2563eb',
+            '#94a3b8',
+          ],
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': 2,
         },
       });
 
@@ -154,14 +186,25 @@ export const MapEngine: React.FC<MapEngineProps> = ({
         },
         paint: {
           'line-color': '#ffffff',
-          'line-width': ['interpolate', ['linear'], ['zoom'], 12, 7, 15, 12, 18, 18],
-          'line-opacity': 0.6,
-          'line-blur': 2,
+          'line-width': ['interpolate', ['linear'], ['zoom'], 12, 10, 15, 15, 18, 20],
+          'line-opacity': 0.7,
+          'line-blur': 3,
         },
       });
 
-      // Click handler on curb segments
+      // Click handler on curb line
       map.on('click', 'curbs-line', (e: MapLayerMouseEvent) => {
+        if (!e.features || e.features.length === 0) return;
+        const feat = e.features[0];
+        const segId = feat.properties?.id;
+        const found = curbsRef.current.find((c) => c.id === segId);
+        if (found) {
+          onSelectCurbRef.current(found);
+        }
+      });
+
+      // Click handler on curb points
+      map.on('click', 'curbs-points', (e: MapLayerMouseEvent) => {
         if (!e.features || e.features.length === 0) return;
         const feat = e.features[0];
         const segId = feat.properties?.id;
@@ -176,6 +219,12 @@ export const MapEngine: React.FC<MapEngineProps> = ({
         map.getCanvas().style.cursor = 'pointer';
       });
       map.on('mouseleave', 'curbs-line', () => {
+        map.getCanvas().style.cursor = '';
+      });
+      map.on('mouseenter', 'curbs-points', () => {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+      map.on('mouseleave', 'curbs-points', () => {
         map.getCanvas().style.cursor = '';
       });
     });
@@ -244,10 +293,11 @@ export const MapEngine: React.FC<MapEngineProps> = ({
 
         const map = mapInstanceRef.current;
         if (map) {
+          // Smooth zoom showing neighborhood blocks without overzooming into rooftop
           map.flyTo({
             center: coords,
-            zoom: 16.5,
-            pitch: 30,
+            zoom: 15.2,
+            pitch: 20,
             essential: true,
           });
 
@@ -256,8 +306,8 @@ export const MapEngine: React.FC<MapEngineProps> = ({
             const el = document.createElement('div');
             el.className = 'relative flex items-center justify-center';
             el.innerHTML = `
-              <div class="absolute w-6 h-6 rounded-full bg-blue-500/30 animate-ping"></div>
-              <div class="relative w-4 h-4 rounded-full bg-blue-600 border-2 border-white shadow-md"></div>
+              <div class="absolute w-8 h-8 rounded-full bg-blue-500/30 animate-ping"></div>
+              <div class="relative w-4 h-4 rounded-full bg-blue-600 border-2 border-white shadow-lg ring-2 ring-blue-400"></div>
             `;
             userMarkerRef.current = new Marker({ element: el })
               .setLngLat(coords)
@@ -266,19 +316,21 @@ export const MapEngine: React.FC<MapEngineProps> = ({
             userMarkerRef.current.setLngLat(coords);
           }
         }
+
+        // Notify parent to fetch parking data for this specific area
+        onLocationFound?.(coords);
       },
       (err) => {
         console.warn('Geolocation failed, centering on default NYC location:', err);
         setIsLocating(false);
-        // Fallback smooth zoom to Lower Manhattan
         mapInstanceRef.current?.flyTo({
           center: [-74.006, 40.7128],
-          zoom: 15,
+          zoom: 14.5,
         });
       },
       { enableHighAccuracy: true, timeout: 8000 }
     );
-  }, [mapInstanceRef]);
+  }, [mapInstanceRef, onLocationFound]);
 
   const handleZoomIn = () => mapInstanceRef.current?.zoomIn();
   const handleZoomOut = () => mapInstanceRef.current?.zoomOut();
@@ -289,12 +341,12 @@ export const MapEngine: React.FC<MapEngineProps> = ({
       {/* Map Canvas */}
       <div ref={mapContainerRef} className="w-full h-full" />
 
-      {/* Floating Map Controls (Right Side) */}
-      <div className="absolute right-3 top-28 z-20 flex flex-col space-y-2">
+      {/* Floating Map Controls (Right Side, adjusted for mobile status bar and header) */}
+      <div className="absolute right-2.5 sm:right-3 top-[calc(max(env(safe-area-inset-top,0px),8px)+9rem)] sm:top-28 z-20 flex flex-col space-y-2">
         {/* Near Me GPS Button */}
         <button
           onClick={handleLocateMe}
-          className={`p-2.5 rounded-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200/80 dark:border-gray-800 shadow-lg text-gray-700 dark:text-gray-200 hover:text-blue-600 transition-all ${
+          className={`p-2.5 rounded-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200/80 dark:border-gray-800 shadow-xl text-gray-700 dark:text-gray-200 hover:text-blue-600 active:scale-95 transition-all ${
             isLocating ? 'animate-pulse text-blue-600' : ''
           }`}
           title="Near Me (GPS)"
@@ -306,7 +358,7 @@ export const MapEngine: React.FC<MapEngineProps> = ({
         {/* Zoom In */}
         <button
           onClick={handleZoomIn}
-          className="p-2.5 rounded-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200/80 dark:border-gray-800 shadow-lg text-gray-700 dark:text-gray-200 hover:text-blue-600 transition-all"
+          className="p-2.5 rounded-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200/80 dark:border-gray-800 shadow-xl text-gray-700 dark:text-gray-200 hover:text-blue-600 active:scale-95 transition-all"
           title="Zoom In"
           aria-label="Zoom in"
         >
@@ -316,7 +368,7 @@ export const MapEngine: React.FC<MapEngineProps> = ({
         {/* Zoom Out */}
         <button
           onClick={handleZoomOut}
-          className="p-2.5 rounded-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200/80 dark:border-gray-800 shadow-lg text-gray-700 dark:text-gray-200 hover:text-blue-600 transition-all"
+          className="p-2.5 rounded-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200/80 dark:border-gray-800 shadow-xl text-gray-700 dark:text-gray-200 hover:text-blue-600 active:scale-95 transition-all"
           title="Zoom Out"
           aria-label="Zoom out"
         >
@@ -326,7 +378,7 @@ export const MapEngine: React.FC<MapEngineProps> = ({
         {/* Reset North / Compass */}
         <button
           onClick={handleResetNorth}
-          className="p-2.5 rounded-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200/80 dark:border-gray-800 shadow-lg text-gray-700 dark:text-gray-200 hover:text-blue-600 transition-all"
+          className="p-2.5 rounded-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200/80 dark:border-gray-800 shadow-xl text-gray-700 dark:text-gray-200 hover:text-blue-600 active:scale-95 transition-all"
           title="Reset Compass & Pitch"
           aria-label="Reset compass"
         >
