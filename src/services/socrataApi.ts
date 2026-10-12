@@ -581,6 +581,252 @@ export const SEED_NYC_CURBS: Array<
       },
     ],
   },
+
+  // 19. 31st Street (Astoria, Queens) - Major N/W Subway Metered Retail Strip
+  {
+    id: 'curb-qn-31st-astoria',
+    onStreet: '31 Street',
+    fromStreet: 'Broadway',
+    toStreet: '31 Avenue',
+    borough: 'Queens',
+    sideOfStreet: 'E',
+    coordinates: [
+      [-73.9238, 40.7615],
+      [-73.9229, 40.7628],
+      [-73.9219, 40.7641],
+    ],
+    shapeLength: 310.0,
+    meterInfo: {
+      payByCell: '400481',
+      vehicleType: 'All Vehicles',
+      allVehiclesDuration: '2 Hours',
+      allVehiclesHours: 'Monday-Saturday 9 AM-7 PM',
+      allVehiclesRate: '$2.00 1st Hour / $3.00 2nd Hour',
+      allVehiclesMaxRate: '$5.00',
+      meterRateZone: 'Zone Q2',
+    },
+    signs: [
+      {
+        signCode: 'PS-127C',
+        description: '2 HMP MONDAY-SATURDAY 9AM-7PM <->',
+        arrowDirection: 'Both',
+      },
+      {
+        signCode: 'SP-413C',
+        description: 'NO PARKING (SANITATION BROOM SYMBOL) TUESDAY FRIDAY 8:30AM-10AM <->',
+        arrowDirection: 'Both',
+      },
+    ],
+  },
+
+  // 20. Broadway (Astoria, Queens) - High Density Commercial Corridor
+  {
+    id: 'curb-qn-broadway-astoria',
+    onStreet: 'Broadway',
+    fromStreet: 'Crescent Street',
+    toStreet: '31 Street',
+    borough: 'Queens',
+    sideOfStreet: 'N',
+    coordinates: [
+      [-73.9282, 40.7635],
+      [-73.9255, 40.7625],
+      [-73.9238, 40.7615],
+    ],
+    shapeLength: 420.0,
+    meterInfo: {
+      payByCell: '400482',
+      vehicleType: 'All Vehicles',
+      allVehiclesDuration: '2 Hours',
+      allVehiclesHours: 'Monday-Saturday 9 AM-7 PM',
+      allVehiclesRate: '$2.00 1st Hour / $3.00 2nd Hour',
+      allVehiclesMaxRate: '$5.00',
+      meterRateZone: 'Zone Q2',
+    },
+    signs: [
+      {
+        signCode: 'PS-127C',
+        description: '2 HMP MONDAY-SATURDAY 9AM-7PM <->',
+        arrowDirection: 'Both',
+      },
+      {
+        signCode: 'SP-412C',
+        description: 'NO PARKING (SANITATION BROOM SYMBOL) MONDAY THURSDAY 8AM-9:30AM <->',
+        arrowDirection: 'Both',
+      },
+    ],
+  },
+
+  // 21. 30th Avenue (Astoria, Queens) - Famous Dining & Retail Avenue
+  {
+    id: 'curb-qn-30thave-astoria',
+    onStreet: '30 Avenue',
+    fromStreet: '31 Street',
+    toStreet: 'Steinway Street',
+    borough: 'Queens',
+    sideOfStreet: 'S',
+    coordinates: [
+      [-73.9215, 40.7667],
+      [-73.9185, 40.7656],
+      [-73.9155, 40.7645],
+      [-73.9125, 40.7634],
+    ],
+    shapeLength: 750.0,
+    meterInfo: {
+      payByCell: '400483',
+      vehicleType: 'All Vehicles',
+      allVehiclesDuration: '1 Hour',
+      allVehiclesHours: 'Monday-Saturday 9 AM-7 PM',
+      allVehiclesRate: '$2.50 / Hour',
+      meterRateZone: 'Zone Q2',
+    },
+    signs: [
+      {
+        signCode: 'PS-126A',
+        description: '1 HMP MONDAY-SATURDAY 9AM-7PM <->',
+        arrowDirection: 'Both',
+      },
+      {
+        signCode: 'SP-413C',
+        description: 'NO PARKING (SANITATION BROOM SYMBOL) TUESDAY FRIDAY 8:30AM-10AM <->',
+        arrowDirection: 'Both',
+      },
+    ],
+  },
+
+  // 22. 33rd Street (Astoria, Queens) - Free Neighborhood Street Parking
+  {
+    id: 'curb-qn-33rdst-astoria-free',
+    onStreet: '33 Street',
+    fromStreet: 'Broadway',
+    toStreet: '31 Avenue',
+    borough: 'Queens',
+    sideOfStreet: 'W',
+    coordinates: [
+      [-73.9220, 40.7608],
+      [-73.9210, 40.7621],
+      [-73.9200, 40.7634],
+    ],
+    shapeLength: 300.0,
+    signs: [
+      {
+        signCode: 'SP-413C',
+        description: 'NO PARKING (SANITATION BROOM SYMBOL) TUESDAY FRIDAY 11:30AM-1PM <->',
+        arrowDirection: 'Both',
+      },
+    ],
+  },
+
+  // 23. Broadway (Financial District) - Wall St to Fulton St
+  {
+    id: 'curb-man-fidi-broadway',
+    onStreet: 'Broadway',
+    fromStreet: 'Wall Street',
+    toStreet: 'Fulton Street',
+    borough: 'Manhattan',
+    sideOfStreet: 'E',
+    coordinates: [
+      [-74.0118, 40.7078],
+      [-74.0112, 40.7088],
+      [-74.0105, 40.7100],
+      [-74.0098, 40.7112],
+    ],
+    shapeLength: 450.0,
+    meterInfo: {
+      payByCell: '100001',
+      vehicleType: 'All Vehicles',
+      allVehiclesDuration: '2 Hours',
+      allVehiclesHours: 'Monday-Saturday 8 AM-7 PM',
+      allVehiclesRate: '$5.50 1st Hour / $9.00 2nd Hour',
+      allVehiclesMaxRate: '$14.50',
+      meterRateZone: 'Zone M1',
+    },
+    signs: [
+      {
+        signCode: 'PS-127C',
+        description: '2 HMP MONDAY-SATURDAY 8AM-7PM <->',
+        arrowDirection: 'Both',
+      },
+      {
+        signCode: 'SP-1044BA',
+        description: 'NO STANDING 7AM-10AM MONDAY-FRIDAY EXCEPT SUNDAY <->',
+        arrowDirection: 'Both',
+      },
+    ],
+  },
+
+  // 24. Water Street (Financial District) - Wall St to Fulton St
+  {
+    id: 'curb-man-fidi-water',
+    onStreet: 'Water Street',
+    fromStreet: 'Wall Street',
+    toStreet: 'Fulton Street',
+    borough: 'Manhattan',
+    sideOfStreet: 'W',
+    coordinates: [
+      [-74.0075, 40.7050],
+      [-74.0062, 40.7062],
+      [-74.0050, 40.7075],
+    ],
+    shapeLength: 350.0,
+    meterInfo: {
+      payByCell: '100005',
+      vehicleType: 'All Vehicles',
+      allVehiclesDuration: '2 Hours',
+      allVehiclesHours: 'Monday-Saturday 8 AM-7 PM',
+      allVehiclesRate: '$5.50 1st Hour / $9.00 2nd Hour',
+      allVehiclesMaxRate: '$14.50',
+      meterRateZone: 'Zone M1',
+    },
+    signs: [
+      {
+        signCode: 'PS-127C',
+        description: '2 HMP MONDAY-SATURDAY 8AM-7PM <->',
+        arrowDirection: 'Both',
+      },
+      {
+        signCode: 'SP-413C',
+        description: 'NO PARKING (SANITATION BROOM SYMBOL) TUESDAY FRIDAY 8:30AM-10AM <->',
+        arrowDirection: 'Both',
+      },
+    ],
+  },
+
+  // 25. Pearl Street (Financial District) - Fulton St to Dover St
+  {
+    id: 'curb-man-fidi-pearl',
+    onStreet: 'Pearl Street',
+    fromStreet: 'Fulton Street',
+    toStreet: 'Dover Street',
+    borough: 'Manhattan',
+    sideOfStreet: 'E',
+    coordinates: [
+      [-74.0048, 40.7072],
+      [-74.0035, 40.7085],
+      [-74.0022, 40.7098],
+    ],
+    shapeLength: 320.0,
+    meterInfo: {
+      payByCell: '100007',
+      vehicleType: 'All Vehicles',
+      allVehiclesDuration: '2 Hours',
+      allVehiclesHours: 'Monday-Saturday 8 AM-7 PM',
+      allVehiclesRate: '$5.50 1st Hour / $9.00 2nd Hour',
+      allVehiclesMaxRate: '$14.50',
+      meterRateZone: 'Zone M1',
+    },
+    signs: [
+      {
+        signCode: 'PS-127C',
+        description: '2 HMP MONDAY-SATURDAY 8AM-7PM <->',
+        arrowDirection: 'Both',
+      },
+      {
+        signCode: 'SP-413C',
+        description: 'NO PARKING (SANITATION BROOM SYMBOL) TUESDAY FRIDAY 8:30AM-10AM <->',
+        arrowDirection: 'Both',
+      },
+    ],
+  },
 ];
 
 /**
@@ -601,14 +847,19 @@ export async function fetchLiveSocrataCurbs(bounds?: {
       headers['X-App-Token'] = NYC_APP_TOKEN;
     }
 
-    // Query active ParkNYC block faces
-    let url = 'https://data.cityofnewyork.us/resource/e7yp-wx55.json?$limit=100';
+    const params = new URLSearchParams();
     if (bounds) {
       // Socrata spatial query using within_box(the_geom, north, west, south, east)
-      const boxQuery = `$where=within_box(the_geom, ${bounds.north}, ${bounds.west}, ${bounds.south}, ${bounds.east})`;
-      url += `&${encodeURIComponent(boxQuery)}`;
+      params.set(
+        '$where',
+        `within_box(the_geom, ${bounds.north}, ${bounds.west}, ${bounds.south}, ${bounds.east})`
+      );
+      params.set('$limit', '1000');
+    } else {
+      params.set('$limit', '1000');
     }
 
+    const url = `https://data.cityofnewyork.us/resource/e7yp-wx55.json?${params.toString()}`;
     const res = await fetch(url, { headers });
     if (!res.ok) {
       throw new Error(`Socrata HTTP ${res.status}`);
@@ -633,7 +884,7 @@ export async function fetchLiveSocrataCurbs(bounds?: {
         coords = item.the_geom.coordinates;
       }
 
-      if (coords.length < 2) continue;
+      if (!coords || coords.length < 2) continue;
 
       const meterInfo: MeterZoneInfo = {
         payByCell: item.pay_by_cel || `ZONE-${i + 1000}`,
@@ -666,14 +917,15 @@ export async function fetchLiveSocrataCurbs(bounds?: {
       }
 
       // Add standard street cleaning sign for realistic NYC dual-regulation curbs
+      const sweepDay = i % 2 === 0 ? 'TUESDAY FRIDAY 8:30AM-10AM' : 'MONDAY THURSDAY 11:30AM-1PM';
       signs.push({
         signCode: 'SP-413C',
-        description: 'NO PARKING (SANITATION BROOM SYMBOL) TUESDAY FRIDAY 8:30AM-10AM <->',
+        description: `NO PARKING (SANITATION BROOM SYMBOL) ${sweepDay} <->`,
         arrowDirection: 'Both',
       });
 
       liveSegments.push({
-        id: `socrata-${item.pay_by_cel || i}`,
+        id: `socrata-${item.pay_by_cel || i}-${i}`,
         onStreet: item.on_street || 'NYC Street',
         fromStreet: item.from_stree || 'Cross Street',
         toStreet: item.to_street || 'Next Cross Street',

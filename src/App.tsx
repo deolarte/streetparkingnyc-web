@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import type { Map } from 'maplibre-gl';
 import { MapEngine } from './components/MapEngine';
 import { SearchHeader } from './components/SearchHeader';
@@ -101,6 +101,34 @@ export function App() {
     }
   };
 
+  // Cache of fetched bounding boxes to prevent redundant Socrata queries
+  const fetchedBoundsCache = useRef<Set<string>>(new Set());
+
+  const handleViewportChange = useCallback(
+    async (bounds: { north: number; south: number; east: number; west: number }) => {
+      // Key bounds by ~1.5km grid square (2 decimals)
+      const key = `${bounds.north.toFixed(2)},${bounds.south.toFixed(2)},${bounds.west.toFixed(2)},${bounds.east.toFixed(2)}`;
+      if (fetchedBoundsCache.current.has(key)) return;
+      fetchedBoundsCache.current.add(key);
+
+      try {
+        setIsLoading(true);
+        const liveCurbs = await fetchLiveSocrataCurbs(bounds);
+        setRawCurbs((prev) => {
+          const existingIds = new Set(prev.map((c) => c.id));
+          const additions = liveCurbs.filter((c) => !existingIds.has(c.id));
+          if (additions.length === 0) return prev;
+          return [...prev, ...additions];
+        });
+      } catch (err) {
+        console.warn('Could not load live curbs for viewport:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
   const handleLocationFound = async (coords: [number, number]) => {
     try {
       const [lon, lat] = coords;
@@ -143,6 +171,7 @@ export function App() {
         selectedCurb={selectedCurb}
         onSelectCurb={handleSelectCurb}
         onLocationFound={handleLocationFound}
+        onViewportChange={handleViewportChange}
         mapInstanceRef={mapInstanceRef}
       />
 
@@ -160,6 +189,21 @@ export function App() {
           />
         </div>
       </div>
+
+      {/* Zero match alert when active filter hides all curbs */}
+      {statusFilter !== 'all' && displayCurbs.length === 0 && evaluatedCurbs.length > 0 && (
+        <div className="absolute top-[calc(max(env(safe-area-inset-top,0px),8px)+6.5rem)] inset-x-4 max-w-sm mx-auto z-20 pointer-events-auto">
+          <div className="bg-amber-600/95 dark:bg-amber-900/95 text-white text-xs px-3.5 py-1.5 rounded-full shadow-lg flex items-center justify-between gap-2 backdrop-blur-md">
+            <span>No curbs match "{statusFilter}" in this area</span>
+            <button
+              onClick={() => setStatusFilter('all')}
+              className="bg-white/20 hover:bg-white/30 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase transition-colors shrink-0"
+            >
+              Show All
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Floating Summary Stats Pill (Top Left Under Header) */}
       <div className="absolute top-[calc(max(env(safe-area-inset-top,0px),8px)+7.5rem)] left-3 z-20 hidden md:flex flex-col space-y-1.5 pointer-events-none">

@@ -9,6 +9,7 @@ interface MapEngineProps {
   selectedCurb: CurbSegment | null;
   onSelectCurb: (curb: CurbSegment | null) => void;
   onLocationFound?: (coords: [number, number]) => void;
+  onViewportChange?: (bounds: { north: number; south: number; east: number; west: number }) => void;
   mapInstanceRef: React.MutableRefObject<Map | null>;
 }
 
@@ -56,6 +57,7 @@ export const MapEngine: React.FC<MapEngineProps> = ({
   selectedCurb,
   onSelectCurb,
   onLocationFound,
+  onViewportChange,
   mapInstanceRef,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -66,11 +68,39 @@ export const MapEngine: React.FC<MapEngineProps> = ({
   // Keep refs to avoid stale closures in MapLibre event listeners
   const curbsRef = useRef<CurbSegment[]>(curbs);
   const onSelectCurbRef = useRef(onSelectCurb);
+  const onViewportChangeRef = useRef(onViewportChange);
 
   useEffect(() => {
     curbsRef.current = curbs;
     onSelectCurbRef.current = onSelectCurb;
-  }, [curbs, onSelectCurb]);
+    onViewportChangeRef.current = onViewportChange;
+  }, [curbs, onSelectCurb, onViewportChange]);
+
+  const buildGeoJson = useCallback((curbList: CurbSegment[]): FeatureCollection<LineString> => {
+    const validFeatures = curbList
+      .filter((c) => Array.isArray(c.coordinates) && c.coordinates.length >= 2)
+      .map((curb) => ({
+        type: 'Feature' as const,
+        properties: {
+          id: curb.id,
+          onStreet: curb.onStreet,
+          fromStreet: curb.fromStreet,
+          toStreet: curb.toStreet,
+          borough: curb.borough,
+          status: curb.status,
+          statusBadge: curb.statusBadge,
+        },
+        geometry: {
+          type: 'LineString' as const,
+          coordinates: curb.coordinates,
+        },
+      }));
+
+    return {
+      type: 'FeatureCollection',
+      features: validFeatures,
+    };
+  }, []);
 
   // Initialize MapLibre
   useEffect(() => {
@@ -92,19 +122,20 @@ export const MapEngine: React.FC<MapEngineProps> = ({
 
     map.addControl(new AttributionControl({ compact: true }), 'bottom-right');
 
+    let moveDebounceTimeout: any = null;
+
     map.on('load', () => {
       setMapLoaded(true);
+
+      const initialGeoJson = buildGeoJson(curbsRef.current);
 
       // GeoJSON source for curb segments
       map.addSource('curbs-source', {
         type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: [],
-        },
+        data: initialGeoJson,
       });
 
-      // Curb line casing (bold outline for extreme high contrast)
+      // Curb line casing (bold outline for extreme high contrast against gray basemap)
       map.addLayer({
         id: 'curbs-casing',
         type: 'line',
@@ -114,9 +145,9 @@ export const MapEngine: React.FC<MapEngineProps> = ({
           'line-join': 'round',
         },
         paint: {
-          'line-color': '#090d16',
-          'line-width': ['interpolate', ['linear'], ['zoom'], 11, 4.5, 14, 8, 16, 12, 18, 16],
-          'line-opacity': 0.85,
+          'line-color': '#0f172a',
+          'line-width': ['interpolate', ['linear'], ['zoom'], 11, 5, 14, 8, 16, 13, 18, 18],
+          'line-opacity': 0.9,
         },
       });
 
@@ -143,34 +174,8 @@ export const MapEngine: React.FC<MapEngineProps> = ({
             '#2563eb', // Electric Blue
             '#94a3b8',
           ],
-          'line-width': ['interpolate', ['linear'], ['zoom'], 11, 3, 14, 5.5, 16, 8.5, 18, 12],
+          'line-width': ['interpolate', ['linear'], ['zoom'], 11, 3.5, 14, 6, 16, 10, 18, 14],
           'line-opacity': 1.0,
-        },
-      });
-
-      // Curb point indicators (dots along curb segments)
-      map.addLayer({
-        id: 'curbs-points',
-        type: 'circle',
-        source: 'curbs-source',
-        minzoom: 12,
-        paint: {
-          'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 3, 14, 5, 16, 7],
-          'circle-color': [
-            'match',
-            ['get', 'status'],
-            'free',
-            '#05df72',
-            'warning',
-            '#f59e0b',
-            'restricted',
-            '#ff2b4e',
-            'metered',
-            '#2563eb',
-            '#94a3b8',
-          ],
-          'circle-stroke-color': '#ffffff',
-          'circle-stroke-width': 2,
         },
       });
 
@@ -186,14 +191,14 @@ export const MapEngine: React.FC<MapEngineProps> = ({
         },
         paint: {
           'line-color': '#ffffff',
-          'line-width': ['interpolate', ['linear'], ['zoom'], 12, 10, 15, 15, 18, 20],
-          'line-opacity': 0.7,
+          'line-width': ['interpolate', ['linear'], ['zoom'], 12, 10, 15, 15, 18, 22],
+          'line-opacity': 0.8,
           'line-blur': 3,
         },
       });
 
-      // Click handler on curb line
-      map.on('click', 'curbs-line', (e: MapLayerMouseEvent) => {
+      // Click handler on curb line & casing
+      const handleCurbClick = (e: MapLayerMouseEvent) => {
         if (!e.features || e.features.length === 0) return;
         const feat = e.features[0];
         const segId = feat.properties?.id;
@@ -201,18 +206,10 @@ export const MapEngine: React.FC<MapEngineProps> = ({
         if (found) {
           onSelectCurbRef.current(found);
         }
-      });
+      };
 
-      // Click handler on curb points
-      map.on('click', 'curbs-points', (e: MapLayerMouseEvent) => {
-        if (!e.features || e.features.length === 0) return;
-        const feat = e.features[0];
-        const segId = feat.properties?.id;
-        const found = curbsRef.current.find((c) => c.id === segId);
-        if (found) {
-          onSelectCurbRef.current(found);
-        }
-      });
+      map.on('click', 'curbs-line', handleCurbClick);
+      map.on('click', 'curbs-casing', handleCurbClick);
 
       // Hover cursors
       map.on('mouseenter', 'curbs-line', () => {
@@ -221,19 +218,41 @@ export const MapEngine: React.FC<MapEngineProps> = ({
       map.on('mouseleave', 'curbs-line', () => {
         map.getCanvas().style.cursor = '';
       });
-      map.on('mouseenter', 'curbs-points', () => {
-        map.getCanvas().style.cursor = 'pointer';
-      });
-      map.on('mouseleave', 'curbs-points', () => {
-        map.getCanvas().style.cursor = '';
+
+      // Trigger initial viewport curb load
+      const bounds = map.getBounds();
+      onViewportChangeRef.current?.({
+        north: bounds.getNorth(),
+        south: bounds.getSouth(),
+        east: bounds.getEast(),
+        west: bounds.getWest(),
       });
     });
 
+    // Debounced moveend listener to fetch live data wherever user pans/zooms
+    const handleMoveEnd = () => {
+      clearTimeout(moveDebounceTimeout);
+      moveDebounceTimeout = setTimeout(() => {
+        if (map.getZoom() >= 13) {
+          const bounds = map.getBounds();
+          onViewportChangeRef.current?.({
+            north: bounds.getNorth(),
+            south: bounds.getSouth(),
+            east: bounds.getEast(),
+            west: bounds.getWest(),
+          });
+        }
+      }, 400);
+    };
+
+    map.on('moveend', handleMoveEnd);
+
     return () => {
+      clearTimeout(moveDebounceTimeout);
       map.remove();
       mapInstanceRef.current = null;
     };
-  }, [mapInstanceRef]);
+  }, [mapInstanceRef, buildGeoJson]);
 
   // Update GeoJSON source when curbs change
   useEffect(() => {
@@ -243,28 +262,9 @@ export const MapEngine: React.FC<MapEngineProps> = ({
     const source = map.getSource('curbs-source') as GeoJSONSource | undefined;
     if (!source) return;
 
-    const geojson: FeatureCollection<LineString> = {
-      type: 'FeatureCollection',
-      features: curbs.map((curb) => ({
-        type: 'Feature',
-        properties: {
-          id: curb.id,
-          onStreet: curb.onStreet,
-          fromStreet: curb.fromStreet,
-          toStreet: curb.toStreet,
-          borough: curb.borough,
-          status: curb.status,
-          statusBadge: curb.statusBadge,
-        },
-        geometry: {
-          type: 'LineString',
-          coordinates: curb.coordinates,
-        },
-      })),
-    };
-
+    const geojson = buildGeoJson(curbs);
     source.setData(geojson);
-  }, [curbs, mapLoaded, mapInstanceRef]);
+  }, [curbs, mapLoaded, mapInstanceRef, buildGeoJson]);
 
   // Update selection highlight
   useEffect(() => {
