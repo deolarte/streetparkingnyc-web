@@ -1,5 +1,16 @@
 import React from 'react';
-import { X, ShieldAlert, Database, HelpCircle, ExternalLink, Info, CheckCircle2 } from 'lucide-react';
+import {
+  X,
+  ShieldAlert,
+  Database,
+  HelpCircle,
+  ExternalLink,
+  Info,
+  CheckCircle2,
+  Sliders,
+  Clock,
+  Calendar,
+} from 'lucide-react';
 
 interface AboutModalProps {
   isOpen: boolean;
@@ -9,10 +20,17 @@ interface AboutModalProps {
 export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
+  const handleDismiss = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('streetpark_disclaimer_viewed', 'true');
+    }
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
       <div 
-        className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 w-full max-w-lg max-h-[88vh] flex flex-col overflow-hidden text-gray-800 dark:text-gray-200"
+        className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden text-gray-800 dark:text-gray-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -26,12 +44,12 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
                 About & FAQ
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Data sources, regulations & legal disclaimers
+                Map legend, time simulation & legal disclaimers
               </p>
             </div>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleDismiss}
             className="p-1.5 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition-colors"
             aria-label="Close"
           >
@@ -51,8 +69,96 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
               <strong>StreetPark</strong> is an independent civic utility and is <strong>NOT affiliated with, sponsored by, or endorsed by the City of New York or the NYC Department of Transportation (NYC DOT)</strong>.
             </p>
             <p className="text-rose-800/80 dark:text-rose-300 text-[11px] leading-relaxed">
-              Physical street signs posted on the block, temporary construction placards, film shoot restrictions, emergency tow-away orders, and police instructions <strong>always supersede any digital information</strong>. The driver remains solely responsible for parking compliance. StreetPark and its operators assume no legal liability for parking tickets, fines, or towing fees.
+              Physical street signs posted on the block, temporary construction placards, film shoot restrictions, emergency tow-away orders, and police instructions <strong>always supersede any digital information</strong>. The driver remains solely responsible for parking compliance. StreetPark and its operators assume no legal liability for parking summonses, fines, or towing fees.
             </p>
+          </div>
+
+          {/* Color Legend & Map Guide */}
+          <div className="space-y-2.5">
+            <div className="flex items-center space-x-1.5 text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider">
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-600" />
+              <span>Map Color Legend</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+              {/* Free */}
+              <div className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-900/50 space-y-1">
+                <div className="flex items-center space-x-1.5 font-bold text-emerald-800 dark:text-emerald-300">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
+                  <span>Free (Green)</span>
+                </div>
+                <p className="text-emerald-900/80 dark:text-emerald-200/80 text-[10.5px]">
+                  Legal free parking permitted. No active street cleaning or meter fees in effect. Outside posted restriction windows, NYC residential curbs are free and unlimited.
+                </p>
+              </div>
+
+              {/* Meter */}
+              <div className="p-2.5 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/50 space-y-1">
+                <div className="flex items-center space-x-1.5 font-bold text-blue-800 dark:text-blue-300">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shrink-0" />
+                  <span>Meter (Blue)</span>
+                </div>
+                <p className="text-blue-900/80 dark:text-blue-200/80 text-[10.5px]">
+                  Active NYC Muni-Meter zone. Pay-by-cell required via official ParkNYC app or kiosk. Subject to posted maximum stay limits (1–3 hours). Free outside operating hours!
+                </p>
+              </div>
+
+              {/* Soon */}
+              <div className="p-2.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/50 space-y-1">
+                <div className="flex items-center space-x-1.5 font-bold text-amber-800 dark:text-amber-300">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" />
+                  <span>Soon (&lt;60Min) (Amber)</span>
+                </div>
+                <p className="text-amber-900/80 dark:text-amber-200/80 text-[10.5px]">
+                  Status change in &lt;60 minutes! Spots opening up soon (sweeping/meters ending shortly), or active legal parking expiring soon as restrictions begin.
+                </p>
+              </div>
+
+              {/* No Parking */}
+              <div className="p-2.5 rounded-xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/50 space-y-1">
+                <div className="flex items-center space-x-1.5 font-bold text-rose-800 dark:text-rose-300">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0" />
+                  <span>No Parking (Red)</span>
+                </div>
+                <p className="text-rose-900/80 dark:text-rose-200/80 text-[10.5px]">
+                  Parking prohibited. Active Alternate Side street sweeping (ASP), No Standing Anytime, or commercial truck loading only. Violators are ticketed and towed.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* How Time Simulation Works */}
+          <div className="space-y-2">
+            <div className="flex items-center space-x-1.5 text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider">
+              <Sliders className="w-4 h-4 text-blue-600" />
+              <span>How Time Simulation Works</span>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-800/60 rounded-2xl p-3 border border-gray-100 dark:border-gray-800 space-y-2 text-[11px]">
+              <div className="flex items-start space-x-2">
+                <Clock className="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" />
+                <div>
+                  <strong>Tap "Simulate"</strong>: Expands the interactive time control dial at the bottom of the screen.
+                </div>
+              </div>
+              <div className="flex items-start space-x-2">
+                <Sliders className="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" />
+                <div>
+                  <strong>Slide Across 24 Hours</strong>: Drag the time slider to test rules at any hour of the day or night (e.g., test what curbs become legal at 7:00 PM tonight or 8:30 AM tomorrow).
+                </div>
+              </div>
+              <div className="flex items-start space-x-2">
+                <Calendar className="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" />
+                <div>
+                  <strong>Day Selector</strong>: Use <code className="font-mono text-[10px] bg-gray-200 dark:bg-gray-700 px-1 py-0.5 rounded">-1 Day</code> / <code className="font-mono text-[10px] bg-gray-200 dark:bg-gray-700 px-1 py-0.5 rounded">+1 Day</code> to plan weekend parking or check street sweeping for upcoming days.
+                </div>
+              </div>
+              <div className="flex items-start space-x-2">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                <div>
+                  <strong>Return to Live Feed</strong>: Tap <strong className="text-emerald-700 dark:text-emerald-300">"Now"</strong> anytime to instantly snap back to real-time clock synchronization.
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Official Data Sources & Attribution */}
@@ -142,10 +248,10 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
             <ExternalLink className="w-3 h-3" />
           </a>
           <button
-            onClick={onClose}
-            className="px-4 py-1.5 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold text-xs transition-opacity hover:opacity-90"
+            onClick={handleDismiss}
+            className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition-all active:scale-95"
           >
-            Got It
+            I Understand & Agree
           </button>
         </div>
       </div>
