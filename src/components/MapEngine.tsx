@@ -1,8 +1,13 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Map, Marker, AttributionControl, GeoJSONSource, type MapLayerMouseEvent } from 'maplibre-gl';
+import { Map, Marker, AttributionControl, GeoJSONSource, config, type MapLayerMouseEvent } from 'maplibre-gl';
 import type { FeatureCollection, LineString } from 'geojson';
 import { Locate, Compass, ZoomIn, ZoomOut } from 'lucide-react';
 import type { CurbSegment } from '../types';
+
+// Configure MapLibre Web Worker URL explicitly to load the local bundled worker
+if (typeof window !== 'undefined') {
+  config.WORKER_URL = '/maplibre-gl-worker.mjs';
+}
 
 interface MapEngineProps {
   curbs: CurbSegment[];
@@ -66,8 +71,8 @@ const ESRI_LIGHT_GRAY_STYLE: any = {
       },
       paint: {
         'line-color': '#0f172a',
-        'line-width': ['interpolate' as const, ['linear' as const], ['zoom' as const], 11, 6, 14, 9, 16, 14, 18, 20],
-        'line-opacity': 0.95,
+        'line-width': ['interpolate' as const, ['linear' as const], ['zoom' as const], 11, 5, 14, 8, 16, 12, 18, 18],
+        'line-opacity': 0.9,
       },
     },
     {
@@ -83,16 +88,16 @@ const ESRI_LIGHT_GRAY_STYLE: any = {
           'match' as const,
           ['get' as const, 'status'],
           'free',
-          '#05df72', // Neon Emerald Green
+          '#10b981', // Emerald Green (Free)
           'warning',
-          '#f59e0b', // High-Vis Amber
+          '#f59e0b', // Amber (Impending ASP)
           'restricted',
-          '#ff2b4e', // High-Vis Coral Red
+          '#ef4444', // Red (No Parking / Active ASP / Tow Away)
           'metered',
-          '#2563eb', // Electric Blue
-          '#94a3b8',
+          '#3b82f6', // Vivid Blue (Muni-Meter)
+          '#64748b', // Slate Fallback
         ],
-        'line-width': ['interpolate' as const, ['linear' as const], ['zoom' as const], 11, 4, 14, 6.5, 16, 10, 18, 15],
+        'line-width': ['interpolate' as const, ['linear' as const], ['zoom' as const], 11, 3.5, 14, 6, 16, 9, 18, 14],
         'line-opacity': 1.0,
       },
     },
@@ -133,24 +138,35 @@ export const MapEngine: React.FC<MapEngineProps> = ({
   const onViewportChangeRef = useRef(onViewportChange);
 
   const buildGeoJson = useCallback((curbList: CurbSegment[]): FeatureCollection<LineString> => {
-    const validFeatures = curbList
-      .filter((c) => Array.isArray(c.coordinates) && c.coordinates.length >= 2)
-      .map((curb) => ({
-        type: 'Feature' as const,
+    const validFeatures: FeatureCollection<LineString>['features'] = [];
+    for (const curb of curbList) {
+      if (!Array.isArray(curb.coordinates) || curb.coordinates.length < 2) continue;
+      // Sanitize coordinates to ensure strictly finite numbers [lng, lat]
+      const cleanCoords: [number, number][] = [];
+      for (const pt of curb.coordinates) {
+        if (Array.isArray(pt) && pt.length >= 2 && Number.isFinite(pt[0]) && Number.isFinite(pt[1])) {
+          cleanCoords.push([Number(pt[0]), Number(pt[1])]);
+        }
+      }
+      if (cleanCoords.length < 2) continue;
+
+      validFeatures.push({
+        type: 'Feature',
         properties: {
           id: curb.id,
-          onStreet: curb.onStreet,
-          fromStreet: curb.fromStreet,
-          toStreet: curb.toStreet,
-          borough: curb.borough,
-          status: curb.status,
-          statusBadge: curb.statusBadge,
+          onStreet: curb.onStreet || '',
+          fromStreet: curb.fromStreet || '',
+          toStreet: curb.toStreet || '',
+          borough: curb.borough || '',
+          status: curb.status || 'free',
+          statusBadge: curb.statusBadge || 'Free Parking',
         },
         geometry: {
-          type: 'LineString' as const,
-          coordinates: curb.coordinates,
+          type: 'LineString',
+          coordinates: cleanCoords,
         },
-      }));
+      });
+    }
 
     return {
       type: 'FeatureCollection',
@@ -214,7 +230,6 @@ export const MapEngine: React.FC<MapEngineProps> = ({
     };
 
     map.on('load', handleLoadedOrStyled);
-    map.on('styledata', updateSourceData);
 
     // Click handler on curb line & casing
     const handleCurbClick = (e: MapLayerMouseEvent) => {
@@ -240,7 +255,6 @@ export const MapEngine: React.FC<MapEngineProps> = ({
 
     // Debounced moveend listener to fetch live data wherever user pans/zooms
     const handleMoveEnd = () => {
-      updateSourceData();
       clearTimeout(moveDebounceTimeout);
       moveDebounceTimeout = setTimeout(() => {
         if (map.getZoom() >= 13) {
@@ -293,11 +307,11 @@ export const MapEngine: React.FC<MapEngineProps> = ({
 
         const map = mapInstanceRef.current;
         if (map) {
-          // Smooth zoom showing neighborhood blocks without overzooming into rooftop
+          // Comfortable neighborhood view (zoom 14.8) displaying 4-6 blocks instead of rooftop
           map.flyTo({
             center: coords,
-            zoom: 15.2,
-            pitch: 20,
+            zoom: 14.8,
+            pitch: 15,
             essential: true,
           });
 

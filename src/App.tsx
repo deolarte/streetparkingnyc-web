@@ -236,12 +236,12 @@ export function App() {
         </div>
       </div>
 
-      {/* Bottom Temporal Slider Container (Floating above bottom, clear of iOS Safari home bar) */}
+      {/* Bottom Temporal Slider Container (Floating above bottom, clear of iOS Safari bottom URL bar) */}
       <div
         className={`absolute inset-x-2 sm:inset-x-4 max-w-xl mx-auto z-20 pointer-events-none transition-all duration-300 ${
           selectedCurb
             ? 'hidden sm:block sm:bottom-[340px]'
-            : 'bottom-[max(calc(env(safe-area-inset-bottom,0px)+12px),16px)]'
+            : 'bottom-[max(calc(env(safe-area-inset-bottom,0px)+72px),76px)] sm:bottom-4'
         }`}
       >
         <div className="pointer-events-auto">
