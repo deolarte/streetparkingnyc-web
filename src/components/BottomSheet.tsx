@@ -286,23 +286,9 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
                     <a
-                      href="parknyc://"
-                      onClick={() => {
-                        const isAndroid = /Android/i.test(navigator.userAgent);
-                        const storeUrl = isAndroid
-                          ? 'https://play.google.com/store/apps/details?id=com.parkingpassport.nyc'
-                          : 'https://apps.apple.com/us/app/parknyc-powered-by-flowbird/id1588661916';
-                        
-                        const start = Date.now();
-                        const timer = setTimeout(() => {
-                          if (Date.now() - start < 2500 && !document.hidden) {
-                            window.location.href = storeUrl;
-                          }
-                        }, 1200);
-
-                        window.addEventListener('blur', () => clearTimeout(timer), { once: true });
-                        window.addEventListener('pagehide', () => clearTimeout(timer), { once: true });
-                      }}
+                      href="https://www.parknycapp.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="flex-1 py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center justify-center space-x-2 transition-all shadow-md shadow-blue-600/20 active:scale-[0.98]"
                     >
                       <Smartphone className="w-3.5 h-3.5" />
@@ -326,7 +312,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
                   </div>
 
                   <p className="text-[10px] text-gray-500 dark:text-gray-400 text-center leading-tight">
-                    Zone <span className="font-bold text-gray-800 dark:text-gray-200 font-mono text-xs">{segment.meterInfo.payByCell}</span> • Tap <strong>Open</strong> if installed, or <strong>Get App</strong> from App Store
+                    Zone <span className="font-bold text-gray-800 dark:text-gray-200 font-mono text-xs">{segment.meterInfo.payByCell}</span> • Directs straight to installed ParkNYC app (or App Store)
                   </p>
                 </div>
               ) : (
