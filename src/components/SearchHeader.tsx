@@ -162,13 +162,15 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
       <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/80 dark:border-gray-800 p-2 sm:p-2.5">
         <div className="flex items-center gap-2">
           {/* Brand Logo & Name */}
-          <div className="flex items-center space-x-1.5 pl-1.5 shrink-0">
-            <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black text-sm shadow-sm">
-              P
-            </div>
+          <div className="flex items-center space-x-2 pl-1 shrink-0">
+            <img
+              src="/apple-touch-icon.png"
+              alt="StreetPark"
+              className="w-7 h-7 rounded-lg shadow-sm shrink-0 object-cover"
+            />
             <div className="hidden sm:block">
               <span className="font-extrabold text-sm tracking-tight text-gray-900 dark:text-white">
-                StreetParking<span className="text-blue-600">NYC</span>
+                StreetPark
               </span>
             </div>
           </div>
@@ -262,7 +264,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200'
             }`}
           >
-            All Curbs
+            All
           </button>
 
           <button
@@ -274,7 +276,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
             }`}
           >
             <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span>Free Legal</span>
+            <span>Free</span>
           </button>
 
           <button
@@ -286,7 +288,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
             }`}
           >
             <span className="w-2 h-2 rounded-full bg-blue-500" />
-            <span>Muni-Meter</span>
+            <span>Meter</span>
           </button>
 
           <button
@@ -298,7 +300,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
             }`}
           >
             <span className="w-2 h-2 rounded-full bg-amber-500" />
-            <span>Impending (&lt;60m)</span>
+            <span>Soon (&lt;60Min)</span>
           </button>
 
           <button

@@ -13,8 +13,15 @@ import { InterstitialAd } from './components/InterstitialAd';
 import { FeedbackModal } from './components/FeedbackModal';
 import { TipModal } from './components/TipModal';
 import { Loader2 } from 'lucide-react';
+import { AdminPortal } from './components/AdminPortal';
 
 export function App() {
+  const [isAdminOpen, setIsAdminOpen] = useState<boolean>(() => {
+    return (
+      typeof window !== 'undefined' &&
+      (window.location.pathname === '/admin' || window.location.hash === '#admin')
+    );
+  });
   const [selectedTime, setSelectedTime] = useState<Date>(() => new Date());
   const [isNow, setIsNow] = useState<boolean>(true);
   const [vehicleType, setVehicleType] = useState<VehicleType>('passenger');
@@ -42,6 +49,36 @@ export function App() {
   };
 
   const mapInstanceRef = useRef<Map | null>(null);
+
+  // Sync /admin or #admin URL
+  useEffect(() => {
+    const handleUrlChange = () => {
+      if (window.location.pathname === '/admin' || window.location.hash === '#admin') {
+        setIsAdminOpen(true);
+      }
+    };
+    window.addEventListener('popstate', handleUrlChange);
+    window.addEventListener('hashchange', handleUrlChange);
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+      window.removeEventListener('hashchange', handleUrlChange);
+    };
+  }, []);
+
+  if (isAdminOpen) {
+    return (
+      <AdminPortal
+        onBackToApp={() => {
+          setIsAdminOpen(false);
+          if (window.location.pathname === '/admin') {
+            window.history.pushState(null, '', '/');
+          } else if (window.location.hash === '#admin') {
+            window.location.hash = '';
+          }
+        }}
+      />
+    );
+  }
 
   // Load NYC curbs on startup
   useEffect(() => {
@@ -309,7 +346,16 @@ export function App() {
       </div>
 
       {/* Mobile Bottom Sheet Drawer for Selected Curb */}
-      <BottomSheet segment={selectedCurb} onClose={() => setSelectedCurbId(null)} />
+      <BottomSheet
+        segment={selectedCurb}
+        onClose={() => setSelectedCurbId(null)}
+        isNow={isNow}
+        selectedTime={selectedTime}
+        onResetToNow={() => {
+          setSelectedTime(new Date());
+          setIsNow(true);
+        }}
+      />
 
       {/* High-Value Interstitial Ad Modal */}
       <InterstitialAd isOpen={showInterstitial} onClose={() => setShowInterstitial(false)} />

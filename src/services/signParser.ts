@@ -230,9 +230,8 @@ function findNextRestriction(
     for (const win of allWindows) {
       if (!win.daysOfWeek.includes(dow)) continue;
       if (win.type === 'street_sweeping' && aspStatus.suspended) continue;
-      if (win.type === 'metered' && aspStatus.isMajor) continue;
-      if (win.type === 'commercial_only' && vehicleType === 'passenger') {
-        // Commercial loading only -> restriction for passenger vehicles
+      if (win.type === 'commercial_only' && vehicleType === 'commercial') {
+        continue; // Commercial loading is allowed for commercial vehicles, not a restriction
       }
 
       const winStart = new Date(
@@ -319,22 +318,19 @@ function computeParkingTimeline(
     else if (activeRestriction.type === 'no_standing') nextTitle = 'No Standing Active';
     else if (activeRestriction.type === 'no_parking') nextTitle = 'No Parking Active';
 
-    const canParkUntilFormatted = nextAfterResume
+    const nextRestrictionFormatted = nextAfterResume
       ? formatEventDateTime(targetTime, nextAfterResume.date)
-      : 'No upcoming restrictions';
-    const canParkUntilDay = nextAfterResume
-      ? formatDayLabel(targetTime, nextAfterResume.date)
       : 'Unlimited';
 
     return {
       canParkNow: false,
       canParkUntilDate: nextAfterResume ? nextAfterResume.date : undefined,
-      canParkUntilFormatted,
-      canParkUntilDay,
+      canParkUntilFormatted: `Legal parking resumes ${resumeFormatted}`,
+      canParkUntilDay: formatDayLabel(targetTime, resumeDate),
       durationFormatted: resumeDuration,
       durationMinutes: Math.max(0, Math.round((resumeDate.getTime() - targetTime.getTime()) / 60000)),
       nextEventTitle: nextTitle,
-      nextEventDescription: `Restricted right now. Legal parking resumes at ${resumeFormatted}.`,
+      nextEventDescription: `Restricted right now. Legal parking resumes at ${resumeFormatted}${nextAfterResume ? ` and remains legal until ${nextRestrictionFormatted}` : '.'}`,
       isUnlimited: !nextAfterResume,
       resumeParkingDate: resumeDate,
       resumeParkingFormatted: resumeFormatted,
@@ -474,6 +470,7 @@ export function evaluateSegmentParking(
   // Check currently active window
   let activeRestriction: TimeWindow | null = null;
   let activeMeter: TimeWindow | null = null;
+  let activeCommercialLoading: TimeWindow | null = null;
 
   for (const win of allWindows) {
     if (!win.daysOfWeek.includes(dayOfWeek)) continue;
@@ -491,6 +488,15 @@ export function evaluateSegmentParking(
     if (currentMinutes >= win.startMinutes && currentMinutes < win.endMinutes) {
       if (win.type === 'metered') {
         activeMeter = win;
+      } else if (win.type === 'commercial_only') {
+        if (vehicleType === 'commercial') {
+          // Commercial vehicles permitted in commercial loading zone!
+          activeCommercialLoading = win;
+        } else {
+          // Passenger vehicles prohibited
+          activeRestriction = win;
+          break;
+        }
       } else {
         activeRestriction = win;
         break;
@@ -502,11 +508,12 @@ export function evaluateSegmentParking(
   let impendingRestriction: TimeWindow | null = null;
   let minutesUntilImpending: number | null = null;
 
-  if (!activeRestriction) {
+  if (!activeRestriction && !activeCommercialLoading) {
     for (const win of allWindows) {
       if (!win.daysOfWeek.includes(dayOfWeek)) continue;
       if (win.type === 'street_sweeping' && aspStatus.suspended) continue;
       if (win.type === 'metered') continue;
+      if (win.type === 'commercial_only' && vehicleType === 'commercial') continue;
 
       const diff = win.startMinutes - currentMinutes;
       if (diff > 0 && diff <= 60) {
@@ -549,6 +556,23 @@ export function evaluateSegmentParking(
       statusHeadline = 'Parking Prohibited';
       statusDescription = `Active parking restriction until ${endFormatted}.`;
     }
+  } else if (activeCommercialLoading && vehicleType === 'commercial') {
+    const endFormatted = formatTimeOnly(activeCommercialLoading.endMinutes);
+    timeUntilChangeMinutes = activeCommercialLoading.endMinutes - currentMinutes;
+    if (activeMeter || segment.meterInfo) {
+      status = 'metered';
+      activeRestrictionType = 'metered';
+      const rateInfo = segment.meterInfo?.allVehiclesRate || '$4.50–$8.25/hr';
+      const zone = segment.meterInfo?.payByCell ? `Zone ${segment.meterInfo.payByCell}` : 'ParkNYC Zone';
+      statusBadge = `🔵 Commercial Meter (${zone})`;
+      statusHeadline = 'Commercial Loading Meter';
+      statusDescription = `Commercial vehicles permitted to park and load until ${endFormatted}. Meter payment required (${rateInfo}). Max stay: ${segment.meterInfo?.allVehiclesDuration || '3 Hours'}.`;
+    } else {
+      status = 'free';
+      statusBadge = '🟢 Commercial Loading Permitted';
+      statusHeadline = 'Commercial Loading Permitted';
+      statusDescription = `Commercial vehicles and trucks permitted to park and load until ${endFormatted}.`;
+    }
   } else if (impendingRestriction && minutesUntilImpending !== null) {
     status = 'warning';
     timeUntilChangeMinutes = minutesUntilImpending;
@@ -580,7 +604,7 @@ export function evaluateSegmentParking(
     targetTime,
     vehicleType,
     activeRestriction,
-    activeMeter,
+    activeMeter || activeCommercialLoading,
     segment.meterInfo
   );
 

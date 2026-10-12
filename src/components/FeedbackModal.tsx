@@ -18,11 +18,45 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose })
     e.preventDefault();
     if (!message.trim()) return;
 
-    // Save submission locally
+    const newFeedback = {
+      id: `fb-${Date.now()}`,
+      category,
+      message,
+      contact: contact || 'Anonymous',
+      date: new Date().toISOString(),
+      status: 'new',
+    };
+
+    // 1. Save locally for Admin Portal
     try {
-      const existing = JSON.parse(localStorage.getItem('user_feedback') || '[]');
-      existing.push({ category, message, contact, date: new Date().toISOString() });
-      localStorage.setItem('user_feedback', JSON.stringify(existing));
+      const existing = JSON.parse(
+        localStorage.getItem('streetpark_feedback_submissions') ||
+        localStorage.getItem('user_feedback') ||
+        '[]'
+      );
+      existing.unshift(newFeedback);
+      localStorage.setItem('streetpark_feedback_submissions', JSON.stringify(existing));
+    } catch {}
+
+    // 2. Dispatch email to user with subject "StreetParkingNYC Feedback" for Spark Gemini!
+    const targetEmail =
+      localStorage.getItem('streetpark_admin_email') ||
+      import.meta.env.VITE_FEEDBACK_EMAIL ||
+      'admin@djtechnyc.com';
+
+    try {
+      fetch(`https://formsubmit.co/ajax/${targetEmail}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          _subject: 'StreetParkingNYC Feedback',
+          Category: category.replace('_', ' ').toUpperCase(),
+          Report: message,
+          Contact: contact || 'Anonymous Driver',
+          Date: new Date().toLocaleString(),
+          Platform: typeof navigator !== 'undefined' ? navigator.userAgent : 'Web',
+        }),
+      }).catch(() => {});
     } catch {}
 
     setSubmitted(true);
