@@ -11,31 +11,7 @@ interface MapEngineProps {
   mapInstanceRef: React.MutableRefObject<Map | null>;
 }
 
-const CARTO_POSITRON_STYLE = {
-  version: 8 as const,
-  sources: {
-    'carto-positron': {
-      type: 'raster' as const,
-      tiles: [
-        'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
-        'https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
-        'https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
-      ],
-      tileSize: 256,
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    },
-  },
-  layers: [
-    {
-      id: 'carto-tiles',
-      type: 'raster' as const,
-      source: 'carto-positron',
-      minzoom: 0,
-      maxzoom: 20,
-    },
-  ],
-};
+const POSITRON_VECTOR_STYLE = 'https://tiles.openfreemap.org/styles/positron';
 
 export const MapEngine: React.FC<MapEngineProps> = ({
   curbs,
@@ -63,7 +39,7 @@ export const MapEngine: React.FC<MapEngineProps> = ({
 
     const map = new Map({
       container: mapContainerRef.current,
-      style: CARTO_POSITRON_STYLE,
+      style: POSITRON_VECTOR_STYLE,
       center: [-74.006, 40.7128], // NYC City Hall / Lower Manhattan
       zoom: 14,
       pitch: 25,
