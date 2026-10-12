@@ -1,0 +1,7 @@
+name = "streetparkingnyc-web"
+compatibility_date = "2026-10-12"
+pages_build_output_dir = "dist"
+
+[env.production.vars]
+VITE_NYC_DATA_APP_TOKEN = ""
+VITE_GOOGLE_ADSENSE_ID = "ca-pub-XXXXXXXXXXXXXXXX"
