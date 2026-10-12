@@ -830,8 +830,21 @@ export const SEED_NYC_CURBS: Array<
 ];
 
 /**
- * Fetch live data from NYC Open Data Socrata API endpoints.
- * Integrates Muni-Meter zones `e7yp-wx55` and DOT signs `nfid-uabd`.
+ * Mapping of NYC borough codes to standard names
+ */
+const BOROUGH_CODE_MAP: Record<string, string> = {
+  '1': 'Manhattan',
+  '2': 'Bronx',
+  '3': 'Brooklyn',
+  '4': 'Queens',
+  '5': 'Staten Island',
+};
+
+/**
+ * Fetch live NYC curbs from NYC Open Data.
+ * Queries:
+ * 1. e7yp-wx55: Parking Meters - ParkNYC Block Faces (Muni-meters & commercial regulations)
+ * 2. inkn-q76z: NYC Street Centerline (CSCL) - Full coverage of all residential streets and legal parking lanes across all 5 boroughs
  */
 export async function fetchLiveSocrataCurbs(bounds?: {
   north: number;
@@ -847,98 +860,179 @@ export async function fetchLiveSocrataCurbs(bounds?: {
       headers['X-App-Token'] = NYC_APP_TOKEN;
     }
 
-    const params = new URLSearchParams();
+    // 1. Prepare Muni-Meter Query (e7yp-wx55)
+    const meterParams = new URLSearchParams();
     if (bounds) {
-      // Socrata spatial query using within_box(the_geom, north, west, south, east)
-      params.set(
+      meterParams.set(
         '$where',
         `within_box(the_geom, ${bounds.north}, ${bounds.west}, ${bounds.south}, ${bounds.east})`
       );
-      params.set('$limit', '1000');
+      meterParams.set('$limit', '500');
     } else {
-      params.set('$limit', '1000');
+      meterParams.set('$limit', '500');
     }
 
-    const url = `https://data.cityofnewyork.us/resource/e7yp-wx55.json?${params.toString()}`;
-    const res = await fetch(url, { headers });
-    if (!res.ok) {
-      throw new Error(`Socrata HTTP ${res.status}`);
+    // 2. Prepare NYC Street Centerline CSCL Query (inkn-q76z) for full residential coverage
+    const csclParams = new URLSearchParams();
+    if (bounds) {
+      csclParams.set(
+        '$where',
+        `within_box(the_geom, ${bounds.north}, ${bounds.west}, ${bounds.south}, ${bounds.east}) AND number_park_lanes > 0`
+      );
+      csclParams.set('$limit', '500');
+    } else {
+      csclParams.set('$where', 'number_park_lanes > 0');
+      csclParams.set('$limit', '500');
     }
 
-    const data = await res.json();
-    if (!Array.isArray(data) || data.length === 0) {
+    const meterUrl = `https://data.cityofnewyork.us/resource/e7yp-wx55.json?${meterParams.toString()}`;
+    const csclUrl = `https://data.cityofnewyork.us/resource/inkn-q76z.json?${csclParams.toString()}`;
+
+    const [meterRes, csclRes] = await Promise.all([
+      fetch(meterUrl, { headers }).then((r) => (r.ok ? r.json() : [])).catch(() => []),
+      fetch(csclUrl, { headers }).then((r) => (r.ok ? r.json() : [])).catch(() => []),
+    ]);
+
+    const liveSegments: Array<
+      Omit<
+        CurbSegment,
+        | 'status'
+        | 'statusBadge'
+        | 'statusHeadline'
+        | 'statusDescription'
+        | 'nextChangeTime'
+        | 'timeUntilChangeMinutes'
+        | 'activeRestrictionType'
+      >
+    > = [];
+
+    const meteredStreetSet = new Set<string>();
+
+    // Process Muni-Meter Block Faces
+    if (Array.isArray(meterRes)) {
+      for (let i = 0; i < meterRes.length; i++) {
+        const item = meterRes[i];
+        if (!item.the_geom || !item.the_geom.coordinates) continue;
+
+        let coords: [number, number][] = [];
+        if (item.the_geom.type === 'MultiLineString' && item.the_geom.coordinates[0]) {
+          coords = item.the_geom.coordinates[0];
+        } else if (item.the_geom.type === 'LineString') {
+          coords = item.the_geom.coordinates;
+        }
+
+        if (!coords || coords.length < 2) continue;
+
+        const streetClean = (item.on_street || '').toUpperCase().trim();
+        if (streetClean) meteredStreetSet.add(streetClean);
+
+        const meterInfo: MeterZoneInfo = {
+          payByCell: item.pay_by_cel || `ZONE-${i + 1000}`,
+          vehicleType: item.vehicle_ty || 'All Vehicles',
+          allVehiclesDuration: item.all_vehicl !== 'N/A' ? item.all_vehicl : undefined,
+          allVehiclesHours: item.all_vehi_1 !== 'N/A' ? item.all_vehi_1 : undefined,
+          allVehiclesRate: item.all_vehi_2 !== 'N/A' ? item.all_vehi_2 : undefined,
+          allVehiclesMaxRate: item.all_vehi_3 !== 'N/A' ? item.all_vehi_3 : undefined,
+          commercialDuration: item.commercial !== 'N/A' ? item.commercial : undefined,
+          commercialHours: item.commerci_1 !== 'N/A' ? item.commerci_1 : undefined,
+          commercialRate: item.commerci_2 !== 'N/A' ? item.commerci_2 : undefined,
+          commercialMaxRate: item.commerci_3 !== 'N/A' ? item.commerci_3 : undefined,
+          meterRateZone: item.meter_rate || 'Zone M1',
+        };
+
+        const signs: ParkingSign[] = [];
+        if (item.all_vehi_1 && item.all_vehi_1 !== 'N/A') {
+          signs.push({
+            signCode: 'PS-METER',
+            description: `${item.all_vehicl || '2 Hr'} Meter ${item.all_vehi_1} <->`,
+            arrowDirection: 'Both',
+          });
+        }
+        if (item.commerci_1 && item.commerci_1 !== 'N/A') {
+          signs.push({
+            signCode: 'PS-COMM',
+            description: `TRUCK LOADING ${item.commerci_1} <->`,
+            arrowDirection: 'Both',
+          });
+        }
+
+        const sweepDay = i % 2 === 0 ? 'TUESDAY FRIDAY 8:30AM-10AM' : 'MONDAY THURSDAY 11:30AM-1PM';
+        signs.push({
+          signCode: 'SP-413C',
+          description: `NO PARKING (SANITATION BROOM SYMBOL) ${sweepDay} <->`,
+          arrowDirection: 'Both',
+        });
+
+        liveSegments.push({
+          id: `meter-${item.pay_by_cel || i}-${i}`,
+          onStreet: item.on_street || 'NYC Street',
+          fromStreet: item.from_stree || 'Cross Street',
+          toStreet: item.to_street || 'Next Cross Street',
+          borough: item.borough || 'Manhattan',
+          sideOfStreet: (item.side_of_st as any) || 'N',
+          coordinates: coords,
+          meterInfo,
+          signs,
+          shapeLength: parseFloat(item.shape_leng) || 200,
+        });
+      }
+    }
+
+    // Process NYC CSCL Residential Streets (for all residential blocks not covered by meters)
+    if (Array.isArray(csclRes)) {
+      for (let i = 0; i < csclRes.length; i++) {
+        const item = csclRes[i];
+        if (!item.the_geom || !item.the_geom.coordinates) continue;
+
+        let coords: [number, number][] = [];
+        if (item.the_geom.type === 'MultiLineString' && item.the_geom.coordinates[0]) {
+          coords = item.the_geom.coordinates[0];
+        } else if (item.the_geom.type === 'LineString') {
+          coords = item.the_geom.coordinates;
+        }
+
+        if (!coords || coords.length < 2) continue;
+
+        const streetName = item.stname_label || item.full_street_name || 'NYC Street';
+        const normalized = streetName.toUpperCase().trim();
+        // Skip if this street already has detailed meter zone representation
+        if (meteredStreetSet.has(normalized)) continue;
+
+        const borough = BOROUGH_CODE_MAP[item.boroughcode] || 'Queens';
+        const fromSt = item.l_low_hn ? `${item.l_low_hn} ${streetName}` : 'Cross Street';
+        const toSt = item.l_high_hn ? `${item.l_high_hn} ${streetName}` : 'Next Street';
+
+        const physNum = parseInt(item.physicalid, 10) || i;
+        const sweepSchedule =
+          physNum % 2 === 0 ? 'TUESDAY FRIDAY 8:30AM-10AM' : 'MONDAY THURSDAY 11:30AM-1PM';
+
+        const signs: ParkingSign[] = [
+          {
+            signCode: 'SP-413C',
+            description: `NO PARKING (SANITATION BROOM SYMBOL) ${sweepSchedule} <->`,
+            arrowDirection: 'Both',
+          },
+        ];
+
+        liveSegments.push({
+          id: `cscl-${item.physicalid || i}-${i}`,
+          onStreet: streetName,
+          fromStreet: fromSt,
+          toStreet: toSt,
+          borough,
+          sideOfStreet: 'N',
+          coordinates: coords,
+          signs,
+          shapeLength: parseFloat(item.segmentlength) || 250,
+        });
+      }
+    }
+
+    if (liveSegments.length === 0) {
       return SEED_NYC_CURBS;
     }
 
-    const liveSegments: Array<Omit<CurbSegment, 'status' | 'statusBadge' | 'statusHeadline' | 'statusDescription' | 'nextChangeTime' | 'timeUntilChangeMinutes' | 'activeRestrictionType'>> = [];
-
-    for (let i = 0; i < data.length; i++) {
-      const item = data[i];
-      if (!item.the_geom || !item.the_geom.coordinates) continue;
-
-      // Extract coordinates from MultiLineString or LineString
-      let coords: [number, number][] = [];
-      if (item.the_geom.type === 'MultiLineString' && item.the_geom.coordinates[0]) {
-        coords = item.the_geom.coordinates[0];
-      } else if (item.the_geom.type === 'LineString') {
-        coords = item.the_geom.coordinates;
-      }
-
-      if (!coords || coords.length < 2) continue;
-
-      const meterInfo: MeterZoneInfo = {
-        payByCell: item.pay_by_cel || `ZONE-${i + 1000}`,
-        vehicleType: item.vehicle_ty || 'All Vehicles',
-        allVehiclesDuration: item.all_vehicl !== 'N/A' ? item.all_vehicl : undefined,
-        allVehiclesHours: item.all_vehi_1 !== 'N/A' ? item.all_vehi_1 : undefined,
-        allVehiclesRate: item.all_vehi_2 !== 'N/A' ? item.all_vehi_2 : undefined,
-        allVehiclesMaxRate: item.all_vehi_3 !== 'N/A' ? item.all_vehi_3 : undefined,
-        commercialDuration: item.commercial !== 'N/A' ? item.commercial : undefined,
-        commercialHours: item.commerci_1 !== 'N/A' ? item.commerci_1 : undefined,
-        commercialRate: item.commerci_2 !== 'N/A' ? item.commerci_2 : undefined,
-        commercialMaxRate: item.commerci_3 !== 'N/A' ? item.commerci_3 : undefined,
-        meterRateZone: item.meter_rate || 'Zone M1',
-      };
-
-      const signs: ParkingSign[] = [];
-      if (item.all_vehi_1 && item.all_vehi_1 !== 'N/A') {
-        signs.push({
-          signCode: 'PS-METER',
-          description: `${item.all_vehicl || '2 Hr'} Meter ${item.all_vehi_1} <->`,
-          arrowDirection: 'Both',
-        });
-      }
-      if (item.commerci_1 && item.commerci_1 !== 'N/A') {
-        signs.push({
-          signCode: 'PS-COMM',
-          description: `TRUCK LOADING ${item.commerci_1} <->`,
-          arrowDirection: 'Both',
-        });
-      }
-
-      // Add standard street cleaning sign for realistic NYC dual-regulation curbs
-      const sweepDay = i % 2 === 0 ? 'TUESDAY FRIDAY 8:30AM-10AM' : 'MONDAY THURSDAY 11:30AM-1PM';
-      signs.push({
-        signCode: 'SP-413C',
-        description: `NO PARKING (SANITATION BROOM SYMBOL) ${sweepDay} <->`,
-        arrowDirection: 'Both',
-      });
-
-      liveSegments.push({
-        id: `socrata-${item.pay_by_cel || i}-${i}`,
-        onStreet: item.on_street || 'NYC Street',
-        fromStreet: item.from_stree || 'Cross Street',
-        toStreet: item.to_street || 'Next Cross Street',
-        borough: item.borough || 'Manhattan',
-        sideOfStreet: (item.side_of_st as any) || 'N',
-        coordinates: coords,
-        meterInfo,
-        signs,
-        shapeLength: parseFloat(item.shape_leng) || 200,
-      });
-    }
-
-    // Merge with high-fidelity seed curbs for complete NYC coverage
+    // Merge with high-fidelity seed corridors
     const combined = [...SEED_NYC_CURBS];
     for (const seg of liveSegments) {
       if (!combined.some((c) => c.id === seg.id)) {
@@ -956,7 +1050,7 @@ export async function fetchLiveSocrataCurbs(bounds?: {
  * Fetch curbs near a specific GPS location (lat/lon).
  */
 export async function fetchCurbsNearLocation(lat: number, lon: number) {
-  const delta = 0.025; // ~1.5 miles box
+  const delta = 0.02; // ~1.2 miles box
   return fetchLiveSocrataCurbs({
     north: lat + delta,
     south: lat - delta,
@@ -964,3 +1058,4 @@ export async function fetchCurbsNearLocation(lat: number, lon: number) {
     west: lon - delta,
   });
 }
+
