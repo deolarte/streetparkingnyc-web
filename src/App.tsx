@@ -67,16 +67,6 @@ export function App() {
     };
   }, []);
 
-  // Check if first-time visitor has viewed the FAQ / Legal Disclaimer
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const hasSeen = localStorage.getItem('streetpark_disclaimer_viewed');
-      if (!hasSeen) {
-        setShowAboutModal(true);
-      }
-    }
-  }, []);
-
   // Periodic clock tick for "Live Now" mode
   useEffect(() => {
     if (!isNow) return;
