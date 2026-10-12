@@ -1,0 +1,22 @@
+{
+  "name": "StreetPark",
+  "short_name": "StreetPark",
+  "description": "NYC Street Parking Rules, Alternate Side & Muni-Meters",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    }
+  ]
+}
