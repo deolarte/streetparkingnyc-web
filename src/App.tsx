@@ -8,6 +8,7 @@ import { fetchLiveSocrataCurbs, fetchCurbsNearLocation } from './services/socrat
 import { evaluateSegmentParking } from './services/signParser';
 import type { AddressCandidate } from './services/geocodingService';
 import type { CurbSegment, VehicleType, RawCurbSegment } from './types';
+import { AdBanner } from './components/AdBanner';
 import { Loader2 } from 'lucide-react';
 
 export function App() {
@@ -252,6 +253,11 @@ export function App() {
               <span>{stats.restrictedCount} No Park</span>
             </span>
           </div>
+        </div>
+
+        {/* Always-Present Persistent Desktop Ad Banner (High Viewability & Impressions) */}
+        <div className="pointer-events-auto">
+          <AdBanner format="rectangle-300x250" />
         </div>
       </div>
 
