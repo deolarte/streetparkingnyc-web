@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Clock, CheckCircle2, ChevronUp, ChevronDown } from 'lucide-react';
 import { getAspHolidayStatus } from '../services/aspCalendar';
+import { useLanguage } from '../context/LanguageContext';
 
 interface TemporalSliderProps {
   isNow: boolean;
@@ -15,6 +16,7 @@ export const TemporalSlider: React.FC<TemporalSliderProps> = ({
   onTimeChange,
   bottomSlot,
 }) => {
+  const { t } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth >= 640 : false
   );
@@ -84,7 +86,7 @@ export const TemporalSlider: React.FC<TemporalSliderProps> = ({
               </span>
             </div>
             <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate max-w-[160px] sm:max-w-none">
-              {isNow ? '🔴 Real-Time Live Feed' : '⏱️ Custom Simulated Time'}
+              {isNow ? t('realtime_feed') : t('simulated_time')}
             </p>
           </div>
         </div>
@@ -100,7 +102,7 @@ export const TemporalSlider: React.FC<TemporalSliderProps> = ({
             }`}
           >
             <span className={`w-1.5 h-1.5 rounded-full ${isNow ? 'bg-white animate-pulse' : 'bg-gray-400'}`} />
-            <span>Now</span>
+            <span>{t('now')}</span>
           </button>
 
           {/* Dedicated Simulate Time Button (Always Visible in Portrait & Landscape) */}
@@ -114,7 +116,7 @@ export const TemporalSlider: React.FC<TemporalSliderProps> = ({
             title={isExpanded ? 'Collapse time controls' : 'Simulate different time/day'}
             aria-label="Simulate time"
           >
-            <span>{isExpanded ? 'Hide' : 'Simulate'}</span>
+            <span>{isExpanded ? t('hide') : t('simulate')}</span>
             {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
           </button>
         </div>
@@ -129,11 +131,11 @@ export const TemporalSlider: React.FC<TemporalSliderProps> = ({
               <div className="flex items-center space-x-1.5 truncate">
                 <CheckCircle2 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
                 <span className="font-medium truncate">
-                  ASP Suspended: <strong>{aspInfo.holidayName}</strong>
+                  {t('asp_suspended')}: <strong>{aspInfo.holidayName}</strong>
                 </span>
               </div>
               <span className="text-[9px] font-bold uppercase tracking-wider bg-amber-200/60 dark:bg-amber-900/60 px-1 py-0.5 rounded ml-1.5 shrink-0">
-                No Sweeping
+                {t('no_sweeping')}
               </span>
             </div>
           )}
@@ -169,14 +171,14 @@ export const TemporalSlider: React.FC<TemporalSliderProps> = ({
                 className="px-2 py-0.5 text-[10px] rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300"
                 title="Previous Day"
               >
-                ← Prev Day
+                {t('prev_day')}
               </button>
               <button
                 onClick={() => handleDayOffset(1)}
                 className="px-2 py-0.5 text-[10px] rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300"
                 title="Next Day"
               >
-                Next Day →
+                {t('next_day')}
               </button>
             </div>
 

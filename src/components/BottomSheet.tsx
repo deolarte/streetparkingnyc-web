@@ -20,6 +20,7 @@ import {
 import type { CurbSegment } from '../types';
 import { AdBanner } from './AdBanner';
 import { fetchNycStormAdvisory, type StormAlert } from '../services/weatherAdvisory';
+import { useLanguage } from '../context/LanguageContext';
 
 interface BottomSheetProps {
   segment: CurbSegment | null;
@@ -37,6 +38,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   selectedTime,
   onResetToNow,
 }) => {
+  const { t } = useLanguage();
   const [advisory, setAdvisory] = useState<StormAlert | null>(null);
   const [copiedZone, setCopiedZone] = useState(false);
 
@@ -95,11 +97,11 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   const StatusIcon = theme.icon;
 
   const sideMap: Record<string, string> = {
-    N: 'North Curb',
-    S: 'South Curb',
-    E: 'East Curb',
-    W: 'West Curb',
-    All: 'Both Sides',
+    N: t('north_curb'),
+    S: t('south_curb'),
+    E: t('east_curb'),
+    W: t('west_curb'),
+    All: t('both_sides'),
   };
 
   return (
@@ -308,12 +310,12 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
                     {copiedZone ? (
                       <>
                         <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                        <span>Zone Copied!</span>
+                        <span>{t('copied')}</span>
                       </>
                     ) : (
                       <>
                         <Copy className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
-                        <span>Copy Zone #{segment.meterInfo.payByCell}</span>
+                        <span>{t('zone')} #{segment.meterInfo.payByCell}</span>
                       </>
                     )}
                   </button>
@@ -328,15 +330,15 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center justify-center space-x-1.5 transition-all shadow-md shadow-blue-600/20 active:scale-[0.98]"
-                    title="Open ParkNYC on App Store"
+                    title="Open ParkNYC"
                   >
                     <Smartphone className="w-3.5 h-3.5 shrink-0" />
-                    <span>Open ParkNYC</span>
+                    <span>{t('pay_parknyc')}</span>
                   </a>
                 </div>
 
                 <p className="text-[10px] text-gray-500 dark:text-gray-400 text-center leading-tight">
-                  Zone <span className="font-bold text-gray-800 dark:text-gray-200 font-mono text-xs">{segment.meterInfo.payByCell}</span> • Copy zone number and open ParkNYC to pay.
+                  {t('zone')} <span className="font-bold text-gray-800 dark:text-gray-200 font-mono text-xs">{segment.meterInfo.payByCell}</span> • Copy zone number & open ParkNYC.
                 </p>
               </div>
             </div>

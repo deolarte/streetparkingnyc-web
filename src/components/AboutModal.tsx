@@ -14,6 +14,7 @@ import {
   Smartphone,
   Share2,
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface AboutModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ interface AboutModalProps {
 }
 
 export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
+  const { t } = useLanguage();
   if (!isOpen) return null;
 
   const handleDismiss = () => {
@@ -44,7 +46,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-black text-gray-900 dark:text-white leading-tight">
-                About & FAQ
+                {t('about_title')}
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Map legend, time simulation & legal disclaimers
@@ -344,7 +346,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
             onClick={handleDismiss}
             className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition-all active:scale-95"
           >
-            I Understand & Agree
+            {t('disclaimer_agree')}
           </button>
         </div>
       </div>

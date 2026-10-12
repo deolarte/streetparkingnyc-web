@@ -15,6 +15,8 @@ import {
 import type { CurbSegment, VehicleType } from '../types';
 import { searchNycAddress, type AddressCandidate } from '../services/geocodingService';
 import { AdBanner } from './AdBanner';
+import { useLanguage } from '../context/LanguageContext';
+import { LanguageSelector } from './LanguageSelector';
 
 interface SearchHeaderProps {
   vehicleType: VehicleType;
@@ -59,6 +61,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
   onOpenTipModal,
   onOpenAbout,
 }) => {
+  const { t } = useLanguage();
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [addressCandidates, setAddressCandidates] = useState<AddressCandidate[]>([]);
@@ -196,7 +199,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
                 setIsOpen(true);
               }}
               onFocus={() => setIsOpen(true)}
-              placeholder="Enter NYC address, landmark, or street..."
+              placeholder={t('search_placeholder')}
               className="w-full pl-8 pr-14 py-2 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all"
             />
             <div className="absolute inset-y-0 right-0 flex items-center pr-1.5 space-x-1">
@@ -235,7 +238,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
               title="Personal / Passenger Car"
             >
               <Car className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">Passenger</span>
+              <span className="hidden md:inline">{t('passenger')}</span>
             </button>
             <button
               onClick={() => onVehicleTypeChange('commercial')}
@@ -247,7 +250,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
               title="Commercial Vehicle / Truck"
             >
               <Truck className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">Commercial</span>
+              <span className="hidden md:inline">{t('commercial')}</span>
             </button>
           </div>
         </div>
@@ -267,7 +270,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200'
             }`}
           >
-            All
+            {t('filter_all')}
           </button>
 
           <button
@@ -279,7 +282,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
             }`}
           >
             <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span>Free</span>
+            <span>{t('filter_free')}</span>
           </button>
 
           <button
@@ -291,7 +294,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
             }`}
           >
             <span className="w-2 h-2 rounded-full bg-blue-500" />
-            <span>Meter</span>
+            <span>{t('filter_meter')}</span>
           </button>
 
           <button
@@ -303,7 +306,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
             }`}
           >
             <span className="w-2 h-2 rounded-full bg-amber-500" />
-            <span>Soon (&lt;60Min)</span>
+            <span>{t('filter_soon')}</span>
           </button>
 
           <button
@@ -315,7 +318,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
             }`}
           >
             <span className="w-2 h-2 rounded-full bg-rose-500" />
-            <span>No Parking</span>
+            <span>{t('filter_restricted')}</span>
           </button>
         </div>
       </div>
@@ -331,7 +334,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
             title="Buy me a coffee / tip developer"
           >
             <Coffee className="w-3.5 h-3.5 fill-gray-950/20" />
-            <span>Tip ☕</span>
+            <span>{t('tip_btn')}</span>
           </button>
         )}
 
@@ -344,7 +347,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
             title="Submit feedback or report sign accuracy"
           >
             <MessageSquare className="w-3.5 h-3.5 text-blue-500" />
-            <span>Feedback</span>
+            <span>{t('feedback_btn')}</span>
           </button>
         )}
 
@@ -357,12 +360,15 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
             title="About StreetPark, FAQ & Data Disclosures"
           >
             <Info className="w-3.5 h-3.5 text-gray-500" />
-            <span>FAQ & Rules</span>
+            <span>{t('faq_btn')}</span>
           </button>
         )}
 
+        {/* Language Selector */}
+        <LanguageSelector />
+
         <span className="text-[10px] font-semibold uppercase text-gray-500 dark:text-gray-400 pl-1 shrink-0">
-          Jump to:
+          {t('jump_to')}
         </span>
         {NYC_NEIGHBORHOODS.map((nh) => (
           <button
