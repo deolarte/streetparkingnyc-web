@@ -18,6 +18,7 @@ interface MapEngineProps {
   onViewportChange?: (bounds: { north: number; south: number; east: number; west: number }) => void;
   mapInstanceRef: React.MutableRefObject<Map | null>;
   statusFilter?: string;
+  onMapGesture?: () => void;
 }
 
 // Watermark-Free High-Definition Street Basemap + Vector Street Name Labeling
@@ -138,6 +139,7 @@ export const MapEngine: React.FC<MapEngineProps> = ({
   onViewportChange,
   mapInstanceRef,
   statusFilter = 'all',
+  onMapGesture,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [isLocating, setIsLocating] = useState(false);
@@ -149,6 +151,7 @@ export const MapEngine: React.FC<MapEngineProps> = ({
   const statusFilterRef = useRef<string>(statusFilter);
   const onSelectCurbRef = useRef(onSelectCurb);
   const onViewportChangeRef = useRef(onViewportChange);
+  const onMapGestureRef = useRef(onMapGesture);
 
   const buildGeoJson = useCallback((curbList: CurbSegment[]): FeatureCollection<LineString> => {
     const validFeatures: FeatureCollection<LineString>['features'] = [];
@@ -210,8 +213,9 @@ export const MapEngine: React.FC<MapEngineProps> = ({
     statusFilterRef.current = statusFilter;
     onSelectCurbRef.current = onSelectCurb;
     onViewportChangeRef.current = onViewportChange;
+    onMapGestureRef.current = onMapGesture;
     updateSourceData();
-  }, [curbs, statusFilter, onSelectCurb, onViewportChange, updateSourceData]);
+  }, [curbs, statusFilter, onSelectCurb, onViewportChange, onMapGesture, updateSourceData]);
 
   // Initialize MapLibre
   useEffect(() => {
@@ -300,6 +304,14 @@ export const MapEngine: React.FC<MapEngineProps> = ({
     };
 
     map.on('moveend', handleMoveEnd);
+
+    // Track user touch/mouse drag and pinch/wheel zoom gestures
+    map.on('dragend', () => {
+      onMapGestureRef.current?.();
+    });
+    map.on('zoomend', () => {
+      onMapGestureRef.current?.();
+    });
 
     return () => {
       clearTimeout(moveDebounceTimeout);

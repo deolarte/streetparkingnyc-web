@@ -42,7 +42,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose })
     const targetEmail =
       localStorage.getItem('streetpark_admin_email') ||
       import.meta.env.VITE_FEEDBACK_EMAIL ||
-      'admin@djtechnyc.com';
+      'deolarte@gmail.com';
 
     try {
       fetch(`https://formsubmit.co/ajax/${targetEmail}`, {
@@ -50,6 +50,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose })
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({
           _subject: 'StreetParkingNYC Feedback',
+          _captcha: 'false',
           Category: category.replace('_', ' ').toUpperCase(),
           Report: message,
           Contact: contact || 'Anonymous Driver',

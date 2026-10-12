@@ -11,6 +11,8 @@ import {
   Clock,
   Calendar,
   ShieldCheck,
+  Smartphone,
+  Share2,
 } from 'lucide-react';
 
 interface AboutModalProps {
@@ -232,6 +234,48 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
                 <p className="text-gray-600 dark:text-gray-300">
                   Toggling the "Commercial" switch evaluates curbs from the perspective of commercial delivery trucks, displaying dedicated commercial loading meters and zones where passenger vehicles are prohibited.
                 </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Add to Home Screen Instructions */}
+          <div className="space-y-2.5">
+            <div className="flex items-center space-x-1.5 text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider">
+              <Smartphone className="w-4 h-4 text-purple-600" />
+              <span>Save to Home Screen (Mobile App Mode)</span>
+            </div>
+
+            <div className="bg-purple-50/70 dark:bg-purple-950/30 rounded-2xl p-3 border border-purple-200/80 dark:border-purple-900/50 space-y-2.5 text-[11px] leading-relaxed">
+              <p className="text-purple-950 dark:text-purple-200 font-medium">
+                Install StreetPark directly onto your smartphone home screen for a fast, full-screen native app experience without browser URL bars:
+              </p>
+
+              <div className="space-y-2">
+                <div className="p-2.5 rounded-xl bg-white dark:bg-gray-800 border border-purple-100 dark:border-purple-900/40 space-y-1">
+                  <div className="flex items-center space-x-1.5 font-bold text-gray-900 dark:text-white">
+                    <Share2 className="w-3.5 h-3.5 text-blue-500" />
+                    <span>iPhone & iPad (Safari)</span>
+                  </div>
+                  <ol className="list-decimal list-inside space-y-0.5 text-gray-600 dark:text-gray-300 pl-1 text-[10.5px]">
+                    <li>Open <strong>park.djtechnyc.com</strong> in Safari.</li>
+                    <li>Tap the <strong>Share</strong> button (square icon with an arrow pointing up at the bottom).</li>
+                    <li>Scroll down and select <strong>"Add to Home Screen"</strong>.</li>
+                    <li>Tap <strong>"Add"</strong> in the top-right corner.</li>
+                  </ol>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-white dark:bg-gray-800 border border-purple-100 dark:border-purple-900/40 space-y-1">
+                  <div className="flex items-center space-x-1.5 font-bold text-gray-900 dark:text-white">
+                    <Smartphone className="w-3.5 h-3.5 text-emerald-500" />
+                    <span>Android (Chrome & Samsung Internet)</span>
+                  </div>
+                  <ol className="list-decimal list-inside space-y-0.5 text-gray-600 dark:text-gray-300 pl-1 text-[10.5px]">
+                    <li>Open <strong>park.djtechnyc.com</strong> in Chrome.</li>
+                    <li>Tap the <strong>three vertical dots (⋮)</strong> menu in the upper-right corner.</li>
+                    <li>Tap <strong>"Add to Home screen"</strong> (or <strong>"Install app"</strong>).</li>
+                    <li>Confirm by tapping <strong>"Install"</strong> or <strong>"Add"</strong>.</li>
+                  </ol>
+                </div>
               </div>
             </div>
           </div>

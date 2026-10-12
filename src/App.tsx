@@ -29,19 +29,37 @@ export function App() {
   const [showTipModal, setShowTipModal] = useState<boolean>(false);
   const [showAboutModal, setShowAboutModal] = useState<boolean>(false);
 
-  const userActionCountRef = useRef(0);
-  const lastInterstitialTimeRef = useRef(Date.now());
+  // Google AdSense Compliant Interstitial Ad Trigger Engine (60s cooldown)
+  const INTERSTITIAL_COOLDOWN_MS = 60000;
+  const lastInterstitialTimeRef = useRef(0);
+  const curbActionCountRef = useRef(0);
+  const mapGestureCountRef = useRef(0);
 
-  const triggerInterstitialCheck = () => {
-    userActionCountRef.current += 1;
+  const attemptShowInterstitial = useCallback((): boolean => {
     const now = Date.now();
-    // Trigger interstitial after every 4th curb interaction with a 150s (2.5 min) cooldown
-    if (userActionCountRef.current >= 4 && now - lastInterstitialTimeRef.current > 150000) {
-      userActionCountRef.current = 0;
+    if (now - lastInterstitialTimeRef.current >= INTERSTITIAL_COOLDOWN_MS) {
       lastInterstitialTimeRef.current = now;
+      curbActionCountRef.current = 0;
+      mapGestureCountRef.current = 0;
       setShowInterstitial(true);
+      return true;
     }
-  };
+    return false;
+  }, []);
+
+  const handleCurbInteractionForAd = useCallback(() => {
+    curbActionCountRef.current += 1;
+    if (curbActionCountRef.current >= 2) {
+      attemptShowInterstitial();
+    }
+  }, [attemptShowInterstitial]);
+
+  const handleMapGestureForAd = useCallback(() => {
+    mapGestureCountRef.current += 1;
+    if (mapGestureCountRef.current >= 10) {
+      attemptShowInterstitial();
+    }
+  }, [attemptShowInterstitial]);
 
   const mapInstanceRef = useRef<Map | null>(null);
 
@@ -123,7 +141,7 @@ export function App() {
   const handleSelectCurb = (curb: CurbSegment | null) => {
     setSelectedCurbId(curb ? curb.id : null);
     if (curb) {
-      triggerInterstitialCheck();
+      handleCurbInteractionForAd();
     }
   };
 
@@ -188,6 +206,9 @@ export function App() {
     // Zoom in within a 1-block radius (zoom 17.2)
     handleJumpToLocation(candidate.center, 17.2);
 
+    // Trigger interstitial on address search (with cooldown)
+    attemptShowInterstitial();
+
     // Automatically load live parking regulations within this block radius
     const [lon, lat] = candidate.center;
     try {
@@ -248,6 +269,7 @@ export function App() {
         onViewportChange={handleViewportChange}
         mapInstanceRef={mapInstanceRef}
         statusFilter={statusFilter}
+        onMapGesture={handleMapGestureForAd}
       />
 
       {/* Top Floating Controls Container with iOS Safe Area Insets */}
