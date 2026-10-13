@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Search,
   X,
@@ -10,7 +10,7 @@ import {
   Navigation,
 } from 'lucide-react';
 import type { CurbSegment, VehicleType } from '../types';
-import { searchNycAddress, type AddressCandidate } from '../services/geocodingService';
+import { searchAddress, type AddressCandidate } from '../services/geocodingService';
 import { AdBanner } from './AdBanner';
 import { useLanguage } from '../context/LanguageContext';
 import { RegionSelector } from './RegionSelector';
@@ -177,7 +177,16 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
   const [isSearchingAddresses, setIsSearchingAddresses] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Debounced address geocoding search for NYC addresses
+  // Proximity center for intelligent nationwide geocoding ranking
+  const proximityCenter = useMemo<[number, number] | undefined>(() => {
+    if (curbs && curbs.length > 0 && curbs[0].coordinates && curbs[0].coordinates.length > 0) {
+      const mid = curbs[0].coordinates[Math.floor(curbs[0].coordinates.length / 2)] as [number, number];
+      if (mid && Number.isFinite(mid[0]) && Number.isFinite(mid[1])) return mid;
+    }
+    return undefined;
+  }, [curbs]);
+
+  // Debounced address geocoding search for nationwide addresses
   useEffect(() => {
     const trimmed = query.trim();
     if (!trimmed || trimmed.length < 3) {
@@ -189,7 +198,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
     setIsSearchingAddresses(true);
     const timer = setTimeout(async () => {
       try {
-        const results = await searchNycAddress(trimmed);
+        const results = await searchAddress(trimmed, proximityCenter);
         setAddressCandidates(results);
       } catch (err) {
         console.warn('Address search error:', err);
@@ -199,7 +208,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
     }, 280);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, proximityCenter]);
 
   const filteredCurbs = query.trim()
     ? curbs.filter(
@@ -228,7 +237,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
     // 2. Otherwise immediately geocode query
     setIsSearchingAddresses(true);
     try {
-      const freshResults = await searchNycAddress(trimmed);
+      const freshResults = await searchAddress(trimmed, proximityCenter);
       if (freshResults.length > 0) {
         onSearchAddress(freshResults[0]);
         setIsOpen(false);

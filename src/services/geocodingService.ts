@@ -8,30 +8,39 @@ export interface AddressCandidate {
 const geocodeCache = new Map<string, AddressCandidate[]>();
 
 /**
- * Geocode NYC addresses, cross streets, and landmarks.
- * Prioritizes New York City boroughs (Manhattan, Brooklyn, Queens, Bronx, Staten Island).
+ * Geocode nationwide US addresses, intersections, and landmarks.
+ * Prioritizes the active metro or map center when proximityCenter is provided,
+ * while seamlessly searching across the entire USA.
  */
-export async function searchNycAddress(query: string): Promise<AddressCandidate[]> {
+export async function searchAddress(
+  query: string,
+  proximityCenter?: [number, number]
+): Promise<AddressCandidate[]> {
   const trimmed = query.trim();
   if (!trimmed || trimmed.length < 2) return [];
 
-  const cacheKey = trimmed.toLowerCase();
+  const centerKey = proximityCenter ? `${proximityCenter[0].toFixed(2)},${proximityCenter[1].toFixed(2)}` : 'default';
+  const cacheKey = `${trimmed.toLowerCase()}|${centerKey}`;
   if (geocodeCache.has(cacheKey)) {
     return geocodeCache.get(cacheKey)!;
   }
 
   try {
-    // Query ArcGIS World Geocoding Service with Tri-State bounding box and proximity center
-    const url =
-      'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?' +
-      new URLSearchParams({
-        SingleLine: trimmed,
-        location: '-73.9851,40.7484', // Tri-State Proximity Center (Midtown)
-        searchExtent: '-74.80,40.15,-72.80,41.50', // Full Tri-State boundary (NY, NJ, CT)
-        f: 'json',
-        maxLocations: '8',
-        outFields: 'Match_addr,Addr_type',
-      }).toString();
+    const params = new URLSearchParams({
+      SingleLine: trimmed,
+      sourceCountry: 'USA',
+      f: 'json',
+      maxLocations: '8',
+      outFields: 'Match_addr,Addr_type',
+    });
+
+    if (proximityCenter && Number.isFinite(proximityCenter[0]) && Number.isFinite(proximityCenter[1])) {
+      params.set('location', `${proximityCenter[0]},${proximityCenter[1]}`);
+    } else {
+      params.set('location', '-73.9851,40.7484'); // NYC default proximity
+    }
+
+    const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?${params.toString()}`;
 
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Geocode HTTP ${res.status}`);
@@ -62,3 +71,9 @@ export async function searchNycAddress(query: string): Promise<AddressCandidate[
     return [];
   }
 }
+
+/**
+ * Backward compatibility alias for searchAddress
+ */
+export const searchNycAddress = searchAddress;
+
