@@ -6,8 +6,8 @@ export interface PaymentProvider {
 }
 
 export interface RegionParkingProfile {
-  regionId: 'nyc' | 'nj_urban' | 'ct_southwest';
-  state: 'NY' | 'NJ' | 'CT';
+  regionId: string;
+  state: string;
   displayName: string;
   jurisdictionName: string;
   defaultCenter: [number, number]; // [lng, lat]
@@ -24,6 +24,56 @@ export interface RegionParkingProfile {
   };
   disputePortalUrl: string;
   disputeAgencyName: string;
+}
+
+export function convertNationalToRegionProfile(resolved: {
+  city?: any;
+  state: any;
+  rules: any;
+  primaryApp: any;
+  secondaryApps: any[];
+}): RegionParkingProfile {
+  const isCity = !!resolved.city;
+  const name = isCity
+    ? resolved.city.cityName
+    : `${resolved.state.stateName} (${resolved.state.stateCode})`;
+  const center = isCity ? resolved.city.center : resolved.state.defaultCenter;
+  const zoom = isCity ? resolved.city.zoom : resolved.state.defaultZoom;
+
+  return {
+    regionId: isCity ? resolved.city.cityId : resolved.state.stateCode.toLowerCase(),
+    state: resolved.state.stateCode,
+    displayName: name,
+    jurisdictionName: isCity
+      ? `${resolved.city.cityName}, ${resolved.state.stateCode}`
+      : `${resolved.state.stateName} Statewide`,
+    defaultCenter: center,
+    defaultZoom: zoom,
+    primaryProvider: {
+      name: resolved.primaryApp.name,
+      scheme: resolved.primaryApp.scheme,
+      webFallback: resolved.primaryApp.webUrl,
+      badgeText: resolved.primaryApp.badgeText,
+    },
+    transitProvider: resolved.secondaryApps[0]
+      ? {
+          name: resolved.secondaryApps[0].name,
+          scheme: resolved.secondaryApps[0].scheme,
+          webFallback: resolved.secondaryApps[0].webUrl,
+          badgeText: resolved.secondaryApps[0].badgeText,
+        }
+      : undefined,
+    curbRules: {
+      hydrantClearanceFt: resolved.rules.hydrantDistanceFt,
+      crosswalkClearanceFt: resolved.rules.crosswalkDistanceFt,
+      meterGracePeriodMin: resolved.rules.meterGracePeriodMin,
+      doubleParkingPermitted: resolved.rules.doubleParkingPermitted,
+      streetCleaningTerm: resolved.rules.streetCleaningTerm,
+      residentPermitTerm: resolved.rules.residentPermitTerm,
+    },
+    disputePortalUrl: resolved.rules.disputeUrl,
+    disputeAgencyName: resolved.rules.disputeAgency,
+  };
 }
 
 export const REGION_PROFILES: Record<string, RegionParkingProfile> = {

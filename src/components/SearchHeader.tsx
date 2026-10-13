@@ -14,7 +14,7 @@ import { searchNycAddress, type AddressCandidate } from '../services/geocodingSe
 import { AdBanner } from './AdBanner';
 import { useLanguage } from '../context/LanguageContext';
 import { RegionSelector } from './RegionSelector';
-import type { RegionParkingProfile, RegionId } from '../config/parkingConfig';
+import type { RegionParkingProfile } from '../config/parkingConfig';
 
 interface SearchHeaderProps {
   vehicleType: VehicleType;
@@ -28,11 +28,16 @@ interface SearchHeaderProps {
   searchedAddressLabel?: string | null;
   onClearSearchedAddress?: () => void;
   regionProfile?: RegionParkingProfile;
-  onSelectRegion?: (id: RegionId) => void;
+  onSelectRegion?: (id: any) => void;
+  activeState?: string;
+  activeCity?: string | null;
+  locationLabel?: string;
+  onSelectLocation?: (stateCode: string, cityId?: string, center?: [number, number], zoom?: number) => void;
 }
 
 const REGION_NEIGHBORHOODS: Record<string, { name: string; center: [number, number]; zoom: number }[]> = {
-  nyc: [
+  // New York
+  ny: [
     { name: 'Midtown East', center: [-73.972, 40.7495], zoom: 15 },
     { name: 'Financial District', center: [-74.008, 40.7075], zoom: 15.5 },
     { name: 'SoHo / Nolita', center: [-73.9968, 40.722], zoom: 15.5 },
@@ -42,7 +47,16 @@ const REGION_NEIGHBORHOODS: Record<string, { name: string; center: [number, numb
     { name: 'Astoria (Queens)', center: [-73.923, 40.764], zoom: 15.5 },
     { name: 'Rego Park (Queens)', center: [-73.868, 40.7228], zoom: 15.5 },
   ],
-  nj_urban: [
+  nyc: [
+    { name: 'Midtown East', center: [-73.972, 40.7495], zoom: 15 },
+    { name: 'Financial District', center: [-74.008, 40.7075], zoom: 15.5 },
+    { name: 'SoHo / Nolita', center: [-73.9968, 40.722], zoom: 15.5 },
+    { name: 'West Village', center: [-74.002, 40.732], zoom: 15.5 },
+    { name: 'Williamsburg (BK)', center: [-73.957, 40.718], zoom: 15.5 },
+    { name: 'Astoria (Queens)', center: [-73.923, 40.764], zoom: 15.5 },
+  ],
+  // New Jersey
+  nj: [
     { name: 'Downtown Jersey City', center: [-74.0431, 40.7178], zoom: 15.5 },
     { name: 'Hoboken Waterfront', center: [-74.0285, 40.744], zoom: 15.5 },
     { name: 'Journal Square (JC)', center: [-74.0628, 40.732], zoom: 15.5 },
@@ -50,12 +64,91 @@ const REGION_NEIGHBORHOODS: Record<string, { name: string; center: [number, numb
     { name: 'Ironbound (Newark)', center: [-74.1555, 40.7315], zoom: 15.5 },
     { name: 'Weehawken Port Imperial', center: [-74.015, 40.774], zoom: 15.5 },
   ],
-  ct_southwest: [
+  nj_urban: [
+    { name: 'Downtown Jersey City', center: [-74.0431, 40.7178], zoom: 15.5 },
+    { name: 'Hoboken Waterfront', center: [-74.0285, 40.744], zoom: 15.5 },
+    { name: 'Downtown Newark', center: [-74.1724, 40.7357], zoom: 15 },
+    { name: 'Weehawken Port Imperial', center: [-74.015, 40.774], zoom: 15.5 },
+  ],
+  // Connecticut
+  ct: [
     { name: 'Downtown Stamford', center: [-73.5387, 41.0534], zoom: 15.5 },
     { name: 'South Norwalk (SoNo)', center: [-73.419, 41.098], zoom: 15.5 },
     { name: 'Greenwich Avenue', center: [-73.626, 41.026], zoom: 15.5 },
     { name: 'Stamford Train Station', center: [-73.541, 41.0465], zoom: 16 },
     { name: 'Darien Town Center', center: [-73.469, 41.078], zoom: 15.5 },
+  ],
+  ct_southwest: [
+    { name: 'Downtown Stamford', center: [-73.5387, 41.0534], zoom: 15.5 },
+    { name: 'South Norwalk (SoNo)', center: [-73.419, 41.098], zoom: 15.5 },
+    { name: 'Greenwich Avenue', center: [-73.626, 41.026], zoom: 15.5 },
+  ],
+  // California
+  ca: [
+    { name: 'SF Downtown / Market', center: [-122.408, 37.785], zoom: 15.5 },
+    { name: 'SF Mission District', center: [-122.419, 37.760], zoom: 15.5 },
+    { name: 'LA Downtown (DTLA)', center: [-118.255, 34.048], zoom: 15 },
+    { name: 'Santa Monica (Ocean Ave)', center: [-118.496, 34.013], zoom: 15.5 },
+    { name: 'San Diego Gaslamp', center: [-117.160, 32.712], zoom: 15.5 },
+  ],
+  // Illinois
+  il: [
+    { name: 'Chicago Loop', center: [-87.6298, 41.882], zoom: 15.5 },
+    { name: 'River North (Chicago)', center: [-87.632, 41.892], zoom: 15.5 },
+    { name: 'West Loop / Fulton', center: [-87.650, 41.886], zoom: 15.5 },
+    { name: 'Wicker Park', center: [-87.677, 41.910], zoom: 15.5 },
+  ],
+  // Texas
+  tx: [
+    { name: 'Austin Downtown', center: [-97.7431, 30.2672], zoom: 15.5 },
+    { name: 'South Congress (Austin)', center: [-97.749, 30.250], zoom: 15.5 },
+    { name: 'Houston Downtown', center: [-95.3698, 29.7604], zoom: 15.5 },
+    { name: 'Dallas Arts District', center: [-96.797, 32.790], zoom: 15.5 },
+  ],
+  // Florida
+  fl: [
+    { name: 'Miami Brickell', center: [-80.1918, 25.7617], zoom: 15.5 },
+    { name: 'Miami Beach (Ocean Dr)', center: [-80.1300, 25.782], zoom: 15.5 },
+    { name: 'Wynwood Arts District', center: [-80.199, 25.804], zoom: 15.5 },
+    { name: 'Downtown Tampa', center: [-82.457, 27.950], zoom: 15.5 },
+  ],
+  // District of Columbia
+  dc: [
+    { name: 'Downtown DC / Penn Qtr', center: [-77.025, 38.896], zoom: 15.5 },
+    { name: 'Georgetown (M Street)', center: [-77.062, 38.905], zoom: 15.5 },
+    { name: 'Dupont Circle', center: [-77.043, 38.909], zoom: 15.5 },
+    { name: 'Capitol Hill', center: [-76.995, 38.889], zoom: 15.5 },
+  ],
+  // Pennsylvania
+  pa: [
+    { name: 'Center City Philly', center: [-75.1652, 39.9526], zoom: 15.5 },
+    { name: 'University City (Penn)', center: [-75.193, 39.953], zoom: 15.5 },
+    { name: 'Old City Philadelphia', center: [-75.145, 39.950], zoom: 15.5 },
+    { name: 'Pittsburgh Downtown', center: [-79.999, 40.441], zoom: 15.5 },
+  ],
+  // Massachusetts
+  ma: [
+    { name: 'Boston Back Bay', center: [-71.080, 42.350], zoom: 15.5 },
+    { name: 'Beacon Hill (Boston)', center: [-71.068, 42.358], zoom: 15.5 },
+    { name: 'Harvard Sq (Cambridge)', center: [-71.119, 42.374], zoom: 15.5 },
+  ],
+  // Washington
+  wa: [
+    { name: 'Seattle Downtown', center: [-122.3321, 47.6062], zoom: 15.5 },
+    { name: 'Pike Place Market', center: [-122.342, 47.609], zoom: 16 },
+    { name: 'Capitol Hill (Seattle)', center: [-122.320, 47.615], zoom: 15.5 },
+  ],
+  // Colorado
+  co: [
+    { name: 'Denver LoDo / Union Sta', center: [-105.000, 39.753], zoom: 15.5 },
+    { name: 'RiNo Arts District', center: [-104.978, 39.768], zoom: 15.5 },
+    { name: 'Capitol Hill (Denver)', center: [-104.981, 39.734], zoom: 15.5 },
+  ],
+  // Georgia
+  ga: [
+    { name: 'Atlanta Midtown', center: [-84.385, 33.785], zoom: 15.5 },
+    { name: 'Downtown Atlanta', center: [-84.3880, 33.7490], zoom: 15.5 },
+    { name: 'Buckhead Village', center: [-84.379, 33.840], zoom: 15.5 },
   ],
 };
 
@@ -72,6 +165,10 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
   onClearSearchedAddress,
   regionProfile,
   onSelectRegion,
+  activeState,
+  activeCity,
+  locationLabel,
+  onSelectLocation,
 }) => {
   const { t } = useLanguage();
   const [query, setQuery] = useState('');
@@ -182,7 +279,11 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
           <MapPin className="w-3 h-3 text-rose-500 shrink-0" />
           <span>{t('jump_to')}</span>
         </span>
-        {(REGION_NEIGHBORHOODS[regionProfile?.regionId || 'nyc'] || REGION_NEIGHBORHOODS.nyc).map((nh) => (
+        {(
+          REGION_NEIGHBORHOODS[(activeState || regionProfile?.state || 'NY').toLowerCase()] ||
+          REGION_NEIGHBORHOODS[regionProfile?.regionId || 'nyc'] ||
+          REGION_NEIGHBORHOODS.ny
+        ).map((nh) => (
           <button
             key={nh.name}
             onClick={() => onJumpToLocation(nh.center, nh.zoom)}
@@ -208,18 +309,27 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
                 StreetParkingUSA
               </span>
               <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold block leading-tight">
-                Tri-State • {regionProfile?.displayName || 'New York City'}
+                Nationwide • {locationLabel || regionProfile?.displayName || 'Active'}
               </span>
             </div>
           </div>
 
-          {/* Region Selector Dropdown */}
-          {regionProfile && onSelectRegion && (
-            <RegionSelector
-              currentRegionId={regionProfile.regionId}
-              onSelectRegion={onSelectRegion}
-            />
-          )}
+          {/* Nationwide Jurisdiction Selector */}
+          <RegionSelector
+            activeState={activeState || regionProfile?.state || 'NY'}
+            activeCity={activeCity || null}
+            locationLabel={locationLabel || regionProfile?.displayName}
+            onSelectLocation={(stateCode, cityId, center, zoom) => {
+              if (onSelectLocation) {
+                onSelectLocation(stateCode, cityId, center, zoom);
+              } else if (onSelectRegion) {
+                onSelectRegion(cityId || stateCode);
+              }
+              if (center) {
+                onJumpToLocation(center, zoom || 15);
+              }
+            }}
+          />
 
           {/* Search Input Form */}
           <form onSubmit={handleFormSubmit} className="relative flex-1">

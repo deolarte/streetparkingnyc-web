@@ -19,7 +19,14 @@ import { localizeCurbSegment } from './i18n/ruleLocalizer';
 import { useRegion } from './context/RegionContext';
 
 export function App() {
-  const { profile: regionProfile, setRegion } = useRegion();
+  const {
+    profile: regionProfile,
+    setRegion,
+    activeState,
+    activeCity,
+    locationLabel,
+    selectLocation,
+  } = useRegion();
   const [selectedTime, setSelectedTime] = useState<Date>(() => new Date());
   const [isNow, setIsNow] = useState<boolean>(true);
   const [vehicleType, setVehicleType] = useState<VehicleType>('passenger');
@@ -299,6 +306,15 @@ export function App() {
             searchedAddressLabel={searchedLocation ? searchedLocation.label : null}
             onClearSearchedAddress={handleClearSearchedAddress}
             regionProfile={regionProfile}
+            activeState={activeState}
+            activeCity={activeCity}
+            locationLabel={locationLabel}
+            onSelectLocation={(stateCode, cityId, center, zoom) => {
+              selectLocation(stateCode, cityId);
+              if (center && mapInstanceRef.current) {
+                handleJumpToLocation(center, zoom || 15);
+              }
+            }}
             onSelectRegion={(id) => {
               setRegion(id);
               if (regionProfile && mapInstanceRef.current) {

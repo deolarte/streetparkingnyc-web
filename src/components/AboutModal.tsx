@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React from 'react';
 import {
   X,
   ShieldAlert,
@@ -17,7 +17,7 @@ import {
 import { useLanguage } from '../context/LanguageContext';
 import { useRegion } from '../context/RegionContext';
 import { aboutContent } from '../i18n/aboutContent';
-import { TRISTATE_FAQS } from '../data/triStateFaq';
+import { NationalFAQ } from './NationalFAQ';
 
 interface AboutModalProps {
   isOpen: boolean;
@@ -26,30 +26,7 @@ interface AboutModalProps {
 
 export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
   const { t, locale, setLocale, languages, isI18nEnabled } = useLanguage();
-  const { profile: regionProfile } = useRegion();
-
-  // Determine initial jurisdiction filter based on user location / selected region
-  const defaultJurisdiction = useMemo<'ALL' | 'NYC' | 'NJ' | 'CT'>(() => {
-    if (!regionProfile) return 'ALL';
-    if (regionProfile.regionId === 'nj_urban') return 'NJ';
-    if (regionProfile.regionId === 'ct_southwest') return 'CT';
-    if (regionProfile.regionId === 'nyc') return 'NYC';
-    return 'ALL';
-  }, [regionProfile]);
-
-  const [activeFaqFilter, setActiveFaqFilter] = useState<'ALL' | 'NYC' | 'NJ' | 'CT'>('NJ');
-
-  // Automatically select the active region tab whenever the modal opens
-  useEffect(() => {
-    if (isOpen) {
-      setActiveFaqFilter(defaultJurisdiction);
-    }
-  }, [isOpen, defaultJurisdiction]);
-
-  const filteredFaqs = useMemo(() => {
-    if (activeFaqFilter === 'ALL') return TRISTATE_FAQS;
-    return TRISTATE_FAQS.filter((f) => f.jurisdiction === activeFaqFilter);
-  }, [activeFaqFilter]);
+  const { profile: regionProfile, activeState, activeCity } = useRegion();
 
   if (!isOpen) return null;
 
@@ -62,31 +39,11 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
     onClose();
   };
 
-  // Dynamic regional dispute and 311 portal link for footer
-  const disputeLinkInfo = (() => {
-    if (activeFaqFilter === 'NJ') {
-      return {
-        label: 'NJMCdirect / NJ Courts Dispute',
-        url: 'https://www.njcourts.gov/municipal-courts',
-      };
-    }
-    if (activeFaqFilter === 'CT') {
-      return {
-        label: 'CT Municipal Traffic & Parking Bureau',
-        url: 'https://www.stamfordct.gov/government/transportation-traffic-parking',
-      };
-    }
-    if (activeFaqFilter === 'NYC') {
-      return {
-        label: 'NYC DOF Ticket Dispute / 311',
-        url: 'https://www.nyc.gov/site/finance/vehicles/dispute-a-ticket.page',
-      };
-    }
-    return {
-      label: regionProfile ? `${regionProfile.disputeAgencyName}` : 'Municipal Dispute Portal',
-      url: regionProfile ? regionProfile.disputePortalUrl : 'https://portal.311.nyc.gov/',
-    };
-  })();
+  // Dynamic regional dispute and portal link for footer
+  const disputeLinkInfo = {
+    label: regionProfile?.disputeAgencyName || 'Municipal Dispute Portal',
+    url: regionProfile?.disputePortalUrl || 'https://portal.311.nyc.gov/',
+  };
 
   return (
     <div 
@@ -122,78 +79,18 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Sticky Top Jurisdiction Pills (Always visible without scrolling!) */}
-        <div className="px-3.5 py-2.5 bg-slate-50 dark:bg-gray-800/90 border-b border-gray-200/80 dark:border-gray-800 shrink-0 z-10">
-          <div className="flex items-center justify-between gap-1.5 overflow-x-auto no-scrollbar">
-            <span className="text-[10px] font-black uppercase text-gray-400 dark:text-gray-500 pl-0.5 shrink-0 flex items-center gap-1">
-              <HelpCircle className="w-3.5 h-3.5 text-amber-500" />
-              <span>FAQ:</span>
-            </span>
-            <div className="flex items-center gap-1 shrink-0">
-              {(
-                [
-                  { id: 'NJ', label: '🛡️ New Jersey' },
-                  { id: 'CT', label: '🌲 Connecticut' },
-                  { id: 'NYC', label: '🗽 New York' },
-                  { id: 'ALL', label: 'All Regions' },
-                ] as const
-              ).map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveFaqFilter(tab.id)}
-                  className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all border ${
-                    activeFaqFilter === tab.id
-                      ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                      : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
         {/* Scrollable Content */}
         <div className="p-4 sm:p-5 overflow-y-auto space-y-5 text-xs leading-relaxed">
-          {/* Active Jurisdiction FAQ Section (Positioned First for Instant Access) */}
+          {/* Nationwide Parking Rules & Knowledge Engine */}
           <div className="space-y-2.5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-1.5 text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider">
-                <HelpCircle className="w-4 h-4 text-amber-500" />
-                <span>
-                  {activeFaqFilter === 'NJ'
-                    ? 'New Jersey Parking Rules & FAQ'
-                    : activeFaqFilter === 'CT'
-                    ? 'Connecticut Parking Rules & FAQ'
-                    : activeFaqFilter === 'NYC'
-                    ? 'New York City Parking Rules & FAQ'
-                    : 'Tri-State Parking Rules & FAQ'}
-                </span>
-              </div>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
-                {filteredFaqs.length} {filteredFaqs.length === 1 ? 'Rule' : 'Rules'}
-              </span>
+            <div className="flex items-center space-x-1.5 text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider">
+              <HelpCircle className="w-4 h-4 text-amber-500" />
+              <span>Nationwide Parking Rules & Statutory FAQ</span>
             </div>
-
-            {/* FAQs List */}
-            <div className="space-y-2 text-[11px]">
-              {filteredFaqs.map((faq, idx) => (
-                <div key={idx} className="p-3 rounded-2xl bg-slate-50 dark:bg-gray-800/60 border border-gray-200/80 dark:border-gray-750 space-y-1.5 shadow-2xs">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <p className="font-extrabold text-gray-900 dark:text-white leading-snug">
-                      {faq.q}
-                    </p>
-                    <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-blue-100 dark:bg-blue-900/60 text-blue-800 dark:text-blue-200 shrink-0">
-                      {faq.jurisdiction}
-                    </span>
-                  </div>
-                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                    {faq.a}
-                  </p>
-                </div>
-              ))}
-            </div>
+            <NationalFAQ
+              activeState={activeState || regionProfile?.state || 'NY'}
+              activeCity={activeCity || null}
+            />
           </div>
 
           {/* Legal Disclaimer Box */}

@@ -72,34 +72,48 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
     segment.borough === 'Greenwich' ||
     segment.borough === 'Darien';
 
-  const municipalInfo = isNJ
-    ? {
+  const municipalInfo = (() => {
+    if (isNJ) {
+      return {
         title: 'Northern NJ Municipal Status',
         subtitle: 'Local Street Sweeping & Parking Updates',
-        url: 'https://www.njcourts.gov/municipal-courts',
+        url: regionProfile?.disputePortalUrl || 'https://www.njcourts.gov/municipal-courts',
         urlDisplay: 'njcourts.gov / 311',
         advice:
-          'Follow posted signs & Street Sweeping rules. Daylighting enforced strictly within 25ft of crosswalks.',
+          'Follow posted signs & Street Sweeping rules. Daylighting enforced strictly within 25ft of crosswalks (NJ Title 39:4-138).',
         signsTitle: 'Official Municipal Posted Regulations',
-      }
-    : isCT
-    ? {
+      };
+    }
+    if (isCT) {
+      return {
         title: 'Southwestern CT Municipal Status',
         subtitle: 'City Transportation & Parking Updates',
-        url: 'https://www.stamfordct.gov/government/transportation-traffic-parking',
+        url: regionProfile?.disputePortalUrl || 'https://www.stamfordct.gov/government/transportation-traffic-parking',
         urlDisplay: 'stamfordct.gov / Traffic',
         advice:
           'Follow posted signs & municipal maintenance schedules. Parking prohibited within 25ft of crosswalks.',
         signsTitle: 'Official Municipal Posted Regulations',
-      }
-    : {
-        title: t('nyc_311_title'),
-        subtitle: t('nyc_311_subtitle'),
-        url: advisory?.portalUrl || 'https://portal.311.nyc.gov/',
-        urlDisplay: 'portal.311.nyc.gov',
-        advice: advisory?.aspAdvice || t('nyc_311_default_advice'),
-        signsTitle: t('official_signs_title'),
       };
+    }
+    if (regionProfile && regionProfile.state !== 'NY') {
+      return {
+        title: `${regionProfile.jurisdictionName} Parking Status`,
+        subtitle: `${regionProfile.curbRules.streetCleaningTerm} & Local Code`,
+        url: regionProfile.disputePortalUrl,
+        urlDisplay: regionProfile.disputeAgencyName,
+        advice: `Follow posted signs. Hydrant clearance: ${regionProfile.curbRules.hydrantClearanceFt}ft. Crosswalk clearance: ${regionProfile.curbRules.crosswalkClearanceFt}ft.`,
+        signsTitle: 'Official Municipal Posted Regulations',
+      };
+    }
+    return {
+      title: t('nyc_311_title'),
+      subtitle: t('nyc_311_subtitle'),
+      url: advisory?.portalUrl || 'https://portal.311.nyc.gov/',
+      urlDisplay: 'portal.311.nyc.gov',
+      advice: advisory?.aspAdvice || t('nyc_311_default_advice'),
+      signsTitle: t('official_signs_title'),
+    };
+  })();
 
   const getStatusColorTheme = () => {
     switch (segment.status) {
