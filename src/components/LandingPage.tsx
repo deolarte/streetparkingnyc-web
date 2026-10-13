@@ -1,148 +1,135 @@
 import React from 'react';
+import { ArrowUpRight, Mail } from 'lucide-react';
 
 export const LandingPage: React.FC = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-[#090c10] text-[#f0f4f8] selection:bg-[#00f0ff] selection:text-[#090c10]">
-      {/* Dynamic Background Glows */}
-      <div 
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{
-          backgroundImage: `
-            radial-gradient(ellipse at 50% -20%, rgba(0, 240, 255, 0.15) 0%, transparent 60%),
-            radial-gradient(circle at 85% 85%, rgba(255, 224, 0, 0.06) 0%, transparent 50%)
-          `
-        }}
-      />
-
+    <div className="min-h-screen flex flex-col bg-black text-neutral-100 selection:bg-neutral-800 selection:text-white font-sans antialiased">
       {/* Top Header / Navigation */}
-      <header className="relative z-10 w-full max-w-6xl mx-auto px-6 py-6 flex justify-between items-center">
-        <a href="/" className="flex items-center gap-3 text-[#f0f4f8] group">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#101622] to-[#1b263b] border border-[#00f0ff] flex items-center justify-center shadow-[0_0_12px_rgba(0,240,255,0.3)] transition-transform group-hover:scale-105">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00f0ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <polygon points="10 8 16 12 10 16 10 8" />
-            </svg>
+      <header className="w-full max-w-5xl mx-auto px-6 py-8 flex justify-between items-center border-b border-neutral-900">
+        <a href="/" className="flex items-center gap-3 group">
+          <div className="w-8 h-8 rounded-lg bg-neutral-900 border border-neutral-800 flex items-center justify-center text-xs font-mono font-bold tracking-wider text-neutral-200 group-hover:border-neutral-700 transition-colors">
+            DJ
           </div>
-          <div className="text-lg font-black tracking-wider font-mono">
-            DJ TECH <span className="text-[#ffe000]">NYC</span>
+          <div className="text-sm font-semibold tracking-wider uppercase text-neutral-300 group-hover:text-white transition-colors">
+            DJ Tech NYC
           </div>
         </a>
 
-        <div className="inline-flex items-center gap-2 text-xs font-mono text-[#00e676] bg-[rgba(0,230,118,0.1)] border border-[rgba(0,230,118,0.25)] px-3 py-1 rounded-full">
-          <span className="w-2 h-2 rounded-full bg-[#00e676] shadow-[0_0_6px_#00e676] animate-pulse" />
-          Systems Online
+        <div className="flex items-center gap-2 text-xs text-neutral-400">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="font-mono text-[11px] tracking-wide text-neutral-400">All systems operational</span>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 flex-1 max-w-5xl mx-auto px-6 pt-10 pb-20 w-full">
+      <main className="flex-1 max-w-5xl mx-auto px-6 pt-16 pb-24 w-full">
         {/* Hero Section */}
-        <section className="text-center mb-16">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.15] mb-4">
-            Launchpad for <br />
-            <span className="bg-gradient-to-r from-[#00f0ff] via-[#4db8ff] to-[#70a6ff] bg-clip-text text-transparent">
-              Digital Solutions
-            </span>
-          </h1>
-          <p className="text-base sm:text-lg text-[#8a99ad] max-w-2xl mx-auto mb-6 leading-relaxed">
-            Custom web deployments, civic platforms, and tech solutions built and hosted under the DJ Tech NYC network.
+        <section className="mb-20 max-w-2xl">
+          <p className="text-xs font-mono uppercase tracking-widest text-neutral-500 mb-4">
+            Studio & Software Lab
           </p>
-          <div className="flex justify-center gap-2 sm:gap-3 flex-wrap">
-            <span className="font-mono text-xs bg-white/[0.04] border border-[#1b263b] px-3 py-1 rounded-md text-[#8a99ad]">
-              Web Services
-            </span>
-            <span className="font-mono text-xs bg-white/[0.04] border border-[#1b263b] px-3 py-1 rounded-md text-[#8a99ad]">
-              Civic Tech
-            </span>
-            <span className="font-mono text-xs bg-white/[0.04] border border-[#1b263b] px-3 py-1 rounded-md text-[#8a99ad]">
-              Cloud Infrastructure
-            </span>
-            <span className="font-mono text-xs bg-white/[0.04] border border-[#1b263b] px-3 py-1 rounded-md text-[#8a99ad]">
-              NYC Applications
-            </span>
-          </div>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-medium tracking-tight text-white mb-6 leading-[1.15]">
+            Engineering digital solutions and civic platforms for New York City.
+          </h1>
+          <p className="text-base text-neutral-400 leading-relaxed font-normal">
+            Independent software design, distributed web architecture, and real-time civic utility applications built with performance and precision.
+          </p>
         </section>
 
-        {/* Solutions Section Header */}
-        <div className="flex justify-between items-end mb-6 border-b border-[#1b263b] pb-3">
-          <h2 className="text-lg font-bold text-[#f0f4f8] tracking-tight">
-            Active & Planned Solutions
+        {/* Section Header */}
+        <div className="flex items-baseline justify-between mb-6 pb-3 border-b border-neutral-900">
+          <h2 className="text-xs font-mono uppercase tracking-wider text-neutral-400">
+            Selected Work & Services
           </h2>
         </div>
 
-        {/* Grid of Solutions (Without Trade Solutions) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Card 1: Live Platform - StreetPark NYC */}
+        {/* Minimalist Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          {/* Card 1: StreetPark NYC */}
           <a
             href="https://park.djtechnyc.com/"
-            className="group relative bg-[#101622] border border-[#00f0ff]/40 hover:border-[#00f0ff] rounded-2xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(0,240,255,0.2)] overflow-hidden"
+            className="group block bg-neutral-950 hover:bg-neutral-900/60 border border-neutral-900 hover:border-neutral-700/80 rounded-xl p-6 sm:p-8 transition-all duration-200"
           >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#00f0ff]/5 rounded-full blur-2xl pointer-events-none group-hover:bg-[#00f0ff]/10 transition-colors" />
-            
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-4">
-                <span className="font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded bg-[#00f0ff]/15 text-[#00f0ff] border border-[#00f0ff]/30">
-                  Live Platform
-                </span>
-                <div className="w-10 h-10 rounded-xl overflow-hidden border border-[#00f0ff]/40 shadow-sm shadow-[#00f0ff]/20 bg-slate-800 p-0.5 group-hover:scale-105 transition-transform">
-                  <img src="/favicon.png" alt="StreetPark NYC Icon" className="w-full h-full object-contain rounded-lg" />
-                </div>
+            <div className="flex items-start justify-between mb-8">
+              <div className="w-11 h-11 rounded-lg overflow-hidden border border-neutral-800 bg-neutral-900 p-0.5 group-hover:border-neutral-700 transition-colors">
+                <img src="/favicon.png" alt="StreetPark NYC" className="w-full h-full object-contain rounded-md" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2 group-hover:text-[#00f0ff] transition-colors">
+              <div className="flex items-center gap-1.5 text-xs font-mono text-neutral-500 group-hover:text-white transition-colors">
+                <span>Live app</span>
+                <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium text-white mb-2">
                 StreetPark NYC
               </h3>
-              <p className="text-sm text-[#8a99ad] leading-relaxed">
-                Real-time New York City street parking rules, Alternate Side Parking (ASP) street sweeping tracker, ParkNYC Muni-Meter rates, and tow-away warnings.
+              <p className="text-sm text-neutral-400 leading-relaxed mb-6 font-normal">
+                Real-time street parking intelligence platform. Interprets complex NYC DOT regulations, Alternate Side Parking (ASP) sweeping schedules, and ParkNYC Muni-Meter zones across all five boroughs.
               </p>
             </div>
 
-            <div className="flex justify-between items-center pt-4 border-t border-white/[0.06] font-mono text-xs">
-              <span className="text-[#00f0ff] flex items-center gap-1.5 font-bold">
+            <div className="pt-4 border-t border-neutral-900/80 flex items-center justify-between text-xs font-mono text-neutral-500">
+              <span className="text-neutral-400 group-hover:text-neutral-200 transition-colors">
                 park.djtechnyc.com
-                <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
               </span>
-              <span className="text-xs text-[#8a99ad]">Open App</span>
+              <span className="text-neutral-600">Free Civic Tool</span>
             </div>
           </a>
 
           {/* Card 2: Web Production & Services */}
           <a
             href="mailto:info@djtechnyc.com?subject=Web%20Development%20%26%20Hosting%20Inquiry%20-%20DJ%20Tech%20NYC&body=Hi%20DJ%20Tech%20NYC%2C%0A%0AI'm%20interested%20in%20discussing%20a%20web%20development%20or%20hosting%20project.%0A%0AProject%20Overview%3A%0A-%20Type%20of%20site%2Fapp%3A%0A-%20Target%20timeline%3A%0A-%20Any%20specific%20features%20or%20integrations%3A%0A%0ABest%20regards%2C%0A"
-            className="group relative bg-[#101622] border border-[#1b263b] hover:border-[#00f0ff]/60 rounded-2xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(0,240,255,0.12)] cursor-pointer"
+            className="group block bg-neutral-950 hover:bg-neutral-900/60 border border-neutral-900 hover:border-neutral-700/80 rounded-xl p-6 sm:p-8 transition-all duration-200 cursor-pointer"
           >
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-4">
-                <span className="font-mono text-[11px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded bg-white/[0.05] text-[#8a99ad] border border-white/10 group-hover:border-[#00f0ff]/30 group-hover:text-[#00f0ff] transition-colors">
-                  Services
-                </span>
-                <span className="text-2xl group-hover:scale-110 transition-transform">⚡</span>
+            <div className="flex items-start justify-between mb-8">
+              <div className="w-11 h-11 rounded-lg border border-neutral-800 bg-neutral-900 flex items-center justify-center text-neutral-300 group-hover:border-neutral-700 group-hover:text-white transition-colors">
+                <Mail className="w-5 h-5 stroke-[1.5]" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2 group-hover:text-[#00f0ff] transition-colors">
-                Web Development & Hosting
+              <div className="flex items-center gap-1.5 text-xs font-mono text-neutral-500 group-hover:text-white transition-colors">
+                <span>Inquiries</span>
+                <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium text-white mb-2">
+                Web Architecture & Development
               </h3>
-              <p className="text-sm text-[#8a99ad] leading-relaxed">
-                Modern responsive web platforms, custom domain configurations, high-performance edge computing, and lightweight serverless web applications.
+              <p className="text-sm text-neutral-400 leading-relaxed mb-6 font-normal">
+                Modern responsive web engineering, bespoke custom domain architectures, CDN edge deployments, and high-availability serverless infrastructure for businesses and creators.
               </p>
             </div>
 
-            <div className="flex justify-between items-center pt-4 border-t border-white/[0.06] font-mono text-xs">
-              <span className="text-[#8a99ad] group-hover:text-white transition-colors">Available on request</span>
-              <span className="text-[#00f0ff] flex items-center gap-1 font-semibold group-hover:translate-x-1 transition-transform">
-                Send Inquiry →
+            <div className="pt-4 border-t border-neutral-900/80 flex items-center justify-between text-xs font-mono text-neutral-500">
+              <span className="text-neutral-400 group-hover:text-neutral-200 transition-colors">
+                info@djtechnyc.com
               </span>
+              <span className="text-neutral-600">Available on Request</span>
             </div>
           </a>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-[#1b263b] py-8 px-6 text-center text-xs text-[#8a99ad]">
-        <p>
-          © 2026 <strong className="text-white">DJ Tech NYC</strong>. All rights reserved. •{' '}
-          <a href="mailto:info@djtechnyc.com" className="hover:text-[#00f0ff] transition-colors">
-            Contact / Inquiries
+      <footer className="w-full max-w-5xl mx-auto px-6 py-8 border-t border-neutral-900 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-neutral-500">
+        <div>
+          © {new Date().getFullYear()} DJ Tech NYC. All rights reserved.
+        </div>
+        <div className="flex items-center gap-6">
+          <a
+            href="https://park.djtechnyc.com"
+            className="hover:text-neutral-300 transition-colors"
+          >
+            StreetPark NYC
           </a>
-        </p>
+          <a
+            href="mailto:info@djtechnyc.com"
+            className="hover:text-neutral-300 transition-colors"
+          >
+            Contact
+          </a>
+        </div>
       </footer>
     </div>
   );
