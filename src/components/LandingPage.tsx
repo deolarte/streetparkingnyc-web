@@ -80,11 +80,13 @@ export const LandingPage: React.FC = () => {
             <div className="absolute top-0 right-0 w-32 h-32 bg-[#00f0ff]/5 rounded-full blur-2xl pointer-events-none group-hover:bg-[#00f0ff]/10 transition-colors" />
             
             <div className="mb-6">
-              <div className="flex justify-between items-center mb-3">
+              <div className="flex justify-between items-center mb-4">
                 <span className="font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded bg-[#00f0ff]/15 text-[#00f0ff] border border-[#00f0ff]/30">
                   Live Platform
                 </span>
-                <span className="text-2xl">🅿️</span>
+                <div className="w-10 h-10 rounded-xl overflow-hidden border border-[#00f0ff]/40 shadow-sm shadow-[#00f0ff]/20 bg-slate-800 p-0.5 group-hover:scale-105 transition-transform">
+                  <img src="/favicon.png" alt="StreetPark NYC Icon" className="w-full h-full object-contain rounded-lg" />
+                </div>
               </div>
               <h3 className="text-xl font-bold text-white mb-2 group-hover:text-[#00f0ff] transition-colors">
                 StreetPark NYC
@@ -104,15 +106,18 @@ export const LandingPage: React.FC = () => {
           </a>
 
           {/* Card 2: Web Production & Services */}
-          <div className="bg-[#101622] border border-[#1b263b] hover:border-gray-700 rounded-2xl p-6 sm:p-7 flex flex-col justify-between transition-all">
+          <a
+            href="mailto:info@djtechnyc.com?subject=Web%20Development%20%26%20Hosting%20Inquiry%20-%20DJ%20Tech%20NYC&body=Hi%20DJ%20Tech%20NYC%2C%0A%0AI'm%20interested%20in%20discussing%20a%20web%20development%20or%20hosting%20project.%0A%0AProject%20Overview%3A%0A-%20Type%20of%20site%2Fapp%3A%0A-%20Target%20timeline%3A%0A-%20Any%20specific%20features%20or%20integrations%3A%0A%0ABest%20regards%2C%0A"
+            className="group relative bg-[#101622] border border-[#1b263b] hover:border-[#00f0ff]/60 rounded-2xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(0,240,255,0.12)] cursor-pointer"
+          >
             <div className="mb-6">
-              <div className="flex justify-between items-center mb-3">
-                <span className="font-mono text-[11px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded bg-white/[0.05] text-[#8a99ad] border border-white/10">
+              <div className="flex justify-between items-center mb-4">
+                <span className="font-mono text-[11px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded bg-white/[0.05] text-[#8a99ad] border border-white/10 group-hover:border-[#00f0ff]/30 group-hover:text-[#00f0ff] transition-colors">
                   Services
                 </span>
-                <span className="text-2xl">⚡</span>
+                <span className="text-2xl group-hover:scale-110 transition-transform">⚡</span>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">
+              <h3 className="text-xl font-bold text-white mb-2 group-hover:text-[#00f0ff] transition-colors">
                 Web Development & Hosting
               </h3>
               <p className="text-sm text-[#8a99ad] leading-relaxed">
@@ -121,15 +126,12 @@ export const LandingPage: React.FC = () => {
             </div>
 
             <div className="flex justify-between items-center pt-4 border-t border-white/[0.06] font-mono text-xs">
-              <span className="text-[#8a99ad]">Available on request</span>
-              <a 
-                href="mailto:info@djtechnyc.com" 
-                className="text-gray-400 hover:text-[#00f0ff] transition-colors"
-              >
-                Inquire →
-              </a>
+              <span className="text-[#8a99ad] group-hover:text-white transition-colors">Available on request</span>
+              <span className="text-[#00f0ff] flex items-center gap-1 font-semibold group-hover:translate-x-1 transition-transform">
+                Send Inquiry →
+              </span>
             </div>
-          </div>
+          </a>
         </div>
       </main>
 
