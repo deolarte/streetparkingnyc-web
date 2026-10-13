@@ -841,6 +841,51 @@ const BOROUGH_CODE_MAP: Record<string, string> = {
   '5': 'Staten Island',
 };
 
+/**
+ * Normalizes NYC street names to eliminate discrepancies between
+ * spelled-out names (Muni-Meter dataset: "East 42 Street") and
+ * abbreviated names (CSCL Centerline: "E 42 ST").
+ */
+export function normalizeNycStreetName(raw: string): string {
+  if (!raw) return '';
+  return raw
+    .toUpperCase()
+    .trim()
+    .replace(/\bEAST\b/g, 'E')
+    .replace(/\bWEST\b/g, 'W')
+    .replace(/\bNORTH\b/g, 'N')
+    .replace(/\bSOUTH\b/g, 'S')
+    .replace(/\bSTREET\b/g, 'ST')
+    .replace(/\bAVENUE\b/g, 'AVE')
+    .replace(/\bAV\b/g, 'AVE')
+    .replace(/\bBOULEVARD\b/g, 'BLVD')
+    .replace(/\bROAD\b/g, 'RD')
+    .replace(/\bDRIVE\b/g, 'DR')
+    .replace(/\bPLACE\b/g, 'PL')
+    .replace(/\bPARKWAY\b/g, 'PKWY')
+    .replace(/\bLANE\b/g, 'LN')
+    .replace(/\bCOURT\b/g, 'CT')
+    .replace(/\bTERRACE\b/g, 'TER')
+    .replace(/\bEXPRESSWAY\b/g, 'EXPWY')
+    .replace(/\bHIGHWAY\b/g, 'HWY')
+    .replace(/(\d+)(ST|ND|RD|TH)\b/g, '$1')
+    .replace(/[.,\x27]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export function getCoordsMidpoint(coords: [number, number][]): [number, number] {
+  if (!coords || coords.length === 0) return [0, 0];
+  const idx = Math.floor(coords.length / 2);
+  return coords[idx];
+}
+
+export function approxDistanceMeters(p1: [number, number], p2: [number, number]): number {
+  const dLon = (p1[0] - p2[0]) * Math.cos(((p1[1] + p2[1]) / 2 * Math.PI) / 180) * 111320;
+  const dLat = (p1[1] - p2[1]) * 110540;
+  return Math.sqrt(dLon * dLon + dLat * dLat);
+}
+
 export const ALL_TRISTATE_SEED_CURBS = [...SEED_NYC_CURBS, ...SEED_NJ_CURBS, ...SEED_CT_CURBS];
 
 /**
@@ -938,7 +983,19 @@ export async function fetchLiveSocrataCurbs(bounds?: {
       >
     > = [];
 
-    const meteredStreetSet = new Set<string>();
+    // Track midpoints of all metered street blocks to deduplicate with CSCL centerlines
+    const meteredStreetMidpoints = new Map<string, Array<[number, number]>>();
+
+    // Seed existing high-fidelity corridors into meteredStreetMidpoints
+    for (const seed of relevantSeeds) {
+      const norm = normalizeNycStreetName(seed.onStreet);
+      if (norm && seed.coordinates.length > 0) {
+        const mid = getCoordsMidpoint(seed.coordinates as [number, number][]);
+        const list = meteredStreetMidpoints.get(norm) || [];
+        list.push(mid);
+        meteredStreetMidpoints.set(norm, list);
+      }
+    }
 
     // Process Muni-Meter Block Faces
     if (Array.isArray(meterRes)) {
@@ -955,8 +1012,14 @@ export async function fetchLiveSocrataCurbs(bounds?: {
 
         if (!coords || coords.length < 2) continue;
 
-        const streetClean = (item.on_street || '').toUpperCase().trim();
-        if (streetClean) meteredStreetSet.add(streetClean);
+        const streetClean = item.on_street || 'NYC Street';
+        const normStreet = normalizeNycStreetName(streetClean);
+        if (normStreet) {
+          const mid = getCoordsMidpoint(coords);
+          const list = meteredStreetMidpoints.get(normStreet) || [];
+          list.push(mid);
+          meteredStreetMidpoints.set(normStreet, list);
+        }
 
         const meterInfo: MeterZoneInfo = {
           payByCell: item.pay_by_cel || `ZONE-${i + 1000}`,
@@ -997,7 +1060,7 @@ export async function fetchLiveSocrataCurbs(bounds?: {
 
         liveSegments.push({
           id: `meter-${item.pay_by_cel || i}-${i}`,
-          onStreet: item.on_street || 'NYC Street',
+          onStreet: streetClean,
           fromStreet: item.from_stree || 'Cross Street',
           toStreet: item.to_street || 'Next Cross Street',
           borough: item.borough || 'Manhattan',
@@ -1026,9 +1089,16 @@ export async function fetchLiveSocrataCurbs(bounds?: {
         if (!coords || coords.length < 2) continue;
 
         const streetName = item.stname_label || item.full_street_name || 'NYC Street';
-        const normalized = streetName.toUpperCase().trim();
-        // Skip if this street already has detailed meter zone representation
-        if (meteredStreetSet.has(normalized)) continue;
+        const normalized = normalizeNycStreetName(streetName);
+
+        // Skip if this street block already has detailed meter zone representation
+        const existingMidpoints = meteredStreetMidpoints.get(normalized);
+        if (existingMidpoints && existingMidpoints.length > 0) {
+          const csclMid = getCoordsMidpoint(coords);
+          // 160 meters covers the length of an entire NYC block face
+          const isDuplicateBlock = existingMidpoints.some((mp) => approxDistanceMeters(mp, csclMid) < 160);
+          if (isDuplicateBlock) continue;
+        }
 
         const borough = BOROUGH_CODE_MAP[item.boroughcode] || 'Queens';
         const fromSt = item.l_low_hn ? `${item.l_low_hn} ${streetName}` : 'Cross Street';
@@ -1064,10 +1134,23 @@ export async function fetchLiveSocrataCurbs(bounds?: {
       return relevantSeeds.length > 0 ? relevantSeeds : ALL_TRISTATE_SEED_CURBS;
     }
 
-    // Merge with high-fidelity seed corridors
+    // Merge with high-fidelity seed corridors, avoiding duplicating seed corridors with live data
     const combined = [...(relevantSeeds.length > 0 ? relevantSeeds : ALL_TRISTATE_SEED_CURBS)];
     for (const seg of liveSegments) {
-      if (!combined.some((c) => c.id === seg.id)) {
+      const isDuplicate = combined.some((c) => {
+        if (c.id === seg.id) return true;
+        if (c.meterInfo?.payByCell && seg.meterInfo?.payByCell && c.meterInfo.payByCell === seg.meterInfo.payByCell) {
+          return true;
+        }
+        if (normalizeNycStreetName(c.onStreet) === normalizeNycStreetName(seg.onStreet)) {
+          const cMid = getCoordsMidpoint(c.coordinates as [number, number][]);
+          const sMid = getCoordsMidpoint(seg.coordinates as [number, number][]);
+          if (approxDistanceMeters(cMid, sMid) < 60) return true;
+        }
+        return false;
+      });
+
+      if (!isDuplicate) {
         combined.push(seg);
       }
     }
