@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import { Globe, X, Check } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
-export const LanguageSelector: React.FC = () => {
+interface LanguageSelectorProps {
+  variant?: 'pill' | 'floating';
+}
+
+export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ variant = 'pill' }) => {
   const { locale, setLocale, languages, isI18nEnabled } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -12,20 +16,32 @@ export const LanguageSelector: React.FC = () => {
 
   return (
     <>
-      {/* Language Trigger Pill Button */}
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        className="px-2.5 py-1 rounded-lg bg-white/95 dark:bg-gray-800/95 hover:bg-blue-50 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold text-[11px] shadow-xs border border-gray-200/90 dark:border-gray-700/80 flex items-center space-x-1.5 shrink-0 transition-transform active:scale-95"
-        title="Select Language / Seleccionar Idioma / 选择语言"
-        aria-label="Language selection"
-      >
-        <span className="text-xs">{currentOption.flag}</span>
-        <span className="uppercase text-[10.5px] tracking-wide font-black">
-          {currentOption.code}
-        </span>
-        <Globe className="w-3 h-3 text-blue-500 opacity-80" />
-      </button>
+      {/* Language Trigger Button */}
+      {variant === 'floating' ? (
+        <button
+          type="button"
+          onClick={() => setIsOpen(true)}
+          className="p-2.5 rounded-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200/80 dark:border-gray-800 shadow-xl text-gray-700 dark:text-gray-200 hover:text-blue-600 active:scale-95 transition-all flex items-center justify-center relative group"
+          title="Select Language / Idioma / 语言"
+          aria-label="Language selection"
+        >
+          <span className="text-sm">{currentOption.flag}</span>
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setIsOpen(true)}
+          className="px-2.5 py-1 rounded-lg bg-white/95 dark:bg-gray-800/95 hover:bg-blue-50 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold text-[11px] shadow-xs border border-gray-200/90 dark:border-gray-700/80 flex items-center space-x-1.5 shrink-0 transition-transform active:scale-95"
+          title="Select Language / Seleccionar Idioma / 选择语言"
+          aria-label="Language selection"
+        >
+          <span className="text-xs">{currentOption.flag}</span>
+          <span className="uppercase text-[10.5px] tracking-wide font-black">
+            {currentOption.code}
+          </span>
+          <Globe className="w-3 h-3 text-blue-500 opacity-80" />
+        </button>
+      )}
 
       {/* Global Centered Language Picker Modal (Never clipped by scrollable parent) */}
       {isOpen && (

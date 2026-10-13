@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Map, Marker, AttributionControl, GeoJSONSource, config, type MapLayerMouseEvent } from 'maplibre-gl';
 import type { FeatureCollection, LineString } from 'geojson';
-import { Locate, ZoomIn, ZoomOut, Coffee } from 'lucide-react';
+import { Locate, ZoomIn, ZoomOut, Coffee, Info, MessageSquare } from 'lucide-react';
 import type { CurbSegment } from '../types';
 import { useLanguage } from '../context/LanguageContext';
+import { LanguageSelector } from './LanguageSelector';
 
 // Configure MapLibre Web Worker URL explicitly to load the local bundled worker
 if (typeof window !== 'undefined') {
@@ -21,6 +22,8 @@ interface MapEngineProps {
   statusFilter?: string;
   onMapGesture?: () => void;
   onOpenTipModal?: () => void;
+  onOpenAbout?: () => void;
+  onOpenFeedback?: () => void;
 }
 
 // Watermark-Free High-Definition Street Basemap + Vector Street Name Labeling
@@ -143,6 +146,8 @@ export const MapEngine: React.FC<MapEngineProps> = ({
   statusFilter = 'all',
   onMapGesture,
   onOpenTipModal,
+  onOpenAbout,
+  onOpenFeedback,
 }) => {
   const { t } = useLanguage();
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -484,6 +489,35 @@ export const MapEngine: React.FC<MapEngineProps> = ({
             aria-label="Tip Jar"
           >
             <Coffee className="w-5 h-5 fill-gray-950/20 group-hover:scale-110 transition-transform" />
+          </button>
+        )}
+
+        {/* Floating Language Selector */}
+        <LanguageSelector variant="floating" />
+
+        {/* Floating FAQ & Legal Disclosures Button */}
+        {onOpenAbout && (
+          <button
+            type="button"
+            onClick={onOpenAbout}
+            className="p-2.5 rounded-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200/80 dark:border-gray-800 shadow-xl text-gray-700 dark:text-gray-200 hover:text-blue-600 active:scale-95 transition-all flex items-center justify-center group"
+            title="FAQ & Parking Rules"
+            aria-label="FAQ & Rules"
+          >
+            <Info className="w-5 h-5 group-hover:scale-110 transition-transform text-gray-600 dark:text-gray-300" />
+          </button>
+        )}
+
+        {/* Floating Feedback Button */}
+        {onOpenFeedback && (
+          <button
+            type="button"
+            onClick={onOpenFeedback}
+            className="p-2.5 rounded-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200/80 dark:border-gray-800 shadow-xl text-gray-700 dark:text-gray-200 hover:text-blue-600 active:scale-95 transition-all flex items-center justify-center group"
+            title="Feedback & Sign Corrections"
+            aria-label="Feedback"
+          >
+            <MessageSquare className="w-5 h-5 group-hover:scale-110 transition-transform text-blue-500" />
           </button>
         )}
       </div>

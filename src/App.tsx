@@ -278,6 +278,8 @@ export function App() {
         statusFilter={statusFilter}
         onMapGesture={handleMapGestureForAd}
         onOpenTipModal={() => setShowTipModal(true)}
+        onOpenAbout={() => setShowAboutModal(true)}
+        onOpenFeedback={() => setShowFeedbackModal(true)}
       />
 
       {/* Top Floating Controls Container with iOS Safe Area Insets */}
@@ -294,9 +296,6 @@ export function App() {
             onSearchAddress={handleSearchAddress}
             searchedAddressLabel={searchedLocation ? searchedLocation.label : null}
             onClearSearchedAddress={handleClearSearchedAddress}
-            onOpenFeedback={() => setShowFeedbackModal(true)}
-            onOpenTipModal={() => setShowTipModal(true)}
-            onOpenAbout={() => setShowAboutModal(true)}
           />
         </div>
       </div>

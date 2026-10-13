@@ -8,14 +8,11 @@ import {
   MapPin,
   Loader2,
   Navigation,
-  MessageSquare,
-  Info,
 } from 'lucide-react';
 import type { CurbSegment, VehicleType } from '../types';
 import { searchNycAddress, type AddressCandidate } from '../services/geocodingService';
 import { AdBanner } from './AdBanner';
 import { useLanguage } from '../context/LanguageContext';
-import { LanguageSelector } from './LanguageSelector';
 
 interface SearchHeaderProps {
   vehicleType: VehicleType;
@@ -28,9 +25,6 @@ interface SearchHeaderProps {
   onSearchAddress: (candidate: AddressCandidate) => void;
   searchedAddressLabel?: string | null;
   onClearSearchedAddress?: () => void;
-  onOpenFeedback?: () => void;
-  onOpenTipModal?: () => void;
-  onOpenAbout?: () => void;
 }
 
 const NYC_NEIGHBORHOODS = [
@@ -56,9 +50,6 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
   onSearchAddress,
   searchedAddressLabel,
   onClearSearchedAddress,
-  onOpenFeedback,
-  onOpenTipModal,
-  onOpenAbout,
 }) => {
   const { t } = useLanguage();
   const [query, setQuery] = useState('');
@@ -337,50 +328,6 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
             <span>{t('filter_restricted')}</span>
           </button>
         </div>
-      </div>
-
-      {/* Action Buttons Bar: Language, FAQ, Tip Jar (Without Coffee Icon), Feedback */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-        {/* Language Selector */}
-        <LanguageSelector />
-
-        {/* FAQ & Legal Disclosures Button */}
-        {onOpenAbout && (
-          <button
-            type="button"
-            onClick={onOpenAbout}
-            className="px-2.5 py-1 rounded-lg bg-white/90 dark:bg-gray-800/90 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-[11px] shadow-xs border border-gray-200/80 dark:border-gray-700/80 flex items-center space-x-1 shrink-0 transition-colors"
-            title="About StreetPark, FAQ & Data Disclosures"
-          >
-            <Info className="w-3.5 h-3.5 text-gray-500" />
-            <span>{t('faq_btn')}</span>
-          </button>
-        )}
-
-        {/* Tip Jar Button (Without Coffee Icon, Pure Clean Text) */}
-        {onOpenTipModal && (
-          <button
-            type="button"
-            onClick={onOpenTipModal}
-            className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 active:from-amber-600 active:to-amber-700 text-gray-950 font-black text-[11px] shadow-xs ring-1 ring-amber-400/50 shrink-0 transition-transform active:scale-95"
-            title="Tip Jar"
-          >
-            <span className="tracking-tight">{t('tip_btn')}</span>
-          </button>
-        )}
-
-        {/* Feedback Button */}
-        {onOpenFeedback && (
-          <button
-            type="button"
-            onClick={onOpenFeedback}
-            className="px-2.5 py-1 rounded-lg bg-white/90 dark:bg-gray-800/90 hover:bg-blue-50 dark:hover:bg-gray-700 text-blue-700 dark:text-blue-300 font-bold text-[11px] shadow-xs border border-blue-200/80 dark:border-blue-900/60 flex items-center space-x-1 shrink-0 transition-colors"
-            title="Submit feedback or report sign accuracy"
-          >
-            <MessageSquare className="w-3.5 h-3.5 text-blue-500" />
-            <span>{t('feedback_btn')}</span>
-          </button>
-        )}
       </div>
 
       {/* Search Results Dropdown with Address Suggestions and Matching Curbs */}
