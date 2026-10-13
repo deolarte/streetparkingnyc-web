@@ -281,7 +281,7 @@ export function App() {
       />
 
       {/* Top Floating Controls Container with iOS Safe Area Insets */}
-      <div className="absolute top-0 inset-x-0 pt-[max(env(safe-area-inset-top,44px),44px)] sm:pt-3 px-2 sm:px-4 max-w-xl mx-auto z-30 pointer-events-none space-y-2">
+      <div className="absolute top-0 inset-x-0 pt-[max(env(safe-area-inset-top,44px),44px)] sm:pt-3 px-2 sm:px-4 max-w-2xl sm:max-w-3xl mx-auto z-30 pointer-events-none space-y-1.5">
         <div className="pointer-events-auto">
           <SearchHeader
             vehicleType={vehicleType}

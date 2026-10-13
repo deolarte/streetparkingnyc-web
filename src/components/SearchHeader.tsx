@@ -8,7 +8,6 @@ import {
   MapPin,
   Loader2,
   Navigation,
-  Coffee,
   MessageSquare,
   Info,
 } from 'lucide-react';
@@ -143,7 +142,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
   };
 
   return (
-    <div className="w-full space-y-2">
+    <div className="w-full space-y-1.5">
       {/* Active Searched Address Notification Pill */}
       {searchedAddressLabel && (
         <div className="flex items-center justify-between bg-rose-500/95 dark:bg-rose-900/95 text-white text-xs px-3 py-1.5 rounded-xl shadow-lg border border-rose-400/40 backdrop-blur-md">
@@ -164,7 +163,24 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
         </div>
       )}
 
-      {/* Top Search & Filter Bar */}
+      {/* Top Neighborhood Jump Navigation Bar (Dedicated Scrollable Row Above Search) */}
+      <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-xl shadow-md border border-gray-200/80 dark:border-gray-800 px-2 py-1.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs">
+        <span className="text-[10px] font-black uppercase text-gray-400 dark:text-gray-500 pl-1 shrink-0 flex items-center gap-1">
+          <MapPin className="w-3 h-3 text-rose-500 shrink-0" />
+          <span>{t('jump_to')}</span>
+        </span>
+        {NYC_NEIGHBORHOODS.map((nh) => (
+          <button
+            key={nh.name}
+            onClick={() => onJumpToLocation(nh.center, nh.zoom)}
+            className="px-2.5 py-1 rounded-lg bg-gray-100/80 dark:bg-gray-800/80 hover:bg-blue-50 dark:hover:bg-blue-950/60 hover:text-blue-600 dark:hover:text-blue-400 text-[11px] font-semibold text-gray-700 dark:text-gray-300 border border-gray-200/60 dark:border-gray-700/60 whitespace-nowrap transition-colors"
+          >
+            {nh.name}
+          </button>
+        ))}
+      </div>
+
+      {/* Main Search & Regulation Filter Card */}
       <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/80 dark:border-gray-800 p-2 sm:p-2.5">
         <div className="flex items-center gap-2">
           {/* Brand Logo & Name */}
@@ -323,9 +339,9 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
         </div>
       </div>
 
-      {/* Neighborhood Quick Navigation Pills & Action Buttons */}
+      {/* Action Buttons Bar: Language, FAQ, Tip Jar (Without Coffee Icon), Feedback */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-        {/* Language Selector (Always First & Instantly Visible on Mobile) */}
+        {/* Language Selector */}
         <LanguageSelector />
 
         {/* FAQ & Legal Disclosures Button */}
@@ -341,16 +357,15 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
           </button>
         )}
 
-        {/* Tip Jar Button in Header */}
+        {/* Tip Jar Button (Without Coffee Icon, Pure Clean Text) */}
         {onOpenTipModal && (
           <button
             type="button"
             onClick={onOpenTipModal}
-            className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 active:from-amber-600 active:to-amber-700 text-gray-950 font-bold text-[11px] shadow-xs ring-1 ring-amber-400/50 flex items-center space-x-1 shrink-0 transition-transform active:scale-95"
+            className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 active:from-amber-600 active:to-amber-700 text-gray-950 font-black text-[11px] shadow-xs ring-1 ring-amber-400/50 shrink-0 transition-transform active:scale-95"
             title="Tip Jar"
           >
-            <Coffee className="w-3.5 h-3.5 fill-gray-950/20 shrink-0" />
-            <span className="tracking-tight">{t('tip_btn_full')}</span>
+            <span className="tracking-tight">{t('tip_btn')}</span>
           </button>
         )}
 
@@ -366,19 +381,6 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
             <span>{t('feedback_btn')}</span>
           </button>
         )}
-
-        <span className="text-[10px] font-semibold uppercase text-gray-500 dark:text-gray-400 pl-1 shrink-0">
-          {t('jump_to')}
-        </span>
-        {NYC_NEIGHBORHOODS.map((nh) => (
-          <button
-            key={nh.name}
-            onClick={() => onJumpToLocation(nh.center, nh.zoom)}
-            className="px-2.5 py-1 rounded-lg bg-white/90 dark:bg-gray-800/90 hover:bg-blue-50 dark:hover:bg-gray-700 text-[11px] font-medium text-gray-700 dark:text-gray-300 shadow-xs border border-gray-200/70 dark:border-gray-700/70 whitespace-nowrap transition-colors"
-          >
-            {nh.name}
-          </button>
-        ))}
       </div>
 
       {/* Search Results Dropdown with Address Suggestions and Matching Curbs */}
