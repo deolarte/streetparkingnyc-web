@@ -26,20 +26,20 @@ export const LandingPage: React.FC = () => {
         {/* Hero Section */}
         <section className="mb-20 max-w-2xl">
           <p className="text-xs font-mono uppercase tracking-widest text-neutral-500 mb-4">
-            Studio & Software Lab
+            Software Lab & Digital Studio
           </p>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-medium tracking-tight text-white mb-6 leading-[1.15]">
-            Engineering digital solutions and civic platforms for New York City.
+            Building purposeful digital products, web platforms, and utilities.
           </h1>
           <p className="text-base text-neutral-400 leading-relaxed font-normal">
-            Independent software design, distributed web architecture, and real-time civic utility applications built with performance and precision.
+            Independent software design, distributed web architecture, and modern apps built for performance and scale. Headquartered in New York, built for anywhere.
           </p>
         </section>
 
         {/* Section Header */}
         <div className="flex items-baseline justify-between mb-6 pb-3 border-b border-neutral-900">
           <h2 className="text-xs font-mono uppercase tracking-wider text-neutral-400">
-            Selected Work & Services
+            Featured Products & Services
           </h2>
         </div>
 
