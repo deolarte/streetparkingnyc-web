@@ -1,13 +1,16 @@
 import type { RawCurbSegment } from '../types';
 import { JERSEY_CITY_OPEN_DATA_CURBS } from './jerseyCityOpenDataCurbs';
+import { NJ_CURBS_EXPANDED } from './njCurbsExpanded';
+import { CT_CURBS_EXPANDED } from './ctCurbsExpanded';
 
 /**
  * High-fidelity seed parking corridors for Northern New Jersey
  * Combining official Jersey City Open Data (60 segments) with
- * Hoboken, Newark, and Weehawken commercial and transit corridors.
+ * complete street grids across Jersey City, Hoboken, Newark, and Weehawken.
  */
 export const SEED_NJ_CURBS: RawCurbSegment[] = [
   ...JERSEY_CITY_OPEN_DATA_CURBS,
+  ...NJ_CURBS_EXPANDED,
   // ==========================================
   // JERSEY CITY - DOWNTOWN & NEWARK AVE CORRIDOR
   // ==========================================
@@ -690,6 +693,7 @@ export const SEED_NJ_CURBS: RawCurbSegment[] = [
  * Covering Stamford, South Norwalk (SoNo), Greenwich, and Darien.
  */
 export const SEED_CT_CURBS: RawCurbSegment[] = [
+  ...CT_CURBS_EXPANDED,
   // ==========================================
   // DOWNTOWN STAMFORD - BEDFORD ST RESTAURANT ROW & CENTER
   // ==========================================
