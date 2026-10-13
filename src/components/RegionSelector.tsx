@@ -78,11 +78,12 @@ export const RegionSelector: React.FC<RegionSelectorProps> = ({
 
   const handleSelectState = (stateCode: string) => {
     const stateObj = STATE_REGISTRY[stateCode];
+    const fallbackState = ALL_US_STATES.find((s) => s.code === stateCode);
     const defaultCity = stateObj && Object.keys(stateObj.cities).length > 0
       ? Object.keys(stateObj.cities)[0]
       : undefined;
-    const center = stateObj?.defaultCenter;
-    const zoom = stateObj?.defaultZoom;
+    const center = stateObj?.defaultCenter || fallbackState?.center || [-98.5795, 39.8283];
+    const zoom = stateObj?.defaultZoom || fallbackState?.zoom || 7;
     onSelectLocation(stateCode, defaultCity, center, zoom);
     setIsOpen(false);
   };

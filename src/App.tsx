@@ -26,7 +26,20 @@ export function App() {
     activeCity,
     locationLabel,
     selectLocation,
+    nationalResolved,
   } = useRegion();
+
+  const initialMapCenter = useMemo<[number, number]>(() => {
+    if (nationalResolved?.city?.center) return nationalResolved.city.center;
+    if (nationalResolved?.state?.defaultCenter) return nationalResolved.state.defaultCenter;
+    return [-73.9851, 40.7484];
+  }, [nationalResolved]);
+
+  const initialMapZoom = useMemo<number>(() => {
+    if (nationalResolved?.city?.zoom) return nationalResolved.city.zoom;
+    if (nationalResolved?.state?.defaultZoom) return nationalResolved.state.defaultZoom;
+    return 14.5;
+  }, [nationalResolved]);
   const [selectedTime, setSelectedTime] = useState<Date>(() => new Date());
   const [isNow, setIsNow] = useState<boolean>(true);
   const [vehicleType, setVehicleType] = useState<VehicleType>('passenger');
@@ -154,23 +167,44 @@ export function App() {
     setIsNow(nowMode);
   };
 
-  const handleSelectCurb = (curb: CurbSegment | null) => {
-    setSelectedCurbId(curb ? curb.id : null);
-    if (curb) {
-      handleCurbInteractionForAd();
-    }
-  };
+  const handleJumpToLocation = useCallback(
+    (center: [number, number], zoom: number = 15.5, withBottomSheetPadding: boolean = false) => {
+      if (mapInstanceRef.current) {
+        const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+        mapInstanceRef.current.flyTo({
+          center,
+          zoom,
+          pitch: 0,
+          padding: withBottomSheetPadding
+            ? { top: 90, bottom: isMobile ? 330 : 160, left: 20, right: 20 }
+            : { top: 0, bottom: 0, left: 0, right: 0 },
+          essential: true,
+        });
+      }
+    },
+    []
+  );
 
-  const handleJumpToLocation = (center: [number, number], zoom: number = 15.5) => {
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.flyTo({
-        center,
-        zoom,
-        pitch: 0,
-        essential: true,
-      });
-    }
-  };
+  const handleSelectCurb = useCallback(
+    (curb: CurbSegment | null) => {
+      setSelectedCurbId(curb ? curb.id : null);
+      if (curb) {
+        handleCurbInteractionForAd();
+        if (curb.coordinates && curb.coordinates.length > 0) {
+          const midIdx = Math.floor(curb.coordinates.length / 2);
+          const centerCoord = curb.coordinates[midIdx] as [number, number];
+          if (centerCoord && Number.isFinite(centerCoord[0]) && Number.isFinite(centerCoord[1])) {
+            handleJumpToLocation(
+              centerCoord,
+              Math.max(mapInstanceRef.current?.getZoom() || 15.5, 15.5),
+              true
+            );
+          }
+        }
+      }
+    },
+    [handleCurbInteractionForAd, handleJumpToLocation]
+  );
 
   // Cache of fetched bounding boxes to prevent redundant Socrata queries
   const fetchedBoundsCache = useRef<Set<string>>(new Set());
@@ -219,8 +253,8 @@ export function App() {
 
   const handleSearchAddress = async (candidate: AddressCandidate) => {
     setSearchedLocation({ center: candidate.center, label: candidate.shortAddress });
-    // Zoom in within a 1-block radius (zoom 17.2)
-    handleJumpToLocation(candidate.center, 17.2);
+    // Zoom in within a 1-block radius (zoom 17.2) with padding
+    handleJumpToLocation(candidate.center, 17.2, true);
 
     // Trigger interstitial on address search (with cooldown)
     attemptShowInterstitial();
@@ -289,6 +323,8 @@ export function App() {
         onOpenTipModal={() => setShowTipModal(true)}
         onOpenAbout={() => setShowAboutModal(true)}
         onOpenFeedback={() => setShowFeedbackModal(true)}
+        initialCenter={initialMapCenter}
+        initialZoom={initialMapZoom}
       />
 
       {/* Top Floating Controls Container with iOS Safe Area Insets */}

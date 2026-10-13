@@ -24,6 +24,8 @@ interface MapEngineProps {
   onOpenTipModal?: () => void;
   onOpenAbout?: () => void;
   onOpenFeedback?: () => void;
+  initialCenter?: [number, number];
+  initialZoom?: number;
 }
 
 // Watermark-Free High-Definition Street Basemap + Vector Street Name Labeling
@@ -148,6 +150,8 @@ export const MapEngine: React.FC<MapEngineProps> = ({
   onOpenTipModal,
   onOpenAbout,
   onOpenFeedback,
+  initialCenter,
+  initialZoom,
 }) => {
   const { t } = useLanguage();
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -233,15 +237,10 @@ export const MapEngine: React.FC<MapEngineProps> = ({
     const map = new Map({
       container: mapContainerRef.current,
       style: MAP_STYLE,
-      center: [-73.9851, 40.7484], // Tri-State Center (Midtown Manhattan)
-      zoom: 14.5,
+      center: initialCenter || [-73.9851, 40.7484],
+      zoom: initialZoom || 14.5,
       maxZoom: 20,
-      minZoom: 8.5, // Allow zooming out to view the full Tri-State region (NY, NJ, CT)
-      // Expanded Tri-State bounding box (Central/Northern NJ across NYC to Southwestern CT)
-      maxBounds: [
-        [-74.80, 40.15], // Southwest bound: Central/Northern NJ (Newark, Jersey City, New Brunswick)
-        [-72.80, 41.50], // Northeast bound: Southwestern/Central CT (Stamford, Norwalk, New Haven)
-      ],
+      minZoom: 3.5, // Allow full nationwide zooming across all US States
       pitch: 0, // Flat 2D map
       maxPitch: 0, // Lock pitch strictly to 0
       minPitch: 0,
@@ -259,7 +258,28 @@ export const MapEngine: React.FC<MapEngineProps> = ({
 
     let moveDebounceTimeout: any = null;
 
+    // Window & Container Resize Observer ensures map canvas center is always accurate
+    const handleResize = () => {
+      try {
+        map.resize();
+      } catch (err) {
+        // Map may be unmounting
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && mapContainerRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        handleResize();
+      });
+      resizeObserver.observe(mapContainerRef.current);
+    }
+
     const handleLoadedOrStyled = () => {
+      handleResize();
       updateSourceData();
 
       // Trigger initial viewport curb load
@@ -282,6 +302,18 @@ export const MapEngine: React.FC<MapEngineProps> = ({
       const found = curbsRef.current.find((c) => c.id === segId);
       if (found) {
         onSelectCurbRef.current(found);
+        // Smoothly position clicked curb in visible upper viewport above the bottom sheet drawer
+        const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+        map.easeTo({
+          center: [e.lngLat.lng, e.lngLat.lat],
+          padding: {
+            top: 90,
+            bottom: isMobile ? 330 : 160,
+            left: 20,
+            right: 20,
+          },
+          duration: 450,
+        });
       }
     };
 
@@ -324,6 +356,9 @@ export const MapEngine: React.FC<MapEngineProps> = ({
 
     return () => {
       clearTimeout(moveDebounceTimeout);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+      if (resizeObserver) resizeObserver.disconnect();
       map.remove();
       mapInstanceRef.current = null;
     };
@@ -427,12 +462,8 @@ export const MapEngine: React.FC<MapEngineProps> = ({
         onLocationFound?.(coords);
       },
       (err) => {
-        console.warn('Geolocation failed, centering on default NYC location:', err);
+        console.warn('Geolocation failed or was denied:', err.message);
         setIsLocating(false);
-        mapInstanceRef.current?.flyTo({
-          center: [-74.006, 40.7128],
-          zoom: 14.5,
-        });
       },
       { enableHighAccuracy: true, timeout: 8000 }
     );
