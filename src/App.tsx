@@ -277,6 +277,7 @@ export function App() {
         mapInstanceRef={mapInstanceRef}
         statusFilter={statusFilter}
         onMapGesture={handleMapGestureForAd}
+        onOpenTipModal={() => setShowTipModal(true)}
       />
 
       {/* Top Floating Controls Container with iOS Safe Area Insets */}

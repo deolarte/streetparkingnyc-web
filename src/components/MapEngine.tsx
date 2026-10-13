@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Map, Marker, AttributionControl, GeoJSONSource, config, type MapLayerMouseEvent } from 'maplibre-gl';
 import type { FeatureCollection, LineString } from 'geojson';
-import { Locate, ZoomIn, ZoomOut } from 'lucide-react';
+import { Locate, ZoomIn, ZoomOut, Coffee } from 'lucide-react';
 import type { CurbSegment } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 // Configure MapLibre Web Worker URL explicitly to load the local bundled worker
 if (typeof window !== 'undefined') {
@@ -19,6 +20,7 @@ interface MapEngineProps {
   mapInstanceRef: React.MutableRefObject<Map | null>;
   statusFilter?: string;
   onMapGesture?: () => void;
+  onOpenTipModal?: () => void;
 }
 
 // Watermark-Free High-Definition Street Basemap + Vector Street Name Labeling
@@ -140,7 +142,9 @@ export const MapEngine: React.FC<MapEngineProps> = ({
   mapInstanceRef,
   statusFilter = 'all',
   onMapGesture,
+  onOpenTipModal,
 }) => {
+  const { t } = useLanguage();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [isLocating, setIsLocating] = useState(false);
   const userMarkerRef = useRef<Marker | null>(null);
@@ -470,6 +474,18 @@ export const MapEngine: React.FC<MapEngineProps> = ({
         >
           <ZoomOut className="w-5 h-5" />
         </button>
+
+        {/* Floating Tip Jar Button Below Zoom Buttons */}
+        {onOpenTipModal && (
+          <button
+            onClick={onOpenTipModal}
+            className="p-2.5 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-700 active:scale-95 text-gray-950 font-black shadow-xl shadow-amber-500/30 border border-amber-300/80 transition-all flex items-center justify-center group"
+            title={`${t('tip_btn_full')} / Tip Jar`}
+            aria-label="Tip Jar"
+          >
+            <Coffee className="w-5 h-5 fill-gray-950/20 group-hover:scale-110 transition-transform" />
+          </button>
+        )}
       </div>
     </div>
   );
