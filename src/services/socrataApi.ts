@@ -2,6 +2,7 @@ import proj4 from 'proj4';
 import type { CurbSegment, ParkingSign, MeterZoneInfo, RawCurbSegment } from '../types';
 import { SEED_NJ_CURBS, SEED_CT_CURBS } from '../data/triStateSeedCurbs';
 import { NATIONAL_SEED_CURBS } from '../data/nationalSeedCurbs';
+import { NATIONAL_REAL_GIS_CURBS } from '../data/nationalCurbsRealGis';
 import { estimateStateFromCoords, resolveJurisdiction } from '../config/nationalRegistry';
 
 // Define NYC State Plane Long Island (EPSG:2263, ftUS) for NYC DOT sign coordinates
@@ -894,6 +895,7 @@ export const ALL_NATIONAL_SEED_CURBS = [
   ...SEED_NJ_CURBS,
   ...SEED_CT_CURBS,
   ...NATIONAL_SEED_CURBS,
+  ...NATIONAL_REAL_GIS_CURBS,
 ];
 
 interface CityStreetPalette {
@@ -1380,26 +1382,19 @@ export async function fetchLiveSocrataCurbs(bounds?: {
     bounds.west <= -73.68 &&
     bounds.east >= -74.28;
 
-  // Outside NYC, return matched national seeds PLUS dense local grid across the entire viewport!
+  // Outside NYC, return matched real GIS seed corridors matching actual roads
   if (!isNycBounds) {
-    const synthetic = synthesizeCurbsForBoundingBox(bounds);
-    if (relevantSeeds.length === 0) {
-      return synthetic;
+    if (relevantSeeds.length > 0) {
+      return relevantSeeds;
     }
 
-    // Merge high-fidelity seeds with synthetic grid, avoiding duplicates near seeds
-    const combined = [...relevantSeeds];
-    for (const syn of synthetic) {
-      const synMid = getCoordsMidpoint(syn.coordinates as [number, number][]);
-      const tooCloseToSeed = relevantSeeds.some((seed) => {
-        const seedMid = getCoordsMidpoint(seed.coordinates as [number, number][]);
-        return approxDistanceMeters(seedMid, synMid) < 70;
-      });
-      if (!tooCloseToSeed) {
-        combined.push(syn);
-      }
+    // Only synthesize local blocks when zoomed into street/neighborhood level (span <= 0.035 deg, ~2 miles)
+    const latSpan = bounds.north - bounds.south;
+    const lngSpan = bounds.east - bounds.west;
+    if (latSpan <= 0.035 && lngSpan <= 0.035) {
+      return synthesizeCurbsForBoundingBox(bounds);
     }
-    return combined;
+    return [];
   }
 
   try {

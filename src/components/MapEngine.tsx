@@ -62,13 +62,14 @@ const MAP_STYLE: any = {
       id: 'curbs-casing',
       type: 'line' as const,
       source: 'curbs-source',
+      minzoom: 13.0,
       layout: {
         'line-cap': 'round' as const,
         'line-join': 'round' as const,
       },
       paint: {
         'line-color': '#0f172a',
-        'line-width': ['interpolate' as const, ['linear' as const], ['zoom' as const], 11, 3.5, 14, 5.5, 16, 7.5, 18, 11],
+        'line-width': ['interpolate' as const, ['linear' as const], ['zoom' as const], 13, 3.5, 15, 6.0, 17, 8.5, 19, 12],
         'line-opacity': 0.22,
       },
     },
@@ -76,6 +77,7 @@ const MAP_STYLE: any = {
       id: 'curbs-line',
       type: 'line' as const,
       source: 'curbs-source',
+      minzoom: 13.0,
       layout: {
         'line-cap': 'round' as const,
         'line-join': 'round' as const,
@@ -94,7 +96,7 @@ const MAP_STYLE: any = {
           '#3b82f6', // Vivid Blue (Muni-Meter)
           '#64748b', // Slate Fallback
         ],
-        'line-width': ['interpolate' as const, ['linear' as const], ['zoom' as const], 11, 2.5, 14, 4, 16, 6, 18, 9],
+        'line-width': ['interpolate' as const, ['linear' as const], ['zoom' as const], 13, 2.5, 15, 4.5, 17, 7.0, 19, 10],
         'line-opacity': 0.65, // Translucent color so roads & buildings underneath shine through
       },
     },
@@ -102,6 +104,7 @@ const MAP_STYLE: any = {
       id: 'curbs-selected-halo',
       type: 'line' as const,
       source: 'curbs-source',
+      minzoom: 13.0,
       filter: ['==' as const, ['get' as const, 'id'], ''],
       layout: {
         'line-cap': 'round' as const,
