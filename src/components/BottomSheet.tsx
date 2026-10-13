@@ -59,6 +59,48 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
 
   if (!segment) return null;
 
+  const isNJ =
+    regionProfile?.state === 'NJ' ||
+    segment.borough === 'Jersey City' ||
+    segment.borough === 'Hoboken' ||
+    segment.borough === 'Newark' ||
+    segment.borough === 'Weehawken';
+  const isCT =
+    regionProfile?.state === 'CT' ||
+    segment.borough === 'Stamford' ||
+    segment.borough === 'Norwalk' ||
+    segment.borough === 'Greenwich' ||
+    segment.borough === 'Darien';
+
+  const municipalInfo = isNJ
+    ? {
+        title: 'Northern NJ Municipal Status',
+        subtitle: 'Local Street Sweeping & Parking Updates',
+        url: 'https://www.njcourts.gov/municipal-courts',
+        urlDisplay: 'njcourts.gov / 311',
+        advice:
+          'Follow posted signs & Street Sweeping rules. Daylighting enforced strictly within 25ft of crosswalks.',
+        signsTitle: 'Official Municipal Posted Regulations',
+      }
+    : isCT
+    ? {
+        title: 'Southwestern CT Municipal Status',
+        subtitle: 'City Transportation & Parking Updates',
+        url: 'https://www.stamfordct.gov/government/transportation-traffic-parking',
+        urlDisplay: 'stamfordct.gov / Traffic',
+        advice:
+          'Follow posted signs & municipal maintenance schedules. Parking prohibited within 25ft of crosswalks.',
+        signsTitle: 'Official Municipal Posted Regulations',
+      }
+    : {
+        title: t('nyc_311_title'),
+        subtitle: t('nyc_311_subtitle'),
+        url: advisory?.portalUrl || 'https://portal.311.nyc.gov/',
+        urlDisplay: 'portal.311.nyc.gov',
+        advice: advisory?.aspAdvice || t('nyc_311_default_advice'),
+        signsTitle: t('official_signs_title'),
+      };
+
   const getStatusColorTheme = () => {
     switch (segment.status) {
       case 'free':
@@ -346,48 +388,56 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
             </div>
           )}
 
-          {/* Unintrusive NYC 311 & Weather Advisory Card (Option 2 & 3) */}
+          {/* Regional Municipal Status & Weather Advisory Card */}
           <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 text-xs space-y-2">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center space-x-2">
-                <div className={`p-1.5 rounded-lg ${
-                  advisory?.hasStormAlert
-                    ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300'
-                    : 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300'
-                }`}>
-                  {advisory?.hasStormAlert ? <CloudSnow className="w-4 h-4" /> : <Info className="w-4 h-4" />}
+                <div
+                  className={`p-1.5 rounded-lg ${
+                    advisory?.hasStormAlert
+                      ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300'
+                      : 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300'
+                  }`}
+                >
+                  {advisory?.hasStormAlert ? (
+                    <CloudSnow className="w-4 h-4" />
+                  ) : (
+                    <Info className="w-4 h-4" />
+                  )}
                 </div>
                 <div>
                   <span className="text-[10px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400 block">
-                    {t('nyc_311_title')}
+                    {municipalInfo.title}
                   </span>
                   <span className="font-bold text-gray-900 dark:text-white text-xs">
-                    {advisory?.hasStormAlert ? advisory.event : t('nyc_311_subtitle')}
+                    {advisory?.hasStormAlert ? advisory.event : municipalInfo.subtitle}
                   </span>
                 </div>
               </div>
 
               <a
-                href={advisory?.portalUrl || 'https://portal.311.nyc.gov/'}
+                href={municipalInfo.url}
                 target="_blank"
                 rel="noreferrer"
                 className="px-2.5 py-1 rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-[10px] font-bold text-blue-600 dark:text-blue-300 border border-gray-200 dark:border-gray-600 flex items-center space-x-1 shrink-0 transition-colors shadow-2xs"
               >
-                <span>portal.311.nyc.gov</span>
+                <span>{municipalInfo.urlDisplay}</span>
                 <ExternalLink className="w-3 h-3" />
               </a>
             </div>
 
             <p className="text-[11px] text-gray-600 dark:text-gray-300 leading-relaxed">
-              {advisory?.aspAdvice || t('nyc_311_default_advice')}
+              {advisory?.aspAdvice || municipalInfo.advice}
             </p>
           </div>
 
-          {/* Official NYC DOT Signs Section */}
+          {/* Official Posted Signs Section */}
           <div className="space-y-2">
             <div className="flex items-center space-x-1.5 text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300">
               <Info className="w-3.5 h-3.5 text-gray-500" />
-              <span>{t('official_signs_title')} ({segment.signs.length})</span>
+              <span>
+                {municipalInfo.signsTitle} ({segment.signs.length})
+              </span>
             </div>
 
             <div className="space-y-2">
