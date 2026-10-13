@@ -77,7 +77,39 @@ export const LandingPage: React.FC = () => {
             </div>
           </a>
 
-          {/* Card 2: Web Production & Services */}
+          {/* Card 2: Live Platform - StreetParkingUSA */}
+          <a
+            href="https://parkusa.djtechnyc.com/"
+            className="group block bg-neutral-950 hover:bg-neutral-900/60 border border-neutral-900 hover:border-neutral-700/80 rounded-xl p-6 sm:p-8 transition-all duration-200"
+          >
+            <div className="flex items-start justify-between mb-8">
+              <div className="w-11 h-11 rounded-lg overflow-hidden border border-neutral-800 bg-neutral-900 p-0.5 group-hover:border-neutral-700 transition-colors">
+                <img src="/apple-touch-icon.png" alt="StreetParkingUSA" className="w-full h-full object-contain rounded-md" />
+              </div>
+              <div className="flex items-center gap-1.5 text-xs font-mono text-neutral-500 group-hover:text-white transition-colors">
+                <span>Tri-State Live</span>
+                <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium text-white mb-2">
+                StreetParkingUSA
+              </h3>
+              <p className="text-sm text-neutral-400 leading-relaxed mb-6 font-normal">
+                Multi-jurisdiction Tri-State parking navigation platform. Normalized curb regulations, payment deep links, and municipal rules across New York, New Jersey, and Connecticut.
+              </p>
+            </div>
+
+            <div className="pt-4 border-t border-neutral-900/80 flex items-center justify-between text-xs font-mono text-neutral-500">
+              <span className="text-neutral-400 group-hover:text-neutral-200 transition-colors">
+                parkusa.djtechnyc.com
+              </span>
+              <span className="text-neutral-600">NY • NJ • CT</span>
+            </div>
+          </a>
+
+          {/* Card 3: Web Production & Services */}
           <a
             href="mailto:info@djtechnyc.com?subject=Web%20Development%20%26%20Hosting%20Inquiry%20-%20DJ%20Tech%20NYC&body=Hi%20DJ%20Tech%20NYC%2C%0A%0AI'm%20interested%20in%20discussing%20a%20web%20development%20or%20hosting%20project.%0A%0AProject%20Overview%3A%0A-%20Type%20of%20site%2Fapp%3A%0A-%20Target%20timeline%3A%0A-%20Any%20specific%20features%20or%20integrations%3A%0A%0ABest%20regards%2C%0A"
             className="group block bg-neutral-950 hover:bg-neutral-900/60 border border-neutral-900 hover:border-neutral-700/80 rounded-xl p-6 sm:p-8 transition-all duration-200 cursor-pointer"
@@ -122,6 +154,12 @@ export const LandingPage: React.FC = () => {
             className="hover:text-neutral-300 transition-colors"
           >
             StreetPark NYC
+          </a>
+          <a
+            href="https://parkusa.djtechnyc.com"
+            className="hover:text-neutral-300 transition-colors"
+          >
+            StreetParkingUSA
           </a>
           <a
             href="mailto:info@djtechnyc.com"

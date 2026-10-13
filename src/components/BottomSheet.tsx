@@ -11,7 +11,6 @@ import {
   Compass,
   CalendarClock,
   CheckCircle2,
-  Smartphone,
   CloudSnow,
   ExternalLink,
   Copy,
@@ -21,6 +20,8 @@ import type { CurbSegment } from '../types';
 import { AdBanner } from './AdBanner';
 import { fetchNycStormAdvisory, type StormAlert } from '../services/weatherAdvisory';
 import { useLanguage } from '../context/LanguageContext';
+import { PaymentTrigger } from './PaymentTrigger';
+import type { RegionParkingProfile } from '../config/parkingConfig';
 
 interface BottomSheetProps {
   segment: CurbSegment | null;
@@ -29,6 +30,7 @@ interface BottomSheetProps {
   isNow?: boolean;
   selectedTime?: Date;
   onResetToNow?: () => void;
+  regionProfile?: RegionParkingProfile;
 }
 
 export const BottomSheet: React.FC<BottomSheetProps> = ({
@@ -37,6 +39,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   isNow = true,
   selectedTime,
   onResetToNow,
+  regionProfile,
 }) => {
   const { t } = useLanguage();
   const [advisory, setAdvisory] = useState<StormAlert | null>(null);
@@ -294,14 +297,14 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
                 </div>
               )}
 
-              {/* ParkNYC: Mobile App Quick Launch & Store Links */}
+              {/* Dynamic Regional Payment Trigger & Zone Copy */}
               <div className="space-y-2 pt-1">
-                <div className="grid grid-cols-2 gap-2">
+                <div className="flex items-center gap-2">
                   {/* 1-tap Copy Zone Button */}
                   <button
                     type="button"
                     onClick={() => handleCopyZone(segment.meterInfo!.payByCell)}
-                    className={`py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center space-x-1.5 transition-all active:scale-[0.98] border shadow-xs ${
+                    className={`flex-1 py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center space-x-1.5 transition-all active:scale-[0.98] border shadow-xs ${
                       copiedZone
                         ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700'
                         : 'bg-white/95 dark:bg-gray-800/95 text-blue-700 dark:text-blue-300 hover:bg-blue-50/80 dark:hover:bg-gray-700/80 border-blue-300 dark:border-blue-700'
@@ -315,31 +318,30 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
                     ) : (
                       <>
                         <Copy className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
-                        <span>{t('zone')} #{segment.meterInfo.payByCell}</span>
+                        <span>Parking Zone #{segment.meterInfo.payByCell}</span>
                       </>
                     )}
                   </button>
-
-                  {/* Open ParkNYC App */}
-                  <a
-                    href={
-                      typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent)
-                        ? 'https://play.google.com/store/apps/details?id=com.flowbird.parknyc'
-                        : 'https://apps.apple.com/app/id1135073877'
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center justify-center space-x-1.5 transition-all shadow-md shadow-blue-600/20 active:scale-[0.98]"
-                    title="Open ParkNYC"
-                  >
-                    <Smartphone className="w-3.5 h-3.5 shrink-0" />
-                    <span>{t('pay_parknyc')}</span>
-                  </a>
                 </div>
 
-                <p className="text-[10px] text-gray-500 dark:text-gray-400 text-center leading-tight">
-                  {t('zone')} <span className="font-bold text-gray-800 dark:text-gray-200 font-mono text-xs">{segment.meterInfo.payByCell}</span> • Copy zone number & open ParkNYC.
-                </p>
+                {/* Regional Provider App Launcher & Web Fallback */}
+                {regionProfile ? (
+                  <PaymentTrigger
+                    primaryProvider={regionProfile.primaryProvider}
+                    transitProvider={regionProfile.transitProvider}
+                    zoneNumber={segment.meterInfo.payByCell}
+                  />
+                ) : (
+                  <PaymentTrigger
+                    primaryProvider={{
+                      name: 'ParkNYC',
+                      scheme: 'flowbird://',
+                      webFallback: 'https://www.parknyc.org',
+                      badgeText: 'Pay via ParkNYC'
+                    }}
+                    zoneNumber={segment.meterInfo.payByCell}
+                  />
+                )}
               </div>
             </div>
           )}

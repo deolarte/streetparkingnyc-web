@@ -13,6 +13,8 @@ import type { CurbSegment, VehicleType } from '../types';
 import { searchNycAddress, type AddressCandidate } from '../services/geocodingService';
 import { AdBanner } from './AdBanner';
 import { useLanguage } from '../context/LanguageContext';
+import { RegionSelector } from './RegionSelector';
+import type { RegionParkingProfile, RegionId } from '../config/parkingConfig';
 
 interface SearchHeaderProps {
   vehicleType: VehicleType;
@@ -25,19 +27,37 @@ interface SearchHeaderProps {
   onSearchAddress: (candidate: AddressCandidate) => void;
   searchedAddressLabel?: string | null;
   onClearSearchedAddress?: () => void;
+  regionProfile?: RegionParkingProfile;
+  onSelectRegion?: (id: RegionId) => void;
 }
 
-const NYC_NEIGHBORHOODS = [
-  { name: 'Rego Park (Queens)', center: [-73.868, 40.7228] as [number, number], zoom: 15.5 },
-  { name: 'Astoria (Queens)', center: [-73.923, 40.764] as [number, number], zoom: 15.5 },
-  { name: 'Financial District', center: [-74.008, 40.7075] as [number, number], zoom: 15.5 },
-  { name: 'Chinatown / Civic', center: [-73.998, 40.714] as [number, number], zoom: 16 },
-  { name: 'SoHo / Nolita', center: [-73.9968, 40.722] as [number, number], zoom: 15.5 },
-  { name: 'West Village', center: [-74.002, 40.732] as [number, number], zoom: 15.5 },
-  { name: 'Midtown East', center: [-73.972, 40.7495] as [number, number], zoom: 15 },
-  { name: 'Williamsburg (BK)', center: [-73.957, 40.718] as [number, number], zoom: 15.5 },
-  { name: 'Brooklyn Heights', center: [-73.995, 40.6946] as [number, number], zoom: 15.5 },
-];
+const REGION_NEIGHBORHOODS: Record<string, { name: string; center: [number, number]; zoom: number }[]> = {
+  nyc: [
+    { name: 'Midtown East', center: [-73.972, 40.7495], zoom: 15 },
+    { name: 'Financial District', center: [-74.008, 40.7075], zoom: 15.5 },
+    { name: 'SoHo / Nolita', center: [-73.9968, 40.722], zoom: 15.5 },
+    { name: 'West Village', center: [-74.002, 40.732], zoom: 15.5 },
+    { name: 'Williamsburg (BK)', center: [-73.957, 40.718], zoom: 15.5 },
+    { name: 'Brooklyn Heights', center: [-73.995, 40.6946], zoom: 15.5 },
+    { name: 'Astoria (Queens)', center: [-73.923, 40.764], zoom: 15.5 },
+    { name: 'Rego Park (Queens)', center: [-73.868, 40.7228], zoom: 15.5 },
+  ],
+  nj_urban: [
+    { name: 'Downtown Jersey City', center: [-74.0431, 40.7178], zoom: 15.5 },
+    { name: 'Hoboken Waterfront', center: [-74.0285, 40.744], zoom: 15.5 },
+    { name: 'Journal Square (JC)', center: [-74.0628, 40.732], zoom: 15.5 },
+    { name: 'Downtown Newark', center: [-74.1724, 40.7357], zoom: 15 },
+    { name: 'Ironbound (Newark)', center: [-74.1555, 40.7315], zoom: 15.5 },
+    { name: 'Weehawken Port Imperial', center: [-74.015, 40.774], zoom: 15.5 },
+  ],
+  ct_southwest: [
+    { name: 'Downtown Stamford', center: [-73.5387, 41.0534], zoom: 15.5 },
+    { name: 'South Norwalk (SoNo)', center: [-73.419, 41.098], zoom: 15.5 },
+    { name: 'Greenwich Avenue', center: [-73.626, 41.026], zoom: 15.5 },
+    { name: 'Stamford Train Station', center: [-73.541, 41.0465], zoom: 16 },
+    { name: 'Darien Town Center', center: [-73.469, 41.078], zoom: 15.5 },
+  ],
+};
 
 export const SearchHeader: React.FC<SearchHeaderProps> = ({
   vehicleType,
@@ -50,6 +70,8 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
   onSearchAddress,
   searchedAddressLabel,
   onClearSearchedAddress,
+  regionProfile,
+  onSelectRegion,
 }) => {
   const { t } = useLanguage();
   const [query, setQuery] = useState('');
@@ -160,7 +182,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
           <MapPin className="w-3 h-3 text-rose-500 shrink-0" />
           <span>{t('jump_to')}</span>
         </span>
-        {NYC_NEIGHBORHOODS.map((nh) => (
+        {(REGION_NEIGHBORHOODS[regionProfile?.regionId || 'nyc'] || REGION_NEIGHBORHOODS.nyc).map((nh) => (
           <button
             key={nh.name}
             onClick={() => onJumpToLocation(nh.center, nh.zoom)}
@@ -174,19 +196,30 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
       {/* Main Search & Regulation Filter Card */}
       <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/80 dark:border-gray-800 p-2 sm:p-2.5">
         <div className="flex items-center gap-2">
-          {/* Brand Logo & Name */}
+          {/* Brand Logo & Name with Dynamic Region Context */}
           <div className="flex items-center space-x-2 pl-1 shrink-0">
             <img
               src="/apple-touch-icon.png"
-              alt="StreetPark"
+              alt="StreetParkingUSA"
               className="w-7 h-7 rounded-lg shadow-sm shrink-0 object-cover"
             />
             <div className="hidden sm:block">
-              <span className="font-extrabold text-sm tracking-tight text-gray-900 dark:text-white">
-                StreetPark
+              <span className="font-extrabold text-sm tracking-tight text-gray-900 dark:text-white block leading-tight">
+                StreetParkingUSA
+              </span>
+              <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold block leading-tight">
+                Tri-State • {regionProfile?.displayName || 'New York City'}
               </span>
             </div>
           </div>
+
+          {/* Region Selector Dropdown */}
+          {regionProfile && onSelectRegion && (
+            <RegionSelector
+              currentRegionId={regionProfile.regionId}
+              onSelectRegion={onSelectRegion}
+            />
+          )}
 
           {/* Search Input Form */}
           <form onSubmit={handleFormSubmit} className="relative flex-1">

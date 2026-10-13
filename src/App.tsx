@@ -16,8 +16,10 @@ import { AboutModal } from './components/AboutModal';
 import { Loader2 } from 'lucide-react';
 import { useLanguage } from './context/LanguageContext';
 import { localizeCurbSegment } from './i18n/ruleLocalizer';
+import { useRegion } from './context/RegionContext';
 
 export function App() {
+  const { profile: regionProfile, setRegion } = useRegion();
   const [selectedTime, setSelectedTime] = useState<Date>(() => new Date());
   const [isNow, setIsNow] = useState<boolean>(true);
   const [vehicleType, setVehicleType] = useState<VehicleType>('passenger');
@@ -296,6 +298,14 @@ export function App() {
             onSearchAddress={handleSearchAddress}
             searchedAddressLabel={searchedLocation ? searchedLocation.label : null}
             onClearSearchedAddress={handleClearSearchedAddress}
+            regionProfile={regionProfile}
+            onSelectRegion={(id) => {
+              setRegion(id);
+              if (regionProfile && mapInstanceRef.current) {
+                const target = id === 'nj_urban' ? [-74.0431, 40.7282] as [number, number] : id === 'ct_southwest' ? [-73.5387, 41.0534] as [number, number] : [-73.9851, 40.7484] as [number, number];
+                handleJumpToLocation(target, 15);
+              }
+            }}
           />
         </div>
       </div>
@@ -387,6 +397,7 @@ export function App() {
           setSelectedTime(new Date());
           setIsNow(true);
         }}
+        regionProfile={regionProfile}
       />
 
       {/* High-Value Interstitial Ad Modal */}

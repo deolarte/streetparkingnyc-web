@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   X,
   ShieldAlert,
@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { aboutContent } from '../i18n/aboutContent';
+import { TRISTATE_FAQS } from '../data/triStateFaq';
 
 interface AboutModalProps {
   isOpen: boolean;
@@ -24,6 +25,13 @@ interface AboutModalProps {
 
 export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
   const { t, locale, setLocale, languages, isI18nEnabled } = useLanguage();
+  const [activeFaqFilter, setActiveFaqFilter] = useState<'ALL' | 'NYC' | 'NJ' | 'CT'>('ALL');
+
+  const filteredFaqs = useMemo(() => {
+    if (activeFaqFilter === 'ALL') return TRISTATE_FAQS;
+    return TRISTATE_FAQS.filter((f) => f.jurisdiction === activeFaqFilter);
+  }, [activeFaqFilter]);
+
   if (!isOpen) return null;
 
   const content = aboutContent[locale] || aboutContent.en;
@@ -204,20 +212,46 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          {/* Frequently Asked Questions */}
+          {/* Interactive Tri-State FAQ & Ticket Dispute Knowledge Base */}
           <div className="space-y-2.5">
-            <div className="flex items-center space-x-1.5 text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider">
-              <HelpCircle className="w-4 h-4 text-amber-500" />
-              <span>{content.faqTitle}</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-1.5 text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider">
+                <HelpCircle className="w-4 h-4 text-amber-500" />
+                <span>Tri-State FAQ & Rules Knowledge Base</span>
+              </div>
             </div>
 
+            {/* State Jurisdiction Filter Pills */}
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+              {(['ALL', 'NYC', 'NJ', 'CT'] as const).map((filter) => (
+                <button
+                  key={filter}
+                  type="button"
+                  onClick={() => setActiveFaqFilter(filter)}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all shrink-0 border ${
+                    activeFaqFilter === filter
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-200/70'
+                  }`}
+                >
+                  {filter === 'ALL' ? 'All Jurisdictions' : filter === 'NYC' ? '🗽 New York City' : filter === 'NJ' ? '🛡️ New Jersey' : '🌲 Connecticut'}
+                </button>
+              ))}
+            </div>
+
+            {/* Filtered FAQs */}
             <div className="space-y-2 text-[11px]">
-              {content.faqs.map((faq, idx) => (
+              {filteredFaqs.map((faq, idx) => (
                 <div key={idx} className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 space-y-1">
-                  <p className="font-bold text-gray-900 dark:text-white">
-                    {faq.q}
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-300">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-bold text-gray-900 dark:text-white">
+                      {faq.q}
+                    </p>
+                    <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 shrink-0">
+                      {faq.jurisdiction}
+                    </span>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                     {faq.a}
                   </p>
                 </div>
