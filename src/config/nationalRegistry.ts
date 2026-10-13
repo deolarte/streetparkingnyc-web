@@ -997,3 +997,47 @@ export function resolveJurisdiction(stateCodeInput?: string, cityIdInput?: strin
     secondaryApps,
   };
 }
+
+// Coordinate bounding boxes and nearest distance heuristic for fast state estimation
+export function estimateStateFromCoords(lat: number, lng: number): string {
+  // California
+  if (lat >= 32.5 && lat <= 42.0 && lng >= -124.5 && lng <= -114.1) return 'CA';
+  // New York
+  if (lat >= 40.5 && lat <= 45.0 && lng >= -79.8 && lng <= -71.8) return 'NY';
+  // New Jersey
+  if (lat >= 38.9 && lat <= 41.4 && lng >= -75.6 && lng <= -73.9) return 'NJ';
+  // Connecticut
+  if (lat >= 40.98 && lat <= 42.05 && lng >= -73.73 && lng <= -71.79) return 'CT';
+  // Illinois
+  if (lat >= 36.97 && lat <= 42.51 && lng >= -91.51 && lng <= -87.02) return 'IL';
+  // Texas
+  if (lat >= 25.84 && lat <= 36.50 && lng >= -106.65 && lng <= -93.51) return 'TX';
+  // Florida
+  if (lat >= 24.52 && lat <= 31.00 && lng >= -87.63 && lng <= -80.03) return 'FL';
+  // Pennsylvania
+  if (lat >= 39.72 && lat <= 42.27 && lng >= -80.52 && lng <= -74.69) return 'PA';
+  // Massachusetts
+  if (lat >= 41.23 && lat <= 42.89 && lng >= -73.51 && lng <= -69.93) return 'MA';
+  // District of Columbia
+  if (lat >= 38.79 && lat <= 38.99 && lng >= -77.12 && lng <= -76.91) return 'DC';
+  // Washington State
+  if (lat >= 45.54 && lat <= 49.00 && lng >= -124.76 && lng <= -116.92) return 'WA';
+  // Colorado
+  if (lat >= 36.99 && lat <= 41.00 && lng >= -109.05 && lng <= -102.04) return 'CO';
+  // Georgia
+  if (lat >= 30.36 && lat <= 35.00 && lng >= -85.61 && lng <= -80.84) return 'GA';
+
+  // Fallback to nearest state geographic center
+  let closestState = 'NY';
+  let minDist = Infinity;
+  for (const s of ALL_US_STATES) {
+    const dLng = s.center[0] - lng;
+    const dLat = s.center[1] - lat;
+    const dist = dLng * dLng + dLat * dLat;
+    if (dist < minDist) {
+      minDist = dist;
+      closestState = s.code;
+    }
+  }
+  return closestState;
+}

@@ -87,13 +87,14 @@ export function App() {
 
   const mapInstanceRef = useRef<Map | null>(null);
 
-  // Load NYC curbs on startup
+  // Load initial curbs on startup tailored to active location
   useEffect(() => {
     let isMounted = true;
     async function loadData() {
       setIsLoading(true);
       try {
-        const data = await fetchLiveSocrataCurbs();
+        const [lon, lat] = initialMapCenter;
+        const data = await fetchCurbsNearLocation(lat, lon);
         if (isMounted) {
           setRawCurbs(data);
         }
@@ -107,7 +108,7 @@ export function App() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [initialMapCenter]);
 
   // Periodic clock tick for "Live Now" mode
   useEffect(() => {
@@ -168,7 +169,7 @@ export function App() {
   };
 
   const handleJumpToLocation = useCallback(
-    (center: [number, number], zoom: number = 15.5, withBottomSheetPadding: boolean = false) => {
+    async (center: [number, number], zoom: number = 15.5, withBottomSheetPadding: boolean = false) => {
       if (mapInstanceRef.current) {
         const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
         mapInstanceRef.current.flyTo({
@@ -180,6 +181,20 @@ export function App() {
             : { top: 0, bottom: 0, left: 0, right: 0 },
           essential: true,
         });
+      }
+
+      // Proactively fetch and populate curbs for this target location
+      const [lon, lat] = center;
+      try {
+        const nearby = await fetchCurbsNearLocation(lat, lon);
+        setRawCurbs((prev) => {
+          const existingIds = new Set(prev.map((c) => c.id));
+          const additions = nearby.filter((c) => !existingIds.has(c.id));
+          if (additions.length === 0) return prev;
+          return [...prev, ...additions];
+        });
+      } catch (err) {
+        console.warn('Could not load curbs for jump location:', err);
       }
     },
     []
