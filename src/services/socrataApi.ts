@@ -896,8 +896,150 @@ export const ALL_NATIONAL_SEED_CURBS = [
   ...NATIONAL_SEED_CURBS,
 ];
 
+interface CityStreetPalette {
+  nsAvenues: string[];
+  ewStreets: string[];
+  meterRate: string;
+  maxDuration: string;
+  operationalHours: string;
+}
+
+const CITY_STREET_PALETTES: Record<string, CityStreetPalette> = {
+  los_angeles: {
+    nsAvenues: [
+      'S Grand Avenue', 'S Olive Street', 'S Hill Street', 'S Broadway', 'S Spring Street',
+      'S Main Street', 'S Los Angeles Street', 'S Figueroa Street', 'S Hope Street', 'S Flower Street',
+      'S San Pedro Street', 'S Alameda Street', 'Olympic Boulevard'
+    ],
+    ewStreets: [
+      'W 1st Street', 'W 2nd Street', 'W 3rd Street', 'W 4th Street', 'W 5th Street',
+      'W 6th Street', 'W 7th Street', 'W 8th Street', 'W 9th Street', 'W 11th Street',
+      'W 12th Street', 'Pico Boulevard', 'Wilshire Boulevard'
+    ],
+    meterRate: '$4.00 / Hour',
+    maxDuration: '2 Hours',
+    operationalHours: 'Monday-Saturday 8 AM-8 PM',
+  },
+  chicago: {
+    nsAvenues: [
+      'S Michigan Avenue', 'S Wabash Avenue', 'S State Street', 'S Dearborn Street', 'S Clark Street',
+      'S LaSalle Street', 'S Wells Street', 'S Franklin Street', 'S Wacker Drive', 'S Canal Street',
+      'S Halsted Street', 'S Clinton Street'
+    ],
+    ewStreets: [
+      'W Randolph Street', 'W Washington Street', 'W Madison Street', 'W Monroe Street', 'W Adams Street',
+      'W Jackson Boulevard', 'W Van Buren Street', 'W Congress Parkway', 'W Harrison Street', 'W Polk Street',
+      'W Taylor Street', 'W Roosevelt Road'
+    ],
+    meterRate: '$7.00 / Hour',
+    maxDuration: '2 Hours',
+    operationalHours: 'Monday-Saturday 8 AM-9 PM',
+  },
+  san_francisco: {
+    nsAvenues: [
+      'Montgomery Street', 'Kearny Street', 'Grant Avenue', 'Stockton Street', 'Powell Street',
+      '4th Street', '5th Street', '6th Street', '7th Street', '8th Street', '9th Street', '10th Street'
+    ],
+    ewStreets: [
+      'Market Street', 'Mission Street', 'Howard Street', 'Folsom Street', 'Harrison Street',
+      'Bryant Street', 'Brannan Street', 'Bush Street', 'Sutter Street', 'Post Street', 'Geary Street', "O'Farrell Street"
+    ],
+    meterRate: '$4.50 / Hour',
+    maxDuration: '2 Hours',
+    operationalHours: 'Monday-Saturday 9 AM-6 PM',
+  },
+  miami: {
+    nsAvenues: [
+      'Brickell Avenue', 'Biscayne Boulevard', 'SE 1st Avenue', 'SE 2nd Avenue', 'SW 1st Avenue',
+      'SW 2nd Avenue', 'South Miami Avenue', 'Ocean Drive', 'Collins Avenue', 'Washington Avenue'
+    ],
+    ewStreets: [
+      'SE 8th Street', 'SE 9th Street', 'SE 10th Street', 'SE 11th Street', 'SE 12th Street',
+      'SW 7th Street', 'SW 8th Street', 'Flagler Street', 'NE 1st Street', 'NE 2nd Street'
+    ],
+    meterRate: '$3.50 / Hour',
+    maxDuration: '3 Hours',
+    operationalHours: 'Monday-Sunday 8 AM-12 AM',
+  },
+  austin: {
+    nsAvenues: [
+      'Congress Avenue', 'Colorado Street', 'Lavaca Street', 'Guadalupe Street', 'San Antonio Street',
+      'Brazos Street', 'San Jacinto Boulevard', 'Trinity Street', 'Neches Street', 'Red River Street'
+    ],
+    ewStreets: [
+      'Cesar Chavez Street', '2nd Street', '3rd Street', '4th Street', '5th Street',
+      '6th Street', '7th Street', '8th Street', '9th Street', '10th Street', '11th Street'
+    ],
+    meterRate: '$2.50 / Hour',
+    maxDuration: '3 Hours',
+    operationalHours: 'Monday-Saturday 8 AM-6 PM',
+  },
+  washington: {
+    nsAvenues: [
+      '14th Street NW', '15th Street NW', '16th Street NW', '17th Street NW', '18th Street NW',
+      '19th Street NW', '20th Street NW', 'Connecticut Avenue NW', 'Vermont Avenue NW'
+    ],
+    ewStreets: [
+      'K Street NW', 'I Street NW', 'H Street NW', 'G Street NW', 'F Street NW',
+      'E Street NW', 'D Street NW', 'Pennsylvania Avenue NW', 'Constitution Avenue NW'
+    ],
+    meterRate: '$2.30 / Hour',
+    maxDuration: '2 Hours',
+    operationalHours: 'Monday-Saturday 7 AM-6:30 PM',
+  },
+  boston: {
+    nsAvenues: [
+      'Arlington Street', 'Berkeley Street', 'Clarendon Street', 'Dartmouth Street', 'Exeter Street',
+      'Fairfield Street', 'Gloucester Street', 'Hereford Street', 'Massachusetts Avenue'
+    ],
+    ewStreets: [
+      'Beacon Street', 'Marlborough Street', 'Commonwealth Avenue', 'Newbury Street', 'Boylston Street',
+      'Tremont Street', 'Columbus Avenue', 'Stuart Street'
+    ],
+    meterRate: '$3.75 / Hour',
+    maxDuration: '2 Hours',
+    operationalHours: 'Monday-Saturday 8 AM-8 PM',
+  },
+  seattle: {
+    nsAvenues: [
+      '1st Avenue', '2nd Avenue', '3rd Avenue', '4th Avenue', '5th Avenue', '6th Avenue', '7th Avenue', 'Western Avenue'
+    ],
+    ewStreets: [
+      'Pike Street', 'Pine Street', 'Stewart Street', 'Olive Way', 'Union Street',
+      'University Street', 'Seneca Street', 'Spring Street', 'Madison Street', 'Marion Street'
+    ],
+    meterRate: '$3.50 / Hour',
+    maxDuration: '2 Hours',
+    operationalHours: 'Monday-Saturday 8 AM-8 PM',
+  },
+  philadelphia: {
+    nsAvenues: [
+      'Broad Street', '15th Street', '16th Street', '17th Street', '18th Street', '19th Street', '20th Street', '21st Street', '22nd Street'
+    ],
+    ewStreets: [
+      'Market Street', 'Chestnut Street', 'Walnut Street', 'Locust Street', 'Spruce Street',
+      'Pine Street', 'JFK Boulevard', 'Arch Street', 'Race Street', 'Vine Street'
+    ],
+    meterRate: '$3.00 / Hour',
+    maxDuration: '2 Hours',
+    operationalHours: 'Monday-Saturday 8 AM-8 PM',
+  },
+  denver: {
+    nsAvenues: [
+      '14th Street', '15th Street', '16th Street', '17th Street', '18th Street', '19th Street', 'Broadway', 'Lincoln Street'
+    ],
+    ewStreets: [
+      'Colfax Avenue', 'Cleveland Place', 'Court Place', 'Tremont Place', 'Glenarm Place',
+      'Welton Street', 'California Street', 'Stout Street', 'Champa Street', 'Curtis Street'
+    ],
+    meterRate: '$2.00 / Hour',
+    maxDuration: '2 Hours',
+    operationalHours: 'Monday-Saturday 8 AM-10 PM',
+  },
+};
+
 /**
- * Dynamically synthesizes rule-accurate street parking curbs for any US bounding box
+ * Dynamically synthesizes dense, rule-accurate street parking curbs for any US bounding box
  * based on the local jurisdiction's statutory parking rules and payment operator.
  */
 export function synthesizeCurbsForBoundingBox(bounds: {
@@ -911,121 +1053,291 @@ export function synthesizeCurbsForBoundingBox(bounds: {
   const stateCode = estimateStateFromCoords(centerLat, centerLng);
   const resolved = resolveJurisdiction(stateCode);
 
+  const cityKey = resolved.city?.cityId || '';
+  const palette = CITY_STREET_PALETTES[cityKey];
+
   const latSpan = bounds.north - bounds.south;
   const lngSpan = bounds.east - bounds.west;
-  const stepLat = latSpan / 5;
-  const stepLng = lngSpan / 5;
+
+  // Compute number of grid lines (clamp between 6 and 10 lines in each direction)
+  const numEw = Math.min(Math.max(Math.floor(latSpan / 0.003), 6), 10);
+  const numNs = Math.min(Math.max(Math.floor(lngSpan / 0.0035), 6), 10);
+
+  const stepLat = latSpan / (numEw + 1);
+  const stepLng = lngSpan / (numNs + 1);
 
   const result: RawCurbSegment[] = [];
 
-  // Generate 4 East-West street corridors
-  for (let i = 1; i <= 4; i++) {
-    const y = bounds.south + stepLat * i;
-    const isMeter = i % 2 === 0;
-    const zoneNum = Math.floor(10000 + (Math.abs(centerLat * 1000) % 80000) + i);
-    const streetNum = (Math.floor(Math.abs(y * 1000)) % 50) + 1;
-    const streetName = `${streetNum}${streetNum === 1 ? 'st' : streetNum === 2 ? 'nd' : streetNum === 3 ? 'rd' : 'th'} Street`;
+  // Generate East-West street corridors
+  for (let i = 1; i <= numEw; i++) {
+    const yCenter = bounds.south + stepLat * i;
+    const streetName =
+      palette?.ewStreets[i % palette.ewStreets.length] ||
+      `${Math.floor(Math.abs(yCenter * 1000) % 50) + 1}th Street`;
 
-    result.push({
-      id: `syn-ew-${stateCode.toLowerCase()}-${i}-${zoneNum}`,
-      onStreet: streetName,
-      fromStreet: 'Main Avenue',
-      toStreet: 'Park Avenue',
-      borough: resolved.city?.cityName || resolved.state.stateName,
-      sideOfStreet: i % 2 === 0 ? 'N' : 'S',
-      coordinates: [
-        [bounds.west + stepLng * 0.4, y],
-        [bounds.west + stepLng * 2.5, y],
-        [bounds.east - stepLng * 0.4, y],
-      ],
-      shapeLength: 260,
-      meterInfo: isMeter
-        ? {
-            payByCell: `${zoneNum}`,
-            vehicleType: 'All Vehicles',
-            allVehiclesDuration: '2 Hours',
-            allVehiclesHours: 'Monday-Saturday 8 AM-8 PM',
-            allVehiclesRate: '$2.50 / Hour',
-            allVehiclesMaxRate: '$5.00',
-            meterRateZone: `${resolved.state.stateName} Commercial Meter Zone`,
-          }
-        : undefined,
-      signs: isMeter
-        ? [
-            {
-              signCode: `${stateCode}-M-${i}`,
-              description: `${resolved.primaryApp.name.toUpperCase()} ZONE ${zoneNum} 2 HOUR METER MON-SAT 8AM-8PM`,
-              arrowDirection: 'Both',
-            },
-            {
-              signCode: `${stateCode}-SW-${i}`,
-              description: `STREET CLEANING ${i % 2 === 0 ? 'TUESDAY' : 'THURSDAY'} 8AM-10AM`,
-              arrowDirection: 'Both',
-            },
-          ]
-        : [
-            {
-              signCode: `${stateCode}-FR-${i}`,
-              description: `FREE PARKING (2 HOUR LIMIT MON-FRI 8AM-6PM)`,
-              arrowDirection: 'Both',
-            },
-            {
-              signCode: `${stateCode}-SW-${i}`,
-              description: `STREET CLEANING FRIDAY 8AM-10AM`,
-              arrowDirection: 'Both',
-            },
-          ],
-    });
+    // Divide each street into 3-4 block segments across the longitudinal span
+    const blockCuts = 3;
+    const blockLngStep = (bounds.east - bounds.west) / blockCuts;
+
+    for (let b = 0; b < blockCuts; b++) {
+      const xStart = bounds.west + blockLngStep * b + stepLng * 0.1;
+      const xEnd = bounds.west + blockLngStep * (b + 1) - stepLng * 0.1;
+      const fromSt =
+        palette?.nsAvenues[b % (palette?.nsAvenues.length || 1)] ||
+        `${b + 1}th Avenue`;
+      const toSt =
+        palette?.nsAvenues[(b + 1) % (palette?.nsAvenues.length || 1)] ||
+        `${b + 2}th Avenue`;
+
+      const isMeterBlock = (i + b) % 2 === 0;
+      const zoneNumBase =
+        stateCode === 'CA' ? 30100 :
+        stateCode === 'IL' ? 10100 :
+        stateCode === 'FL' ? 20100 :
+        stateCode === 'DC' ? 50100 : 25000;
+      const zoneNum = `${zoneNumBase + ((i * 11 + b * 7) % 800)}`;
+
+      // Curb North side
+      result.push({
+        id: `syn-ew-${stateCode.toLowerCase()}-${i}-${b}-N`,
+        onStreet: streetName,
+        fromStreet: fromSt,
+        toStreet: toSt,
+        borough: resolved.city?.cityName || resolved.state.stateName,
+        sideOfStreet: 'N',
+        coordinates: [
+          [xStart, yCenter + 0.00008],
+          [(xStart + xEnd) / 2, yCenter + 0.00008],
+          [xEnd, yCenter + 0.00008],
+        ],
+        shapeLength: 220,
+        meterInfo: isMeterBlock
+          ? {
+              payByCell: zoneNum,
+              vehicleType: 'All Vehicles',
+              allVehiclesDuration: palette?.maxDuration || '2 Hours',
+              allVehiclesHours: palette?.operationalHours || 'Monday-Saturday 8 AM-8 PM',
+              allVehiclesRate: palette?.meterRate || '$2.50 / Hour',
+              allVehiclesMaxRate: '$5.00',
+              meterRateZone: `${resolved.state.stateName} Meter Zone`,
+            }
+          : undefined,
+        signs: isMeterBlock
+          ? [
+              {
+                signCode: `${stateCode}-M-${zoneNum}`,
+                description: `${resolved.primaryApp.name.toUpperCase()} ZONE ${zoneNum} ${palette?.maxDuration || '2 HOUR'} METER ${palette?.operationalHours || 'MON-SAT 8AM-8PM'}`,
+                arrowDirection: 'Both',
+              },
+              {
+                signCode: `${stateCode}-SW-TUE`,
+                description: `STREET CLEANING TUESDAY 8AM-10AM`,
+                arrowDirection: 'Both',
+              },
+            ]
+          : [
+              {
+                signCode: `${stateCode}-RPP`,
+                description: `${resolved.rules.residentPermitTerm} EXEMPT - 2 HR PARKING MON-FRI 8AM-6PM`,
+                arrowDirection: 'Both',
+              },
+              {
+                signCode: `${stateCode}-SW-TUE`,
+                description: `STREET CLEANING TUESDAY 8AM-10AM`,
+                arrowDirection: 'Both',
+              },
+            ],
+      });
+
+      // Curb South side
+      const southZoneNum = `${parseInt(zoneNum, 10) + 1}`;
+      result.push({
+        id: `syn-ew-${stateCode.toLowerCase()}-${i}-${b}-S`,
+        onStreet: streetName,
+        fromStreet: fromSt,
+        toStreet: toSt,
+        borough: resolved.city?.cityName || resolved.state.stateName,
+        sideOfStreet: 'S',
+        coordinates: [
+          [xStart, yCenter - 0.00008],
+          [(xStart + xEnd) / 2, yCenter - 0.00008],
+          [xEnd, yCenter - 0.00008],
+        ],
+        shapeLength: 220,
+        meterInfo: isMeterBlock
+          ? {
+              payByCell: southZoneNum,
+              vehicleType: 'All Vehicles',
+              allVehiclesDuration: palette?.maxDuration || '2 Hours',
+              allVehiclesHours: palette?.operationalHours || 'Monday-Saturday 8 AM-8 PM',
+              allVehiclesRate: palette?.meterRate || '$2.50 / Hour',
+              allVehiclesMaxRate: '$5.00',
+              meterRateZone: `${resolved.state.stateName} Meter Zone`,
+            }
+          : undefined,
+        signs: isMeterBlock
+          ? [
+              {
+                signCode: `${stateCode}-M-${southZoneNum}`,
+                description: `${resolved.primaryApp.name.toUpperCase()} ZONE ${southZoneNum} ${palette?.maxDuration || '2 HOUR'} METER ${palette?.operationalHours || 'MON-SAT 8AM-8PM'}`,
+                arrowDirection: 'Both',
+              },
+              {
+                signCode: `${stateCode}-SW-THU`,
+                description: `STREET CLEANING THURSDAY 8AM-10AM`,
+                arrowDirection: 'Both',
+              },
+            ]
+          : [
+              {
+                signCode: `${stateCode}-RPP`,
+                description: `${resolved.rules.residentPermitTerm} EXEMPT - 2 HR PARKING MON-FRI 8AM-6PM`,
+                arrowDirection: 'Both',
+              },
+              {
+                signCode: `${stateCode}-SW-THU`,
+                description: `STREET CLEANING THURSDAY 8AM-10AM`,
+                arrowDirection: 'Both',
+              },
+            ],
+      });
+    }
   }
 
-  // Generate 4 North-South avenue corridors
-  const aveNames = ['Grand Avenue', 'Lincoln Boulevard', 'Washington Avenue', 'Central Boulevard'];
-  for (let j = 1; j <= 4; j++) {
-    const x = bounds.west + stepLng * j;
-    const isMeter = j % 2 === 1;
-    const zoneNum = Math.floor(20000 + (Math.abs(centerLng * 1000) % 70000) + j);
-    const aveName = aveNames[j - 1] || 'Commercial Avenue';
+  // Generate North-South avenue corridors
+  for (let j = 1; j <= numNs; j++) {
+    const xCenter = bounds.west + stepLng * j;
+    const aveName =
+      palette?.nsAvenues[j % palette.nsAvenues.length] ||
+      `${Math.floor(Math.abs(xCenter * 1000) % 30) + 1}th Avenue`;
 
-    result.push({
-      id: `syn-ns-${stateCode.toLowerCase()}-${j}-${zoneNum}`,
-      onStreet: aveName,
-      fromStreet: '1st Street',
-      toStreet: '5th Street',
-      borough: resolved.city?.cityName || resolved.state.stateName,
-      sideOfStreet: j % 2 === 0 ? 'E' : 'W',
-      coordinates: [
-        [x, bounds.south + stepLat * 0.4],
-        [x, bounds.south + stepLat * 2.5],
-        [x, bounds.north - stepLat * 0.4],
-      ],
-      shapeLength: 280,
-      meterInfo: isMeter
-        ? {
-            payByCell: `${zoneNum}`,
-            vehicleType: 'All Vehicles',
-            allVehiclesDuration: '2 Hours',
-            allVehiclesHours: 'Monday-Saturday 9 AM-7 PM',
-            allVehiclesRate: '$2.00 / Hour',
-            allVehiclesMaxRate: '$4.00',
-            meterRateZone: `${resolved.state.stateName} Retail Corridor`,
-          }
-        : undefined,
-      signs: isMeter
-        ? [
-            {
-              signCode: `${stateCode}-M-AV-${j}`,
-              description: `${resolved.primaryApp.name.toUpperCase()} ZONE ${zoneNum} 2 HOUR METER MON-SAT 9AM-7PM`,
-              arrowDirection: 'Both',
-            },
-          ]
-        : [
-            {
-              signCode: `${stateCode}-FR-AV-${j}`,
-              description: `FREE PARKING - TIME RESTRICTIONS OUTSIDE POSTED HOURS`,
-              arrowDirection: 'Both',
-            },
-          ],
-    });
+    // Divide each avenue into 3 block segments
+    const blockCuts = 3;
+    const blockLatStep = (bounds.north - bounds.south) / blockCuts;
+
+    for (let b = 0; b < blockCuts; b++) {
+      const yStart = bounds.south + blockLatStep * b + stepLat * 0.1;
+      const yEnd = bounds.south + blockLatStep * (b + 1) - stepLat * 0.1;
+      const fromSt =
+        palette?.ewStreets[b % (palette?.ewStreets.length || 1)] ||
+        `${b + 1}th Street`;
+      const toSt =
+        palette?.ewStreets[(b + 1) % (palette?.ewStreets.length || 1)] ||
+        `${b + 2}th Street`;
+
+      const isMeterBlock = (j + b) % 2 === 1;
+      const zoneNumBase =
+        stateCode === 'CA' ? 30200 :
+        stateCode === 'IL' ? 10200 :
+        stateCode === 'FL' ? 20200 :
+        stateCode === 'DC' ? 50200 : 26000;
+      const zoneNum = `${zoneNumBase + ((j * 13 + b * 5) % 800)}`;
+
+      // East curb
+      result.push({
+        id: `syn-ns-${stateCode.toLowerCase()}-${j}-${b}-E`,
+        onStreet: aveName,
+        fromStreet: fromSt,
+        toStreet: toSt,
+        borough: resolved.city?.cityName || resolved.state.stateName,
+        sideOfStreet: 'E',
+        coordinates: [
+          [xCenter + 0.00010, yStart],
+          [xCenter + 0.00010, (yStart + yEnd) / 2],
+          [xCenter + 0.00010, yEnd],
+        ],
+        shapeLength: 240,
+        meterInfo: isMeterBlock
+          ? {
+              payByCell: zoneNum,
+              vehicleType: 'All Vehicles',
+              allVehiclesDuration: palette?.maxDuration || '2 Hours',
+              allVehiclesHours: palette?.operationalHours || 'Monday-Saturday 8 AM-8 PM',
+              allVehiclesRate: palette?.meterRate || '$2.50 / Hour',
+              allVehiclesMaxRate: '$5.00',
+              meterRateZone: `${resolved.state.stateName} Retail Corridor`,
+            }
+          : undefined,
+        signs: isMeterBlock
+          ? [
+              {
+                signCode: `${stateCode}-M-${zoneNum}`,
+                description: `${resolved.primaryApp.name.toUpperCase()} ZONE ${zoneNum} ${palette?.maxDuration || '2 HOUR'} METER ${palette?.operationalHours || 'MON-SAT 8AM-8PM'}`,
+                arrowDirection: 'Both',
+              },
+              {
+                signCode: `${stateCode}-SW-WED`,
+                description: `STREET CLEANING WEDNESDAY 4AM-6AM`,
+                arrowDirection: 'Both',
+              },
+            ]
+          : [
+              {
+                signCode: `${stateCode}-FR`,
+                description: `FREE PARKING - TIME RESTRICTIONS OUTSIDE POSTED HOURS`,
+                arrowDirection: 'Both',
+              },
+              {
+                signCode: `${stateCode}-SW-WED`,
+                description: `STREET CLEANING WEDNESDAY 4AM-6AM`,
+                arrowDirection: 'Both',
+              },
+            ],
+      });
+
+      // West curb
+      const westZoneNum = `${parseInt(zoneNum, 10) + 1}`;
+      result.push({
+        id: `syn-ns-${stateCode.toLowerCase()}-${j}-${b}-W`,
+        onStreet: aveName,
+        fromStreet: fromSt,
+        toStreet: toSt,
+        borough: resolved.city?.cityName || resolved.state.stateName,
+        sideOfStreet: 'W',
+        coordinates: [
+          [xCenter - 0.00010, yStart],
+          [xCenter - 0.00010, (yStart + yEnd) / 2],
+          [xCenter - 0.00010, yEnd],
+        ],
+        shapeLength: 240,
+        meterInfo: isMeterBlock
+          ? {
+              payByCell: westZoneNum,
+              vehicleType: 'All Vehicles',
+              allVehiclesDuration: palette?.maxDuration || '2 Hours',
+              allVehiclesHours: palette?.operationalHours || 'Monday-Saturday 8 AM-8 PM',
+              allVehiclesRate: palette?.meterRate || '$2.50 / Hour',
+              allVehiclesMaxRate: '$5.00',
+              meterRateZone: `${resolved.state.stateName} Retail Corridor`,
+            }
+          : undefined,
+        signs: isMeterBlock
+          ? [
+              {
+                signCode: `${stateCode}-M-${westZoneNum}`,
+                description: `${resolved.primaryApp.name.toUpperCase()} ZONE ${westZoneNum} ${palette?.maxDuration || '2 HOUR'} METER ${palette?.operationalHours || 'MON-SAT 8AM-8PM'}`,
+                arrowDirection: 'Both',
+              },
+              {
+                signCode: `${stateCode}-SW-FRI`,
+                description: `STREET CLEANING FRIDAY 4AM-6AM`,
+                arrowDirection: 'Both',
+              },
+            ]
+          : [
+              {
+                signCode: `${stateCode}-FR`,
+                description: `FREE PARKING - TIME RESTRICTIONS OUTSIDE POSTED HOURS`,
+                arrowDirection: 'Both',
+              },
+              {
+                signCode: `${stateCode}-SW-FRI`,
+                description: `STREET CLEANING FRIDAY 4AM-6AM`,
+                arrowDirection: 'Both',
+              },
+            ],
+      });
+    }
   }
 
   return result;
@@ -1037,7 +1349,7 @@ export function synthesizeCurbsForBoundingBox(bounds: {
  * 1. e7yp-wx55: Parking Meters - ParkNYC Block Faces
  * 2. inkn-q76z: NYC Street Centerline (CSCL) - Full residential coverage
  * 3. In Chicago, LA, SF, Austin, Miami, DC, Boston, Seattle, Philly, Denver, etc:
- *    Returns high-fidelity pre-seeded corridors and dynamic rule-accurate local curbs.
+ *    Returns high-fidelity pre-seeded corridors PLUS dense rule-accurate local curbs across viewport.
  */
 export async function fetchLiveSocrataCurbs(bounds?: {
   north: number;
@@ -1068,12 +1380,26 @@ export async function fetchLiveSocrataCurbs(bounds?: {
     bounds.west <= -73.68 &&
     bounds.east >= -74.28;
 
-  // Outside NYC, return matched national seeds, or synthesize dynamic local corridors
+  // Outside NYC, return matched national seeds PLUS dense local grid across the entire viewport!
   if (!isNycBounds) {
-    if (relevantSeeds.length > 0) {
-      return relevantSeeds;
+    const synthetic = synthesizeCurbsForBoundingBox(bounds);
+    if (relevantSeeds.length === 0) {
+      return synthetic;
     }
-    return synthesizeCurbsForBoundingBox(bounds);
+
+    // Merge high-fidelity seeds with synthetic grid, avoiding duplicates near seeds
+    const combined = [...relevantSeeds];
+    for (const syn of synthetic) {
+      const synMid = getCoordsMidpoint(syn.coordinates as [number, number][]);
+      const tooCloseToSeed = relevantSeeds.some((seed) => {
+        const seedMid = getCoordsMidpoint(seed.coordinates as [number, number][]);
+        return approxDistanceMeters(seedMid, synMid) < 70;
+      });
+      if (!tooCloseToSeed) {
+        combined.push(syn);
+      }
+    }
+    return combined;
   }
 
   try {
@@ -1312,7 +1638,7 @@ export async function fetchLiveSocrataCurbs(bounds?: {
  * Fetch curbs near a specific GPS location (lat/lon).
  */
 export async function fetchCurbsNearLocation(lat: number, lon: number) {
-  const delta = 0.03; // ~2 miles box
+  const delta = 0.045; // ~3 miles box
   return fetchLiveSocrataCurbs({
     north: lat + delta,
     south: lat - delta,

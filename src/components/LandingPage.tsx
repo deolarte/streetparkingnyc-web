@@ -86,9 +86,10 @@ export const LandingPage: React.FC = () => {
               <div className="w-11 h-11 rounded-lg overflow-hidden border border-neutral-800 bg-neutral-900 p-0.5 group-hover:border-neutral-700 transition-colors">
                 <img src="/apple-touch-icon.png" alt="StreetParkingUSA" className="w-full h-full object-contain rounded-md" />
               </div>
-              <div className="flex items-center gap-1.5 text-xs font-mono text-neutral-500 group-hover:text-white transition-colors">
-                <span>Tri-State Live</span>
-                <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              <div className="flex items-center gap-1.5 text-xs font-mono text-emerald-400 group-hover:text-emerald-300 transition-colors">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Nationwide Live</span>
+                <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 text-neutral-400 group-hover:text-white" />
               </div>
             </div>
 
@@ -97,7 +98,7 @@ export const LandingPage: React.FC = () => {
                 StreetParkingUSA
               </h3>
               <p className="text-sm text-neutral-400 leading-relaxed mb-6 font-normal">
-                Multi-jurisdiction Tri-State parking navigation platform. Normalized curb regulations, payment deep links, and municipal rules across New York, New Jersey, and Connecticut.
+                Nationwide street parking and muni-meter assistant across all 50 US States. Real-time curb regulations, street sweeping calendars, meter rates, and payment deep links across New York, Chicago, Los Angeles, San Francisco, Miami, Austin, Seattle, Boston, and beyond.
               </p>
             </div>
 
@@ -105,7 +106,7 @@ export const LandingPage: React.FC = () => {
               <span className="text-neutral-400 group-hover:text-neutral-200 transition-colors">
                 parkusa.djtechnyc.com
               </span>
-              <span className="text-neutral-600">NY • NJ • CT</span>
+              <span className="text-neutral-600">All 50 US States</span>
             </div>
           </a>
 

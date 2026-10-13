@@ -332,7 +332,7 @@ export const MapEngine: React.FC<MapEngineProps> = ({
     const handleMoveEnd = () => {
       clearTimeout(moveDebounceTimeout);
       moveDebounceTimeout = setTimeout(() => {
-        if (map.getZoom() >= 13) {
+        if (map.getZoom() >= 11) {
           const bounds = map.getBounds();
           onViewportChangeRef.current?.({
             north: bounds.getNorth(),

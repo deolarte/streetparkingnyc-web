@@ -5,5 +5,7 @@ assets = { directory = "./dist", not_found_handling = "single-page-application" 
 workers_dev = true
 
 routes = [
-  { pattern = "parkusa.djtechnyc.com/*", zone_name = "djtechnyc.com" }
+  { pattern = "parkusa.djtechnyc.com/*", zone_name = "djtechnyc.com" },
+  { pattern = "djtechnyc.com/*", zone_name = "djtechnyc.com" },
+  { pattern = "www.djtechnyc.com/*", zone_name = "djtechnyc.com" }
 ]

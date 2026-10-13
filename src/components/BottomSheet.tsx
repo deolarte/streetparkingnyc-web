@@ -432,7 +432,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
               <a
                 href={municipalInfo.url}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="px-2.5 py-1 rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-[10px] font-bold text-blue-600 dark:text-blue-300 border border-gray-200 dark:border-gray-600 flex items-center space-x-1 shrink-0 transition-colors shadow-2xs"
               >
                 <span>{municipalInfo.urlDisplay}</span>
