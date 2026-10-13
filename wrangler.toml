@@ -1,11 +1,9 @@
-name = "streetparkingnyc-web"
+name = "streetparkingusa-web"
 compatibility_date = "2026-10-12"
 
 assets = { directory = "./dist", not_found_handling = "single-page-application" }
 workers_dev = true
 
 routes = [
-  { pattern = "park.djtechnyc.com/*", zone_name = "djtechnyc.com" },
-  { pattern = "parkusa.djtechnyc.com/*", zone_name = "djtechnyc.com" },
-  { pattern = "djtechnyc.com/*", zone_name = "djtechnyc.com" }
+  { pattern = "parkusa.djtechnyc.com/*", zone_name = "djtechnyc.com" }
 ]

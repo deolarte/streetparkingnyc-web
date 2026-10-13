@@ -105,7 +105,12 @@ export function parseSignToWindows(description: string): TimeWindow[] {
   const isStanding = upper.includes('NO STANDING');
   const isStopping = upper.includes('NO STOPPING');
   const isCommercial = upper.includes('TRUCK') || upper.includes('COMMERCIAL VEHICLES') || upper.includes('LOADING ONLY');
-  const isMeter = upper.includes('HMP') || upper.includes('METER') || upper.includes('PAY-BY-CELL');
+  const isMeter =
+    upper.includes('HMP') ||
+    upper.includes('METER') ||
+    upper.includes('PAY-BY-CELL') ||
+    upper.includes('PARKMOBILE') ||
+    upper.includes('PASSPORT');
   const isNoParking = upper.includes('NO PARKING') && !isSweeping;
 
   let type: TimeWindow['type'] = 'no_parking';

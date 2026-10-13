@@ -1,5 +1,6 @@
 import proj4 from 'proj4';
 import type { CurbSegment, ParkingSign, MeterZoneInfo } from '../types';
+import { SEED_NJ_CURBS, SEED_CT_CURBS } from '../data/triStateSeedCurbs';
 
 // Define NYC State Plane Long Island (EPSG:2263, ftUS) for NYC DOT sign coordinates
 proj4.defs(
@@ -840,11 +841,14 @@ const BOROUGH_CODE_MAP: Record<string, string> = {
   '5': 'Staten Island',
 };
 
+export const ALL_TRISTATE_SEED_CURBS = [...SEED_NYC_CURBS, ...SEED_NJ_CURBS, ...SEED_CT_CURBS];
+
 /**
- * Fetch live NYC curbs from NYC Open Data.
+ * Fetch live NYC curbs from NYC Open Data, or Tri-State regional curbs.
  * Queries:
- * 1. e7yp-wx55: Parking Meters - ParkNYC Block Faces (Muni-meters & commercial regulations)
- * 2. inkn-q76z: NYC Street Centerline (CSCL) - Full coverage of all residential streets and legal parking lanes across all 5 boroughs
+ * 1. e7yp-wx55: Parking Meters - ParkNYC Block Faces
+ * 2. inkn-q76z: NYC Street Centerline (CSCL) - Full residential coverage
+ * 3. In NJ & CT: Returns high-fidelity regional curbs with ParkMobile/Passport zones.
  */
 export async function fetchLiveSocrataCurbs(bounds?: {
   north: number;
@@ -852,6 +856,34 @@ export async function fetchLiveSocrataCurbs(bounds?: {
   east: number;
   west: number;
 }): Promise<Array<Omit<CurbSegment, 'status' | 'statusBadge' | 'statusHeadline' | 'statusDescription' | 'nextChangeTime' | 'timeUntilChangeMinutes' | 'activeRestrictionType'>>> {
+  // If no bounds specified (e.g. startup load), return all Tri-State seed corridors
+  if (!bounds) {
+    return ALL_TRISTATE_SEED_CURBS;
+  }
+
+  // Find relevant seeds within or near the bounding box
+  const relevantSeeds = ALL_TRISTATE_SEED_CURBS.filter((c) =>
+    c.coordinates.some(
+      ([lon, lat]) =>
+        lat >= bounds.south - 0.05 &&
+        lat <= bounds.north + 0.05 &&
+        lon >= bounds.west - 0.05 &&
+        lon <= bounds.east + 0.05
+    )
+  );
+
+  // Check if bounds overlap NYC 5 Boroughs (Socrata Open Data coverage)
+  const isNycBounds =
+    bounds.south <= 40.95 &&
+    bounds.north >= 40.48 &&
+    bounds.west <= -73.68 &&
+    bounds.east >= -74.28;
+
+  // Outside NYC (in NJ or CT), return regional seeds directly without calling NYC Socrata
+  if (!isNycBounds) {
+    return relevantSeeds.length > 0 ? relevantSeeds : ALL_TRISTATE_SEED_CURBS;
+  }
+
   try {
     const headers: Record<string, string> = {
       Accept: 'application/json',
@@ -1029,11 +1061,11 @@ export async function fetchLiveSocrataCurbs(bounds?: {
     }
 
     if (liveSegments.length === 0) {
-      return SEED_NYC_CURBS;
+      return relevantSeeds.length > 0 ? relevantSeeds : ALL_TRISTATE_SEED_CURBS;
     }
 
     // Merge with high-fidelity seed corridors
-    const combined = [...SEED_NYC_CURBS];
+    const combined = [...(relevantSeeds.length > 0 ? relevantSeeds : ALL_TRISTATE_SEED_CURBS)];
     for (const seg of liveSegments) {
       if (!combined.some((c) => c.id === seg.id)) {
         combined.push(seg);
@@ -1041,8 +1073,8 @@ export async function fetchLiveSocrataCurbs(bounds?: {
     }
     return combined;
   } catch (err) {
-    console.warn('Falling back to built-in high-fidelity NYC Open Data curbs:', err);
-    return SEED_NYC_CURBS;
+    console.warn('Falling back to built-in high-fidelity Tri-State curbs:', err);
+    return relevantSeeds.length > 0 ? relevantSeeds : ALL_TRISTATE_SEED_CURBS;
   }
 }
 
@@ -1050,7 +1082,7 @@ export async function fetchLiveSocrataCurbs(bounds?: {
  * Fetch curbs near a specific GPS location (lat/lon).
  */
 export async function fetchCurbsNearLocation(lat: number, lon: number) {
-  const delta = 0.02; // ~1.2 miles box
+  const delta = 0.03; // ~2 miles box
   return fetchLiveSocrataCurbs({
     north: lat + delta,
     south: lat - delta,

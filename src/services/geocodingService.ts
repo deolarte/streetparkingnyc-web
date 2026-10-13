@@ -21,20 +21,15 @@ export async function searchNycAddress(query: string): Promise<AddressCandidate[
   }
 
   try {
-    const hasNycContext = /(new york|nyc|ny|manhattan|brooklyn|queens|bronx|staten island|astoria|flushing|harlem)/i.test(
-      trimmed
-    );
-    const searchQuery = hasNycContext ? trimmed : `${trimmed}, New York, NY`;
-
-    // Query ArcGIS World Geocoding Service with NYC bounding box and proximity center
+    // Query ArcGIS World Geocoding Service with Tri-State bounding box and proximity center
     const url =
       'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?' +
       new URLSearchParams({
-        SingleLine: searchQuery,
-        location: '-74.006,40.7128', // Lower Manhattan center for proximity bias
-        searchExtent: '-74.26,40.49,-73.70,40.92', // NYC 5 Boroughs boundary
+        SingleLine: trimmed,
+        location: '-73.9851,40.7484', // Tri-State Proximity Center (Midtown)
+        searchExtent: '-74.80,40.15,-72.80,41.50', // Full Tri-State boundary (NY, NJ, CT)
         f: 'json',
-        maxLocations: '6',
+        maxLocations: '8',
         outFields: 'Match_addr,Addr_type',
       }).toString();
 

@@ -233,14 +233,14 @@ export const MapEngine: React.FC<MapEngineProps> = ({
     const map = new Map({
       container: mapContainerRef.current,
       style: MAP_STYLE,
-      center: [-74.006, 40.7128], // NYC City Hall / Lower Manhattan
+      center: [-73.9851, 40.7484], // Tri-State Center (Midtown Manhattan)
       zoom: 14.5,
       maxZoom: 20,
-      minZoom: 10.2, // Prevent zooming out beyond greater NYC area
-      // Strict NYC 5-Borough bounding box + small radius buffer to prevent panning to other states
+      minZoom: 8.5, // Allow zooming out to view the full Tri-State region (NY, NJ, CT)
+      // Expanded Tri-State bounding box (Central/Northern NJ across NYC to Southwestern CT)
       maxBounds: [
-        [-74.32, 40.48], // Southwest bound: south of Staten Island / Arthur Kill
-        [-73.65, 40.96], // Northeast bound: north of Bronx / Pelhams, east of Queens
+        [-74.80, 40.15], // Southwest bound: Central/Northern NJ (Newark, Jersey City, New Brunswick)
+        [-72.80, 41.50], // Northeast bound: Southwestern/Central CT (Stamford, Norwalk, New Haven)
       ],
       pitch: 0, // Flat 2D map
       maxPitch: 0, // Lock pitch strictly to 0

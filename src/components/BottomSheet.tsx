@@ -264,7 +264,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
                 <div className="flex items-center space-x-1.5">
                   <DollarSign className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                   <span className="text-xs font-bold uppercase tracking-wider text-blue-800 dark:text-blue-300">
-                    ParkNYC Muni-Meter Info
+                    {regionProfile ? `${regionProfile.primaryProvider.name} Meter Info` : 'Parking Meter Info'}
                   </span>
                 </div>
                 <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-blue-200/70 dark:bg-blue-900/70 text-blue-900 dark:text-blue-200">

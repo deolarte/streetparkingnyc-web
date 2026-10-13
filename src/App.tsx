@@ -334,12 +334,12 @@ export function App() {
         <div className="pointer-events-auto bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-3 py-2 rounded-2xl shadow-lg border border-gray-200/80 dark:border-gray-800 text-xs space-y-1">
           <div className="flex items-center justify-between gap-3">
             <span className="font-bold text-gray-800 dark:text-gray-200 text-[11px] uppercase tracking-wider">
-              NYC Curbs Overview
+              {regionProfile?.displayName ? `${regionProfile.displayName} Curbs` : 'Curbs Overview'}
             </span>
             {isLoading && (
               <span className="flex items-center space-x-1 text-[10px] text-blue-500 font-semibold animate-pulse">
                 <Loader2 className="w-3 h-3 animate-spin" />
-                <span>Syncing NYC Data</span>
+                <span>Syncing Data</span>
               </span>
             )}
           </div>
