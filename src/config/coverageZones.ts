@@ -185,6 +185,40 @@ export const COVERAGE_ZONES: CoverageZone[] = [
       [-83.025, 39.935],
     ]],
   },
+
+  // 11. Des Moines, Iowa (Downtown, Western Gateway, Court Ave, East Village)
+  {
+    id: 'zone-des-moines',
+    name: 'Des Moines, IA (Downtown & East Village)',
+    shortName: 'Des Moines',
+    stateCode: 'IA',
+    boundaryLabel: 'LIVE SURVEYED COVERAGE: DES MOINES DOWNTOWN',
+    center: [-93.6208, 41.5868],
+    coordinates: [[
+      [-93.645, 41.575],
+      [-93.645, 41.600],
+      [-93.595, 41.600],
+      [-93.595, 41.575],
+      [-93.645, 41.575],
+    ]],
+  },
+
+  // 12. Cedar Rapids, Iowa (Downtown, Kingston Village, NewBo Arts District)
+  {
+    id: 'zone-cedar-rapids',
+    name: 'Cedar Rapids, IA (Downtown & NewBo)',
+    shortName: 'Cedar Rapids',
+    stateCode: 'IA',
+    boundaryLabel: 'LIVE SURVEYED COVERAGE: CEDAR RAPIDS DOWNTOWN',
+    center: [-91.6660, 41.9778],
+    coordinates: [[
+      [-91.685, 41.955],
+      [-91.685, 41.992],
+      [-91.645, 41.992],
+      [-91.645, 41.955],
+      [-91.685, 41.955],
+    ]],
+  },
 ];
 
 /**

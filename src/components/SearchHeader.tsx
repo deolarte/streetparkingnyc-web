@@ -158,6 +158,14 @@ const REGION_NEIGHBORHOODS: Record<string, { name: string; center: [number, numb
     { name: 'Cleveland Public Square', center: [-81.6944, 41.4993], zoom: 15.5 },
     { name: 'Cincinnati Over-the-Rhine', center: [-84.5150, 39.1120], zoom: 15.5 },
   ],
+  // Iowa
+  ia: [
+    { name: 'Des Moines Downtown / Court Ave', center: [-93.6208, 41.5868], zoom: 15.5 },
+    { name: 'Historic East Village (Des Moines)', center: [-93.6100, 41.5900], zoom: 15.5 },
+    { name: 'Western Gateway / Pappajohn', center: [-93.6330, 41.5850], zoom: 15.5 },
+    { name: 'Cedar Rapids Downtown / 1st Ave', center: [-91.6660, 41.9778], zoom: 15.5 },
+    { name: 'NewBo Arts District (Cedar Rapids)', center: [-91.6580, 41.9660], zoom: 15.5 },
+  ],
 };
 
 export const SearchHeader: React.FC<SearchHeaderProps> = ({
