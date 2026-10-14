@@ -150,6 +150,14 @@ const REGION_NEIGHBORHOODS: Record<string, { name: string; center: [number, numb
     { name: 'Downtown Atlanta', center: [-84.3880, 33.7490], zoom: 15.5 },
     { name: 'Buckhead Village', center: [-84.379, 33.840], zoom: 15.5 },
   ],
+  // Ohio
+  oh: [
+    { name: 'Columbus Downtown / High St', center: [-83.0007, 39.9612], zoom: 15.5 },
+    { name: 'Short North Arts District', center: [-83.0035, 39.9790], zoom: 15.5 },
+    { name: 'German Village (Columbus)', center: [-82.9960, 39.9470], zoom: 15.5 },
+    { name: 'Cleveland Public Square', center: [-81.6944, 41.4993], zoom: 15.5 },
+    { name: 'Cincinnati Over-the-Rhine', center: [-84.5150, 39.1120], zoom: 15.5 },
+  ],
 };
 
 export const SearchHeader: React.FC<SearchHeaderProps> = ({
@@ -389,7 +397,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
           <div className="flex items-center bg-gray-100 dark:bg-gray-800 p-0.5 rounded-xl shrink-0">
             <button
               onClick={() => onVehicleTypeChange('passenger')}
-              className={`flex items-center space-x-1 px-2 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center space-x-1 px-1.5 sm:px-2 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 ${
                 vehicleType === 'passenger'
                   ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-xs'
                   : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-300'
@@ -397,11 +405,11 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
               title="Personal / Passenger Car"
             >
               <Car className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">{t('passenger')}</span>
+              <span className="hidden xl:inline">{t('passenger')}</span>
             </button>
             <button
               onClick={() => onVehicleTypeChange('commercial')}
-              className={`flex items-center space-x-1 px-2 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center space-x-1 px-1.5 sm:px-2 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 ${
                 vehicleType === 'commercial'
                   ? 'bg-white dark:bg-gray-700 text-amber-600 dark:text-amber-400 shadow-xs'
                   : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-300'
@@ -409,7 +417,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
               title="Commercial Vehicle / Truck"
             >
               <Truck className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">{t('commercial')}</span>
+              <span className="hidden xl:inline">{t('commercial')}</span>
             </button>
           </div>
         </div>

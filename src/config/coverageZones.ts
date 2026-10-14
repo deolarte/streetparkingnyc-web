@@ -15,7 +15,7 @@ export const COVERAGE_ZONES: CoverageZone[] = [
   {
     id: 'zone-nyc',
     name: 'New York City (5 Boroughs)',
-    shortName: 'NYC Live Zone',
+    shortName: 'NYC',
     stateCode: 'NY',
     boundaryLabel: 'LIVE SURVEYED COVERAGE: NYC 5 BOROUGHS',
     center: [-73.9851, 40.7484],
@@ -149,6 +149,40 @@ export const COVERAGE_ZONES: CoverageZone[] = [
       [-77.005, 38.920],
       [-77.005, 38.885],
       [-77.050, 38.885],
+    ]],
+  },
+
+  // 9. Philadelphia (Center City, Old City, Callowhill)
+  {
+    id: 'zone-philly',
+    name: 'Philadelphia (Center City & Old City)',
+    shortName: 'Philadelphia',
+    stateCode: 'PA',
+    boundaryLabel: 'LIVE SURVEYED COVERAGE: PHILADELPHIA CENTER CITY',
+    center: [-75.1638, 39.9526],
+    coordinates: [[
+      [-75.192, 39.940],
+      [-75.192, 39.975],
+      [-75.135, 39.975],
+      [-75.135, 39.940],
+      [-75.192, 39.940],
+    ]],
+  },
+
+  // 10. Columbus, Ohio (Downtown, Short North, High St, German Village)
+  {
+    id: 'zone-columbus-ohio',
+    name: 'Columbus, OH (Downtown & Short North)',
+    shortName: 'Columbus, OH',
+    stateCode: 'OH',
+    boundaryLabel: 'LIVE SURVEYED COVERAGE: COLUMBUS DOWNTOWN',
+    center: [-83.0007, 39.9612],
+    coordinates: [[
+      [-83.025, 39.935],
+      [-83.025, 39.995],
+      [-82.980, 39.995],
+      [-82.980, 39.935],
+      [-83.025, 39.935],
     ]],
   },
 ];

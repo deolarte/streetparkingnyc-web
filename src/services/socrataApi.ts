@@ -1420,15 +1420,16 @@ export async function fetchLiveSocrataCurbs(bounds?: {
     }
 
     // 2. Prepare NYC Street Centerline CSCL Query (inkn-q76z) for full residential coverage
+    // Note: Staten Island (boroughcode = '5') residential streets are uncounted (number_park_lanes = 0) by NYC DOT
     const csclParams = new URLSearchParams();
     if (bounds) {
       csclParams.set(
         '$where',
-        `within_box(the_geom, ${bounds.north}, ${bounds.west}, ${bounds.south}, ${bounds.east}) AND number_park_lanes > 0`
+        `within_box(the_geom, ${bounds.north}, ${bounds.west}, ${bounds.south}, ${bounds.east}) AND (number_park_lanes > 0 OR boroughcode = '5') AND rw_type in ('1', '3')`
       );
       csclParams.set('$limit', '500');
     } else {
-      csclParams.set('$where', 'number_park_lanes > 0');
+      csclParams.set('$where', "(number_park_lanes > 0 OR boroughcode = '5') AND rw_type in ('1', '3')");
       csclParams.set('$limit', '500');
     }
 

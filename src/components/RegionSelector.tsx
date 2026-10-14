@@ -37,7 +37,8 @@ const POPULAR_METROS: Array<{
   { cityId: 'washington', cityName: 'Washington, D.C.', stateCode: 'DC', center: [-77.0369, 38.9072], zoom: 15, appName: 'ParkMobile' },
   { cityId: 'boston', cityName: 'Boston', stateCode: 'MA', center: [-71.0589, 42.3601], zoom: 15.5, appName: 'Flowbird' },
   { cityId: 'seattle', cityName: 'Seattle', stateCode: 'WA', center: [-122.3321, 47.6062], zoom: 15, appName: 'PayByPhone' },
-  { cityId: 'philadelphia', cityName: 'Philadelphia', stateCode: 'PA', center: [-75.1652, 39.9526], zoom: 15, appName: 'ParkMobile' },
+  { cityId: 'philadelphia', cityName: 'Philadelphia', stateCode: 'PA', center: [-75.1652, 39.9526], zoom: 15, appName: 'meterUP' },
+  { cityId: 'columbus', cityName: 'Columbus', stateCode: 'OH', center: [-83.0007, 39.9612], zoom: 15, appName: 'ParkColumbus' },
   { cityId: 'denver', cityName: 'Denver', stateCode: 'CO', center: [-104.9903, 39.7392], zoom: 15, appName: 'ParkMobile' },
   { cityId: 'stamford', cityName: 'Stamford', stateCode: 'CT', center: [-73.5387, 41.0534], zoom: 15.5, appName: 'Passport' },
 ];
