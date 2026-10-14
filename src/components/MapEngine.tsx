@@ -5,6 +5,7 @@ import { Locate, ZoomIn, ZoomOut, Coffee, Info, MessageSquare } from 'lucide-rea
 import type { CurbSegment } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { LanguageSelector } from './LanguageSelector';
+import { COVERAGE_ZONES_GEOJSON, findActiveCoverageZone, type CoverageZone } from '../config/coverageZones';
 
 // Configure MapLibre Web Worker URL explicitly to load the local bundled worker
 if (typeof window !== 'undefined') {
@@ -42,6 +43,10 @@ const MAP_STYLE: any = {
       maxzoom: 19,
       attribution: 'Esri, HERE, Garmin, © OpenStreetMap contributors',
     },
+    'coverage-zones-source': {
+      type: 'geojson' as const,
+      data: COVERAGE_ZONES_GEOJSON,
+    },
     'curbs-source': {
       type: 'geojson' as const,
       data: {
@@ -57,6 +62,67 @@ const MAP_STYLE: any = {
       source: 'street-base',
       minzoom: 0,
       maxzoom: 22,
+    },
+    // Visual High-Density Survey Coverage Boundary Zones
+    {
+      id: 'coverage-zone-fill',
+      type: 'fill' as const,
+      source: 'coverage-zones-source',
+      minzoom: 8,
+      paint: {
+        'fill-color': '#0284c7',
+        'fill-opacity': 0.03,
+      },
+    },
+    {
+      id: 'coverage-zone-casing',
+      type: 'line' as const,
+      source: 'coverage-zones-source',
+      minzoom: 9,
+      layout: {
+        'line-cap': 'round' as const,
+        'line-join': 'round' as const,
+      },
+      paint: {
+        'line-color': '#0f172a',
+        'line-width': 4.5,
+        'line-opacity': 0.35,
+      },
+    },
+    {
+      id: 'coverage-zone-line',
+      type: 'line' as const,
+      source: 'coverage-zones-source',
+      minzoom: 9,
+      layout: {
+        'line-cap': 'round' as const,
+        'line-join': 'round' as const,
+      },
+      paint: {
+        'line-color': '#38bdf8', // Luminous sky blue boundary stitch
+        'line-width': 2.5,
+        'line-dasharray': [4, 2], // Dashed survey perimeter
+        'line-opacity': 0.9,
+      },
+    },
+    {
+      id: 'coverage-zone-label',
+      type: 'symbol' as const,
+      source: 'coverage-zones-source',
+      minzoom: 11,
+      layout: {
+        'symbol-placement': 'line' as const,
+        'text-field': ['get' as const, 'boundaryLabel'],
+        'text-font': ['Noto Sans Regular'],
+        'text-size': 10.5,
+        'text-letter-spacing': 0.08,
+        'symbol-spacing': 350,
+      },
+      paint: {
+        'text-color': '#0369a1',
+        'text-halo-color': '#ffffff',
+        'text-halo-width': 3,
+      },
     },
     {
       id: 'curbs-casing',
@@ -161,6 +227,8 @@ export const MapEngine: React.FC<MapEngineProps> = ({
   const [isLocating, setIsLocating] = useState(false);
   const userMarkerRef = useRef<Marker | null>(null);
   const searchMarkerRef = useRef<Marker | null>(null);
+  const [activeCoverageZone, setActiveCoverageZone] = useState<CoverageZone | null>(null);
+  const [showZoneInfoModal, setShowZoneInfoModal] = useState(false);
 
   // Keep refs to avoid stale closures in MapLibre event listeners
   const curbsRef = useRef<CurbSegment[]>(curbs);
@@ -285,6 +353,9 @@ export const MapEngine: React.FC<MapEngineProps> = ({
       handleResize();
       updateSourceData();
 
+      const center = map.getCenter();
+      setActiveCoverageZone(findActiveCoverageZone(center.lng, center.lat));
+
       // Trigger initial viewport curb load
       const bounds = map.getBounds();
       onViewportChangeRef.current?.({
@@ -334,6 +405,8 @@ export const MapEngine: React.FC<MapEngineProps> = ({
     // Debounced moveend listener to fetch live data wherever user pans/zooms
     const handleMoveEnd = () => {
       clearTimeout(moveDebounceTimeout);
+      const center = map.getCenter();
+      setActiveCoverageZone(findActiveCoverageZone(center.lng, center.lat));
       moveDebounceTimeout = setTimeout(() => {
         if (map.getZoom() >= 11) {
           const bounds = map.getBounds();
@@ -555,6 +628,90 @@ export const MapEngine: React.FC<MapEngineProps> = ({
           </button>
         )}
       </div>
+
+      {/* Floating Coverage Zone Indicator Badge */}
+      <div className="absolute bottom-[calc(env(safe-area-inset-bottom,0px)+5.5rem)] sm:bottom-6 left-3 sm:left-4 z-20 pointer-events-auto">
+        {activeCoverageZone ? (
+          <button
+            type="button"
+            onClick={() => setShowZoneInfoModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/90 text-white text-[11px] font-bold border border-emerald-500/60 shadow-xl backdrop-blur-md hover:bg-slate-800 active:scale-95 transition-all group"
+            title="Verified Live Survey Coverage Corridor (Click for details)"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span className="truncate max-w-[170px] sm:max-w-xs">{activeCoverageZone.shortName} Live Zone</span>
+            <Info className="w-3.5 h-3.5 text-emerald-400 opacity-80 group-hover:scale-110 transition-transform" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowZoneInfoModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/90 text-amber-300 text-[11px] font-bold border border-amber-500/60 shadow-xl backdrop-blur-md hover:bg-slate-800 active:scale-95 transition-all group"
+            title="Outside Surveyed Corridor (Click for details)"
+          >
+            <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+            <span className="truncate max-w-[170px] sm:max-w-xs">Outside Survey Zone</span>
+            <Info className="w-3.5 h-3.5 text-amber-400 opacity-80 group-hover:scale-110 transition-transform" />
+          </button>
+        )}
+      </div>
+
+      {/* Coverage Boundary Explanatory Modal */}
+      {showZoneInfoModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in pointer-events-auto select-text"
+          onClick={() => setShowZoneInfoModal(false)}
+        >
+          <div
+            className="bg-slate-900 text-white rounded-2xl p-5 max-w-sm w-full border border-slate-700 shadow-2xl relative space-y-3.5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🗺️</span>
+                <h3 className="text-sm font-bold text-white">Survey Coverage Boundaries</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowZoneInfoModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-xs font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed">
+              StreetParkingUSA displays high-density surveyed parking lines inside the <strong className="text-sky-400">blue dashed boundary lines</strong> shown on the map.
+            </p>
+
+            <div className="bg-slate-800/80 rounded-xl p-3 border border-slate-700/60 space-y-2 text-xs">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0"></span>
+                <span className="font-semibold text-emerald-300">Inside Boundary (Green/Blue lines):</span>
+              </div>
+              <p className="text-[11px] text-slate-300 pl-4.5">
+                Full surveyed road vectors with real meter zones, ASP cleaning schedules, and direct mobile payment app deep links.
+              </p>
+
+              <div className="flex items-center gap-2 pt-1 border-t border-slate-700/40">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shrink-0"></span>
+                <span className="font-semibold text-amber-300">Outside Boundary:</span>
+              </div>
+              <p className="text-[11px] text-slate-300 pl-4.5">
+                Statewide statutory baselines apply (15 ft fire hydrants, 20 ft crosswalk clearances, municipal general codes). Survey corridors expand continually across all 50 states.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowZoneInfoModal(false)}
+              className="w-full py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition-colors shadow-lg"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
