@@ -1002,12 +1002,12 @@ export function resolveJurisdiction(stateCodeInput?: string, cityIdInput?: strin
 export function estimateStateFromCoords(lat: number, lng: number): string {
   // California
   if (lat >= 32.5 && lat <= 42.0 && lng >= -124.5 && lng <= -114.1) return 'CA';
-  // New York
-  if (lat >= 40.5 && lat <= 45.0 && lng >= -79.8 && lng <= -71.8) return 'NY';
-  // New Jersey
-  if (lat >= 38.9 && lat <= 41.4 && lng >= -75.6 && lng <= -73.9) return 'NJ';
+  // New Jersey (evaluated before NY since longitude -74.0 to -75.6 falls within NY bounding rectangle)
+  if (lat >= 38.9 && lat <= 41.4 && lng >= -75.6 && (lng <= -74.02 || (lat <= 40.65 && lng <= -74.26))) return 'NJ';
   // Connecticut
   if (lat >= 40.98 && lat <= 42.05 && lng >= -73.73 && lng <= -71.79) return 'CT';
+  // New York
+  if (lat >= 40.5 && lat <= 45.0 && lng >= -79.8 && lng <= -71.8) return 'NY';
   // Illinois
   if (lat >= 36.97 && lat <= 42.51 && lng >= -91.51 && lng <= -87.02) return 'IL';
   // Texas

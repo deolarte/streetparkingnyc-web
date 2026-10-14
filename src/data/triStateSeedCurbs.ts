@@ -1,5 +1,4 @@
 import type { RawCurbSegment } from '../types';
-import { JERSEY_CITY_OPEN_DATA_CURBS } from './jerseyCityOpenDataCurbs';
 import { NJ_CURBS_EXPANDED } from './njCurbsExpanded';
 import { CT_CURBS_EXPANDED } from './ctCurbsExpanded';
 
@@ -9,7 +8,6 @@ import { CT_CURBS_EXPANDED } from './ctCurbsExpanded';
  * complete street grids across Jersey City, Hoboken, Newark, and Weehawken.
  */
 export const SEED_NJ_CURBS: RawCurbSegment[] = [
-  ...JERSEY_CITY_OPEN_DATA_CURBS,
   ...NJ_CURBS_EXPANDED,
   // ==========================================
   // JERSEY CITY - DOWNTOWN & NEWARK AVE CORRIDOR

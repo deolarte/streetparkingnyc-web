@@ -1376,11 +1376,13 @@ export async function fetchLiveSocrataCurbs(bounds?: {
   );
 
   // Check if bounds overlap NYC 5 Boroughs (Socrata Open Data coverage)
+  // Note: Jersey City, Hoboken & Newark are west of -74.02 for lat > 40.65
   const isNycBounds =
     bounds.south <= 40.95 &&
     bounds.north >= 40.48 &&
     bounds.west <= -73.68 &&
-    bounds.east >= -74.28;
+    bounds.east >= -74.28 &&
+    (bounds.east >= -74.02 || bounds.south <= 40.65);
 
   // Outside NYC, return matched real GIS seed corridors matching actual roads
   if (!isNycBounds) {
@@ -1388,10 +1390,10 @@ export async function fetchLiveSocrataCurbs(bounds?: {
       return relevantSeeds;
     }
 
-    // Only synthesize local blocks when zoomed into street/neighborhood level (span <= 0.035 deg, ~2 miles)
+    // Only synthesize local blocks when zoomed into immediate block level (span <= 0.015 deg, ~1 mile)
     const latSpan = bounds.north - bounds.south;
     const lngSpan = bounds.east - bounds.west;
-    if (latSpan <= 0.035 && lngSpan <= 0.035) {
+    if (latSpan <= 0.015 && lngSpan <= 0.015) {
       return synthesizeCurbsForBoundingBox(bounds);
     }
     return [];
