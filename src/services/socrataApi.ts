@@ -1368,10 +1368,10 @@ export async function fetchLiveSocrataCurbs(bounds?: {
   const relevantSeeds = ALL_NATIONAL_SEED_CURBS.filter((c) =>
     c.coordinates.some(
       ([lon, lat]) =>
-        lat >= bounds.south - 0.05 &&
-        lat <= bounds.north + 0.05 &&
-        lon >= bounds.west - 0.05 &&
-        lon <= bounds.east + 0.05
+        lat >= bounds.south - 0.03 &&
+        lat <= bounds.north + 0.03 &&
+        lon >= bounds.west - 0.03 &&
+        lon <= bounds.east + 0.03
     )
   );
 
@@ -1390,10 +1390,10 @@ export async function fetchLiveSocrataCurbs(bounds?: {
       return relevantSeeds;
     }
 
-    // Only synthesize local blocks when zoomed into immediate block level (span <= 0.015 deg, ~1 mile)
+    // Outside seeded corridors, synthesize local blocks when zoomed into street level (span <= 0.035 deg, ~2 miles)
     const latSpan = bounds.north - bounds.south;
     const lngSpan = bounds.east - bounds.west;
-    if (latSpan <= 0.015 && lngSpan <= 0.015) {
+    if (latSpan <= 0.035 && lngSpan <= 0.035) {
       return synthesizeCurbsForBoundingBox(bounds);
     }
     return [];
