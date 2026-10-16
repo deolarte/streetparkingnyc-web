@@ -15,9 +15,18 @@ export const LandingPage: React.FC = () => {
           </div>
         </a>
 
-        <div className="flex items-center gap-2 text-xs text-neutral-400">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="font-mono text-[11px] tracking-wide text-neutral-400">All systems operational</span>
+        <div className="flex items-center gap-3 sm:gap-4 text-xs">
+          <a
+            href="mailto:info@djtechnyc.com?subject=Web%20Development%20%26%20Services%20Inquiry%20-%20DJ%20Tech%20NYC&body=Hi%20DJ%20Tech%20NYC%2C%0A%0AI'm%20interested%20in%20discussing%20a%20web%20development%20or%20hosting%20project.%0A%0AProject%20Overview%3A%0A-%20Type%20of%20site%2Fapp%3A%0A-%20Target%20timeline%3A%0A-%20Any%20specific%20features%20or%20integrations%3A%0A%0ABest%20regards%2C%0A"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-700 transition-colors font-mono text-[11px] font-medium"
+          >
+            <Mail className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Hire Me / Services</span>
+          </a>
+          <div className="hidden sm:flex items-center gap-2 text-neutral-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="font-mono text-[11px] tracking-wide text-neutral-400">Systems operational</span>
+          </div>
         </div>
       </header>
 
@@ -149,7 +158,7 @@ export const LandingPage: React.FC = () => {
         <div>
           © {new Date().getFullYear()} DJ Tech NYC. All rights reserved.
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex flex-wrap items-center gap-4 sm:gap-6">
           <a
             href="https://park.djtechnyc.com"
             className="hover:text-neutral-300 transition-colors"
@@ -163,10 +172,17 @@ export const LandingPage: React.FC = () => {
             StreetParkingUSA
           </a>
           <a
-            href="mailto:info@djtechnyc.com"
+            href="/privacy.html"
             className="hover:text-neutral-300 transition-colors"
           >
-            Contact
+            Privacy Policy
+          </a>
+          <a
+            href="mailto:info@djtechnyc.com?subject=Web%20Development%20%26%20Services%20Inquiry%20-%20DJ%20Tech%20NYC"
+            className="text-cyan-400 hover:text-cyan-300 transition-colors font-medium flex items-center gap-1"
+          >
+            <Mail className="w-3.5 h-3.5" />
+            <span>Hire Me / Services</span>
           </a>
         </div>
       </footer>

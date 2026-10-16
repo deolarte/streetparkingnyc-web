@@ -310,7 +310,37 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
                   </a>.
                 </span>
               </div>
+
+              <div className="pt-1.5 border-t border-gray-100 dark:border-gray-800">
+                <a
+                  href="/privacy.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 font-semibold hover:underline"
+                >
+                  <span>View Dedicated Privacy Policy Page</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
             </div>
+          </div>
+
+          {/* Web Architecture & Engineering Services Card */}
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <div className="font-bold text-gray-900 dark:text-white text-xs flex items-center gap-1.5">
+                <span>⚡ Web Architecture & Engineering Services</span>
+              </div>
+              <a
+                href="mailto:info@djtechnyc.com?subject=Web%20Development%20%26%20Services%20Inquiry%20-%20DJ%20Tech%20NYC&body=Hi%20DJ%20Tech%20NYC%2C%0A%0AI'm%20interested%20in%20discussing%20a%20web%20development%20or%20hosting%20project.%0A%0AProject%20Overview%3A%0A-%20Type%20of%20site%2Fapp%3A%0A-%20Target%20timeline%3A%0A-%20Any%20specific%20features%20or%20integrations%3A%0A%0ABest%20regards%2C%0A"
+                className="text-blue-600 dark:text-cyan-400 font-semibold text-xs hover:underline flex items-center gap-1"
+              >
+                <span>Email Inquiries →</span>
+              </a>
+            </div>
+            <p className="text-gray-600 dark:text-gray-300 text-[11px] leading-relaxed">
+              Designed and built by <strong>DJ Tech NYC</strong>. Inquire for custom responsive web platforms, civic applications, or edge cloud deployments at <a href="mailto:info@djtechnyc.com?subject=Web%20Development%20%26%20Services%20Inquiry%20-%20DJ%20Tech%20NYC" className="text-blue-600 dark:text-cyan-400 font-medium underline">info@djtechnyc.com</a>.
+            </p>
           </div>
         </div>
 
